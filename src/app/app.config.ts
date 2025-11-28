@@ -9,7 +9,8 @@ import { provideAuth } from '@angular/fire/auth';
 import { getAuth } from 'firebase/auth';
 import { provideStorage } from '@angular/fire/storage';
 import { getStorage } from 'firebase/storage';
-import { environment } from '../environments/environment';
+import { environment } from '../environments/enviroment';
+
 
 export const appConfig: ApplicationConfig = {
   providers: [

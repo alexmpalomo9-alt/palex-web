@@ -47,8 +47,6 @@ Thumbs.db
 /src/environments/*.ts
 !/src/environments/environment.example.ts
 
-# Ignorar solo las credenciales reales
-/src/environments/environment.ts
-
 # Permitir los archivos de ejemplo / producción
 !/src/environments/environment.prod.ts
+!/src/environments/environment.ts
