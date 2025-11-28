@@ -47,6 +47,8 @@ Thumbs.db
 /src/environments/*.ts
 !/src/environments/environment.example.ts
 
-# Firebase local
-/.firebase/
-firebase-debug.log
+# Ignorar solo las credenciales reales
+/src/environments/environment.ts
+
+# Permitir los archivos de ejemplo / producción
+!/src/environments/environment.prod.ts

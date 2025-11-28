@@ -42,8 +42,8 @@
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/firebase.ts",
-                  "with": "src/environments/firebase.example.ts"
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
                 }
               ],
               "budgets": [
