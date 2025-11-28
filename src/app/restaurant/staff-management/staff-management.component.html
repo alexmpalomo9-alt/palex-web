@@ -1,0 +1,55 @@
+<mat-card class="staff-card">
+
+  <div class="header">
+    <h2>Personal del Restaurante</h2>
+
+    <button mat-raised-button color="accent" (click)="toggleDisabled()">
+      {{ showDisabled ? "Ver habilitados" : "Ver deshabilitados" }}
+    </button>
+  </div>
+
+  <!-- Template para roles -->
+  <ng-template #rolesTemplate let-user>
+    <mat-chip-set>
+      <mat-chip *ngFor="let r of user.rolesList" color="primary" selected>
+        {{ r }}
+      </mat-chip>
+    </mat-chip-set>
+  </ng-template>
+
+  <!-- Tabla -->
+  <app-base-table
+    [columns]="columns"
+    [data]="staff"
+    [actionsTemplate]="actionsTemplate"
+    filterPlaceholder="Buscar empleado..."
+  >
+  </app-base-table>
+
+  <!-- Acciones -->
+  <ng-template #actionsTemplate let-user>
+    <div class="actions">
+      <button mat-icon-button color="primary" (click)="changeRole(user)">
+        <mat-icon>manage_accounts</mat-icon>
+      </button>
+
+      <button
+        *ngIf="!showDisabled"
+        mat-icon-button
+        color="warn"
+        (click)="disable(user)"
+      >
+        <mat-icon>person_off</mat-icon>
+      </button>
+
+      <button
+        *ngIf="showDisabled"
+        mat-icon-button
+        color="accent"
+        (click)="enable(user)"
+      >
+        <mat-icon>person_add</mat-icon>
+      </button>
+    </div>
+  </ng-template>
+</mat-card>

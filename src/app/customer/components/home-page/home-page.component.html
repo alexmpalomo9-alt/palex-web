@@ -1,0 +1,44 @@
+<div class="index-container">
+  <div class="title-container">
+    <h1 class="title">Explora Restaurantes</h1>
+  </div>
+
+  <app-search-box
+    placeholder="Buscar restaurantes..."
+    (search)="onSearch($event)"
+  ></app-search-box>
+
+  <div class="restaurants-grid" *ngIf="filteredRestaurants.length > 0; else noData">
+    <div class="restaurant-card" *ngFor="let restaurant of filteredRestaurants" (click)="openRestaurant(restaurant.slug)">
+      <img
+        [src]="restaurant.mainImage || 'assets/img/not-found.png'"
+        alt="Imagen del restaurante"
+        class="restaurant-image"
+      />
+
+      <div class="info">
+        <div class="info-header">
+          <h2>{{ restaurant.name }}</h2>
+          <img
+            [src]="restaurant.imageLogo || '/assets/img/not-found.png'"
+            alt="Logo del restaurante"
+            class="restaurant-logo"
+          />
+        </div>
+
+        <p class="address">
+          {{ restaurant.address }} {{ restaurant.addressNumber }}
+        </p>
+
+        <div class="stats">
+          <span class="rating">⭐ {{ restaurant.rating || 'Sin calificar' }}</span>
+          <span class="category">{{ restaurant.category || 'General' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noData>
+    <p class="empty-text">No hay restaurantes disponibles por ahora.</p>
+  </ng-template>
+</div>

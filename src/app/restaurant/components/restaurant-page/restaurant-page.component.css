@@ -1,0 +1,39 @@
+.toolbar-header {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  min-height: 64px;
+  background-color: #3f51b5; /* azul principal */
+  color: #ffffff;
+  font-family: "Roboto", sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Botón toggle */
+.toggle-btn {
+  margin-left: 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Iconos dentro de botones */
+button mat-icon {
+  margin-right: 6px;
+}

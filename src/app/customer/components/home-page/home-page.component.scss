@@ -1,0 +1,103 @@
+/* Contenedor principal */
+.index-container {
+  padding: 40px;
+
+  /* Contenedor del título y logo */
+  .title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+
+    .title {
+      font-size: 32px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .small-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  /* Grid de restaurantes */
+  .restaurants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+
+    /* Tarjeta de restaurante */
+    .restaurant-card {
+      cursor: pointer;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px var(--card-shadow);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      border: 1px solid #eee;
+
+      &:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 25px var(--card-shadow-hover);
+      }
+
+      .restaurant-image {
+        width: 100%;
+        height: 180px;
+        object-fit: contain;
+      }
+
+      /* Info interna */
+      .info {
+        padding: 15px;
+
+        .info-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 10px;
+
+          .restaurant-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: contain;
+          }
+        }
+
+        .address {
+          font-size: 14px;
+          color: #777;
+        }
+
+        .stats {
+          margin-top: 10px;
+          display: flex;
+          justify-content: space-between;
+
+          .rating {
+            font-size: 14px;
+            color: #f5a623;
+          }
+
+          .category {
+            font-size: 14px;
+            background: #eee;
+            padding: 3px 8px;
+            border-radius: 8px;
+          }
+        }
+      }
+    }
+  }
+
+  /* Texto cuando no hay datos */
+  .empty-text {
+    font-size: 16px;
+    color: #999;
+  }
+}

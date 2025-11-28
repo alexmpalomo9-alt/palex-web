@@ -1,0 +1,39 @@
+<!-- ====== TEMPLATES ESPECÍFICOS ====== -->
+
+<!-- Enabled (Sí / No) -->
+<ng-template #tplEnabled let-r>
+  {{ r.enabled ? 'Sí' : 'No' }}
+</ng-template>
+
+<!-- Dirección compuesta -->
+<ng-template #tplAddress let-r>
+  {{ r.address }} {{ r.addressNumber }}
+</ng-template>
+
+<!-- ACCIONES -->
+<ng-template #actions let-r>
+  <button mat-icon-button color="primary" (click)="onEdit(r)">
+    <mat-icon>edit</mat-icon>
+  </button>
+
+  <button mat-icon-button color="accent" (click)="onSelect(r.slug!)">
+    <mat-icon>info</mat-icon>
+  </button>
+
+  <button mat-icon-button color="warn" (click)="onRemove(r)" *ngIf="r.enabled">
+    <mat-icon>delete</mat-icon>
+  </button>
+
+  <button mat-icon-button color="primary" (click)="onEnable(r)" *ngIf="!r.enabled">
+    <mat-icon>restore_from_trash</mat-icon>
+  </button>
+</ng-template>
+
+
+<!-- ====== BASE TABLE ====== -->
+<app-base-table
+  [columns]="columns"
+  [data]="restaurants"
+  [actionsTemplate]="actions"
+  filterPlaceholder="Buscar restaurantes..."
+></app-base-table>

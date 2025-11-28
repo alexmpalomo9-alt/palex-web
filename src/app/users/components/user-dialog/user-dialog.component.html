@@ -1,0 +1,88 @@
+<h1 mat-dialog-title>Datos del Usuario</h1>
+
+<div mat-dialog-content class="medidas-dialog">
+  <form [formGroup]="editForm">
+    <!-- Nombre -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" />
+
+      <mat-error *ngIf="editForm.controls['name'].errors?.['required']">
+        El nombre es requerido.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Apellido -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Apellido</mat-label>
+      <input matInput formControlName="lastname" />
+
+      <mat-error *ngIf="editForm.controls['lastname'].errors?.['required']">
+        El apellido es requerido.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Email (solo lectura) -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Correo</mat-label>
+      <input matInput formControlName="email" />
+    </mat-form-field>
+
+    <!-- Teléfono -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phone" />
+
+      <mat-error *ngIf="editForm.controls['phone'].errors?.['pattern']">
+        Solo números.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Dirección -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Dirección</mat-label>
+      <input matInput formControlName="address" />
+
+      <mat-error *ngIf="editForm.controls['address'].errors?.['pattern']">
+        Carácter inválido.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Roles -->
+    <div class="roles-section">
+      <h3>Roles</h3>
+      <div class="roles-grid">
+        <mat-checkbox formControlName="adminGlobal">Admin Global</mat-checkbox>
+        <mat-checkbox formControlName="adminLocal">Admin Local</mat-checkbox>
+        <mat-checkbox formControlName="mozo">Mozo</mat-checkbox>
+        <mat-checkbox formControlName="cocina">Cocina</mat-checkbox>
+        <mat-checkbox formControlName="gerencia">Gerencia</mat-checkbox>
+        <mat-checkbox formControlName="customer">Cliente</mat-checkbox>
+        <mat-checkbox formControlName="guest">Invitado</mat-checkbox>
+      </div>
+    </div>
+
+    <!-- Fecha de nacimiento -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Fecha de Nacimiento</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="birthdate"
+        placeholder="dd/mm/yyyy"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+
+      <mat-error *ngIf="editForm.controls['birthdate'].errors">
+        Fecha inválida
+      </mat-error>
+    </mat-form-field>
+  </form>
+</div>
+
+<!-- Botones -->
+<div mat-dialog-actions align="end">
+  <button mat-raised-button color="primary" (click)="aceptar()">Aceptar</button>
+  <button mat-stroked-button color="warn" (click)="cancelar()">Cancelar</button>
+</div>

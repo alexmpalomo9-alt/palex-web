@@ -1,0 +1,116 @@
+<div mat-dialog-title class="dialog-title">Restaurante</div>
+
+<div mat-dialog-content class="medidas-dialog">
+  <form [formGroup]="editForm">
+    <!-- Fila 1: Nombre / Teléfono -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="name" autocomplete="off" />
+        <mat-icon matSuffix *ngIf="editForm.controls['name'].dirty">
+          {{ editForm.controls["name"].valid ? "check" : "close" }}
+        </mat-icon>
+        <mat-error *ngIf="editForm.controls['name'].hasError('required')">
+          El campo es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="phone" autocomplete="off" />
+        <mat-error *ngIf="editForm.controls['phone'].hasError('required')">
+          El campo es requerido
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 2: Dirección / Número -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="address" />
+        <mat-error *ngIf="editForm.controls['address'].hasError('required')">
+          El campo es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Número</mat-label>
+        <input matInput type="number" formControlName="addressNumber" />
+        <mat-error
+          *ngIf="editForm.controls['addressNumber'].hasError('required')"
+        >
+          El campo es requerido
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 3: Horarios -->
+    <div class="form-row single">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Horarios</mat-label>
+        <input matInput formControlName="openingHours" />
+        <mat-error
+          *ngIf="editForm.controls['openingHours'].hasError('required')"
+        >
+          El campo es requerido
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 4: Descripción -->
+    <div class="form-row single">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Descripción</mat-label>
+        <input matInput formControlName="description" />
+        <mat-icon matSuffix *ngIf="editForm.controls['description'].dirty">
+          {{ editForm.controls["description"].valid ? "check" : "close" }}
+        </mat-icon>
+        <mat-error
+          *ngIf="editForm.controls['description'].hasError('required')"
+        >
+          El campo es requerido
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 5: Disponible -->
+    <div class="form-row single">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Disponible</mat-label>
+        <mat-select formControlName="enabled" panelClass="select-in-dialog">
+          <mat-option [value]="true">Sí</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- <mat-button-toggle-group formControlName="enabled">
+  <mat-button-toggle [value]="true">Sí</mat-button-toggle>
+  <mat-button-toggle [value]="false">No</mat-button-toggle>
+</mat-button-toggle-group> -->
+
+    <!-- Fila 6: Icono pequeño -->
+    <div class="form-row single">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Icono (URL)</mat-label>
+        <input matInput formControlName="imageLogo" />
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 7: Imagen principal -->
+    <div class="form-row single">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Imagen (URL)</mat-label>
+        <input matInput formControlName="mainImage" />
+      </mat-form-field>
+    </div>
+  </form>
+</div>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-raised-button color="primary" (click)="saveRestaurant()">
+    Guardar
+  </button>
+  <button mat-button color="warn" (click)="cancel()">Cancelar</button>
+</mat-dialog-actions>

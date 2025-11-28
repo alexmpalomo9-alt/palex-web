@@ -1,0 +1,22 @@
+<h2 mat-dialog-title class="title">¿Sigues ahí?</h2>
+
+<mat-dialog-content class="content">
+  <p class="subtitle">Tu sesión está a punto de expirar por inactividad.</p>
+
+  <p class="timer">
+    Se cerrará automáticamente en
+    <strong class="seconds">{{ data.seconds }}s</strong>.
+  </p>
+
+  <p class="question">¿Querés continuar conectado?</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="actions">
+  <button mat-stroked-button color="warn" (click)="dialogRef.close(false)">
+    Cerrar sesión
+  </button>
+
+  <button mat-raised-button color="primary" (click)="dialogRef.close(true)">
+    Continuar sesión
+  </button>
+</mat-dialog-actions>
