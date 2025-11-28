@@ -29,7 +29,6 @@
                 "glob": "**/*",
                 "input": "public"
               }
-              
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
@@ -41,6 +40,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/firebase.ts",
+                  "with": "src/environments/firebase.example.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
