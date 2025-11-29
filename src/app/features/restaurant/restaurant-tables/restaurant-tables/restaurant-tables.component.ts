@@ -79,6 +79,7 @@ export class RestaurantTablesComponent implements OnInit {
         try {
           await this.tableService.createTable({
             ...result,
+            restaurantId: this.restaurant!.restaurantId,
           });
 
           this.dialogService.infoDialog('Éxito', 'Mesa creada correctamente.');
@@ -109,7 +110,7 @@ export class RestaurantTablesComponent implements OnInit {
         }
         const { restaurantId } = restaurant;
 
-        const { restaurantId: _r, tableId: _t, ...cleanData } = result;
+        const { restaurantId: _ignore, ...cleanData } = result;
 
         await this.tableService.updateTable(
           restaurantId,

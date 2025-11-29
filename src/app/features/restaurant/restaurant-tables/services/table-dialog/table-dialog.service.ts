@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { Table } from '../../model/tables.model';
 import { TableDialogComponent } from '../../table-dialog/table-dialog.component';
 
-type DialogMode = 'create' | 'edit';
 
 @Injectable({
   providedIn: 'root',
