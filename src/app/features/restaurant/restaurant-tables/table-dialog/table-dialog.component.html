@@ -1,0 +1,79 @@
+<div mat-dialog-title class="dialog-title">Mesa</div>
+
+<div mat-dialog-content class="medidas-dialog">
+  <form [formGroup]="editForm">
+
+    <!-- Fila 1: Número / Nombre -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Número</mat-label>
+        <input matInput type="number" formControlName="number" autocomplete="off" />
+        <mat-error *ngIf="editForm.controls['number'].hasError('required')">
+          El campo es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Nombre (opcional)</mat-label>
+        <input matInput formControlName="name" autocomplete="off" />
+        <mat-icon matSuffix *ngIf="editForm.controls['name'].dirty">
+          {{ editForm.controls["name"].valid ? "check" : "close" }}
+        </mat-icon>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 2: Estado / Capacidad -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="available">Disponible</mat-option>
+          <mat-option value="occupied">Ocupada</mat-option>
+          <mat-option value="reserved">Reservada</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Capacidad</mat-label>
+        <input matInput type="number" formControlName="capacity" />
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 3: Sector / QR Slug -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Sector (opcional)</mat-label>
+        <input matInput formControlName="sector" autocomplete="off" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>QR Slug</mat-label>
+        <input matInput formControlName="qrSlug" autocomplete="off" />
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 4: QR Code -->
+    <div class="form-row single">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>QR Code (URL o JSON codificado)</mat-label>
+        <input matInput formControlName="qrCode" />
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 5: Pedido actual -->
+    <div class="form-row single">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>ID Pedido Actual (opcional)</mat-label>
+        <input matInput formControlName="currentOrderId" />
+      </mat-form-field>
+    </div>
+
+  </form>
+</div>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-raised-button color="primary" (click)="saveTable()">
+    Guardar
+  </button>
+  <button mat-button color="warn" (click)="cancel()">Cancelar</button>
+</mat-dialog-actions>

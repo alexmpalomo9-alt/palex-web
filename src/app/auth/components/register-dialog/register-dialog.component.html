@@ -1,15 +1,18 @@
-<div mat-dialog-content class="medidas-dialog">
+<div mat-dialog-content class="medidas-dialog glass">
+    <!-- BOTÓN VOLVER -->
+  <button class="back-button" mat-icon-button (click)="backToLogin()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <!-- BOTÓN CERRAR -->
   <button class="close-button" mat-icon-button (click)="closeDialog()">
     <mat-icon>close</mat-icon>
   </button>
 
   <div class="text-center form-wrapper">
-
-    <img
-      class="logo mb-3"
-      src="https://avellaneda.ibeltran.com.ar/img/logo/logo.png"
-      alt="Logo"
-    />
+    <div class="img-logo">
+      <img class="logo mb-3" src="assets/img/small_logo.png" alt="Logo" />
+    </div>
 
     <h2 class="title">Crear cuenta</h2>
     <p class="subtitle">Completá los datos para registrarte</p>
@@ -37,6 +40,7 @@
           formControlName="email"
           placeholder="email@example.com"
         />
+
         <mat-error *ngIf="userForm.controls['email'].hasError('required')">
           El campo es requerido
         </mat-error>
@@ -59,7 +63,7 @@
       </mat-form-field>
 
       <!-- REQUISITOS -->
-      <div class="requisitosContasena" *ngIf="userForm.get('password')?.dirty">
+      <div class="requisitosContrasena" *ngIf="userForm.get('password')?.dirty">
         <p>La contraseña debe cumplir:</p>
         <ul>
           <li [ngClass]="{ valido: !passwordHasError('minuscula'), invalido: passwordHasError('minuscula') }">
@@ -77,10 +81,9 @@
         </ul>
       </div>
 
-      <button class="btn-primary-main" type="submit">
+      <button class="btn-primary-main w100" type="submit">
         Registrarse
       </button>
-
     </form>
   </div>
 </div>

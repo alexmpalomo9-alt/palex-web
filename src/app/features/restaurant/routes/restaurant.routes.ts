@@ -7,6 +7,7 @@ import { RestaurantStaffComponent } from '../restaurant-staff/restaurant-staff/r
 import { RestaurantStatsComponent } from '../restaurant-stats/restaurant-stats/restaurant-stats.component';
 import { RestaurantTablesComponent } from '../restaurant-tables/restaurant-tables/restaurant-tables.component';
 import { RestaurantShellComponent } from '../restaurant-shell/restaurant-shell/restaurant-shell.component';
+import { RestaurantProductsComponent } from '../restaurant-products/restaurant-products/restaurant-products.component';
 
 export const RESTAURANT_ROUTES: Routes = [
   // Listado de restaurantes
@@ -24,11 +25,15 @@ export const RESTAURANT_ROUTES: Routes = [
       { path: '', redirectTo: 'info', pathMatch: 'full' },
 
       { path: 'info', component: RestaurantInfoComponent },
-      { path: 'menu', component: RestaurantMenuComponent },
+      { path: 'products', component: RestaurantProductsComponent },
       { path: 'staff', component: RestaurantStaffComponent },
       { path: 'tables', component: RestaurantTablesComponent },
       { path: 'orders', component: RestaurantOrdersComponent },
       { path: 'stats', component: RestaurantStatsComponent },
     ],
+  },
+  {
+    path: ':slug/menu',
+    component: RestaurantMenuComponent,
   },
 ];

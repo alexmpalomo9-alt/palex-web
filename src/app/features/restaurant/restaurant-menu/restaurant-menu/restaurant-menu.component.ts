@@ -1,136 +1,105 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
+import { MatSidenav } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableDataSource } from '@angular/material/table';
-import { RestaurantService } from '../../services/restaurant.service';
-import { Restaurant } from '../../model/restaurant.model';
-import { ProductListComponent } from '../../../../products/components/product-list/product-list.component';
-import { DialogService } from '../../../../core/services/dialog.service';
-import { Product } from '../../../../products/model/product.model';
-import { ProductDialogService } from '../../../../products/services/product-dialog.service';
+import { SharedModule } from '../../../../shared/shared.module';
+import { CartComponent } from '../../../../customer/components/cart/cart.component';
+import { CartService } from '../../../../customer/services/cart.service';
+import {
+  Product,
+  PRODUCT_CATEGORIES,
+} from '../../../../products/model/product.model';
 import { ProductService } from '../../../../products/services/product.service';
+import { Restaurant } from '../../model/restaurant.model';
+import { RestaurantService } from '../../services/restaurant.service';
 
 @Component({
   selector: 'app-restaurant-menu',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    ProductListComponent,
-  ],
+  imports: [CartComponent, SharedModule],
   templateUrl: './restaurant-menu.component.html',
   styleUrls: ['./restaurant-menu.component.scss'],
 })
-export class RestaurantMenuComponent implements OnInit {
+export class RestaurantMenuComponent implements OnInit, OnDestroy {
+  @ViewChild('cartSidenav') cartSidenav!: MatSidenav;
+  private destroy$ = new Subject<void>();
+  selectedImage: string | null = null;
+  categories: { label: string; products$: Observable<Product[]> }[] = [];
+  offerProducts$!: Observable<Product[]>;
   restaurant: Restaurant | null = null;
-  dataSource = new MatTableDataSource<Product>();
 
   constructor(
+    private productsService: ProductService,
     private route: ActivatedRoute,
     private restaurantService: RestaurantService,
-    private productService: ProductService,
-    private productDialogService: ProductDialogService,
-    private dialogService: DialogService
+    private cartService: CartService
   ) {}
 
-  ngOnInit() {
-    this.route.parent?.paramMap.subscribe((params) => {
-      const slug = params.get('restaurantId');
-      if (!slug) return;
-
-      this.restaurantService.getRestaurantBySlug(slug).subscribe((res) => {
-        this.restaurant = res[0] ?? null;
-        if (this.restaurant) {
-          this.loadProducts(this.restaurant.restaurantId!);
-        }
-      });
-    });
+  ngOnInit(): void {
+    this.initializeProducts();
   }
 
-  loadProducts(restaurantId: string) {
-    this.restaurantService
-      .getProductsByRestaurant(restaurantId)
-      .subscribe((products) => {
-        this.dataSource.data = products;
-      });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  createProduct() {
-    this.productDialogService
-      .openProductDialog({ mode: 'create' })
-      .subscribe(async (result) => {
-        // Caso CANCELAR
-        if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelar',
-            'No se realizaron cambios.'
-          );
-          return;
+  private initializeProducts() {
+    this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          const slug = params.get('slug');
+          if (!slug) return [];
+          return this.restaurantService.getRestaurantBySlug(slug);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((restaurantResult) => {
+        const restaurant = Array.isArray(restaurantResult)
+          ? restaurantResult[0]
+          : restaurantResult;
+        if (!restaurant) return;
+        this.restaurant = restaurant;
+        const restaurantId = restaurant.restaurantId!;
+
+        // ----- 🔥 Resetear carrito si cambia de restaurante -----
+        const currentCartRestaurant = this.cartService.getCurrentRestaurantId();
+        if (currentCartRestaurant && currentCartRestaurant !== restaurantId) {
+          this.cartService.clearCart();
         }
-        if (!this.restaurant) return;
-
-        // Caso ACEPTAR (crear producto)
-        try {
-          await this.productService.createProduct({
-            ...result,
-            restaurantId: this.restaurant.restaurantId!,
-          });
-
-          this.dialogService.infoDialog(
-            'Éxito',
-            'Producto creado correctamente.'
-          );
-
-          this.loadProducts(this.restaurant.restaurantId!);
-        } catch (e: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            e.message || 'Ocurrió un error inesperado.'
-          );
-        }
+        this.categories = PRODUCT_CATEGORIES.map((label) => ({
+          label,
+          products$: this.productsService.getAvailableProductsByCategory(
+            restaurantId,
+            label
+          ),
+        }));
+        this.offerProducts$ =
+          this.productsService.getOfferProducts(restaurantId);
       });
   }
 
-  editProduct(product: Product) {
+  /** Agregar producto usando el servicio */
+  addProductToCart(product: Product) {
     if (!this.restaurant) return;
+    const restaurantId = this.restaurant.restaurantId!;
+    this.cartService.addProduct(product, restaurantId);
+  }
 
-    this.productDialogService
-      .openProductDialog({ mode: 'edit', data: product })
-      .subscribe(async (result) => {
-        if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelar',
-            'No se realizaron cambios.'
-          );
-          return;
-        }
+  getCartQuantity(): number {
+    return this.cartService.getTotalQuantity();
+  }
 
-        try {
-          if (!this.restaurant) return;
+  openImageModal(imageUrl?: string) {
+    if (imageUrl) this.selectedImage = imageUrl;
+  }
 
-          const { restaurantId, ...cleanData } = result;
-          await this.productService.updateProduct(
-            this.restaurant.restaurantId!,
-            product.productId!,
-            cleanData
-          );
+  closeImageModal() {
+    this.selectedImage = null;
+  }
 
-          this.dialogService.infoDialog(
-            'Éxito',
-            'Producto editado correctamente.'
-          );
-          this.loadProducts(this.restaurant.restaurantId!);
-        } catch (e: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            e.message || 'Ocurrió un error inesperado.'
-          );
-        }
-      });
+  onImageError(event: any) {
+    event.target.src = 'assets/img/not-found.png';
   }
 }

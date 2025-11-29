@@ -20,6 +20,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [],
@@ -44,6 +46,8 @@ import { MatListModule } from '@angular/material/list';
     MatProgressSpinnerModule,
     MatSidenavModule,
     MatListModule,
+    MatProgressBarModule,
+    MatMenuModule,
   ],
   exports: [
     CommonModule,
@@ -66,6 +70,8 @@ import { MatListModule } from '@angular/material/list';
     MatProgressSpinnerModule,
     MatSidenavModule,
     MatListModule,
+    MatProgressBarModule,
+    MatMenuModule,
   ],
   providers: [{ provide: DateAdapter, useClass: CustomDateAdapter }],
 })

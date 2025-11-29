@@ -1,27 +1,21 @@
 /* === Tipografía global === */
 body {
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-  background: #f7f9fc;
+  background: linear-gradient(135deg, #d8e8ff, #f3d9ff, #ffe6e6);
+  backdrop-filter: blur(10px);
   margin: 0;
   padding: 0;
 }
 
-.title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 0.3rem;
+.img-logo img{
+  height: 6rem;
 }
-
-.subtitle {
-  color: #6b7280;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
-.logo {
-  margin-bottom: 1rem;
-  user-select: none;
+/* === GLASSMORPHISM APPLY === */
+.glass {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* === Contenedor del diálogo === */
@@ -29,32 +23,47 @@ body {
   max-height: 100vh;
   max-width: 420px;
   width: 100%;
-  overflow-y: auto;
   padding: 2rem;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
   position: relative;
+  overflow-y: auto;
+  animation: fadeIn 0.4s ease;
 }
 
-@media (max-width: 600px) {
-  .medidas-dialog {
-    width: 100%;
-    padding: 1.5rem;
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* === Botón Google === */
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2961b4;
+}
+
+.subtitle {
+  color: #2961b4;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* === Google Button === */
 .btn-google {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 0.85rem;
   width: 100%;
   font-weight: 600;
-  margin-top: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  transition: 0.3s ease;
+}
+.btn-google:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .google-logo {
@@ -64,23 +73,19 @@ body {
 /* === Botón principal === */
 .btn-primary-main {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
   padding: 0.85rem;
   font-size: 1rem;
   font-weight: 600;
   border-radius: 12px;
   border: none;
-  background: #4f46e5;
+  background: #2961b4;
   color: #fff !important;
   transition: 0.3s ease;
-  min-height: 48px; /* fuerza altura consistente */
+  min-height: 48px;
+  backdrop-filter: blur(10px);
 }
-
 .btn-primary-main:hover {
-  background: #4338ca;
+  background: rgba(8, 0, 160, 0.95);
 }
 
 /* Spinner centrado */
@@ -91,51 +96,22 @@ body {
   transform: translate(-50%, -50%);
 }
 
-/* Oculta el texto cuando carga (opcional si querés) */
-.btn-primary-main span {
-  visibility: visible;
-}
-
-.btn-primary-main[disabled] span {
-  visibility: hidden; /* oculta texto cuando loading = true */
-}
-
-/* === Botón secundario === */
-.btn-secondary {
-  width: 100%;
-  margin-top: 10px;
-  font-weight: 600;
-}
-
-/* === Divider === */
-.divider {
-  margin: 10px 0;
-  border: none;
-  border-top: 1px solid #e5e7eb;
-}
-
-/* === Cerrar === */
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  color: #6b7280;
-  font-size: 1.2rem;
-}
-
-.close-button:hover {
-  color: #111827;
-}
-
-/* === Campos Material === */
+/* === Inputs Material === */
 mat-form-field {
   width: 100%;
   margin-bottom: 10px;
 }
-.btn-link {
-  width: 100%;
-  margin-top: 8px;
-  color: #4f46e5;
-  background: transparent;
+
+.mat-form-field-appearance-fill .mat-form-field-flex {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(8px);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #f5eaea;
+  background: rgba(0, 0, 0, 0.37);
+  border-radius: 50%;
 }

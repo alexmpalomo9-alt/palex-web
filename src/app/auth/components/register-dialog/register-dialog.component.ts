@@ -4,9 +4,10 @@ import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { regexMail } from '../../../shared/pattern/patterns';
 import { validatePassword } from '../../helper/passwordValidator';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
 import { DialogService } from '../../../core/services/dialog.service';
+import { LoginDialogComponent } from '../login-dialog/login-dialog.component';
 
 @Component({
   selector: 'app-register-dialog',
@@ -23,12 +24,23 @@ export class RegisterDialogComponent {
     private dialogRef: MatDialogRef<RegisterDialogComponent>,
     private authService: AuthService,
     private dialogService: DialogService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {
     this.userForm = new FormGroup({
-      name: new FormControl('', [Validators.required, Validators.maxLength(30)]),
-      lastname: new FormControl('', [Validators.required, Validators.maxLength(30)]),
-      email: new FormControl('', [Validators.required, Validators.pattern(regexMail), Validators.maxLength(30)]),
+      name: new FormControl('', [
+        Validators.required,
+        Validators.maxLength(30),
+      ]),
+      lastname: new FormControl('', [
+        Validators.required,
+        Validators.maxLength(30),
+      ]),
+      email: new FormControl('', [
+        Validators.required,
+        Validators.pattern(regexMail),
+        Validators.maxLength(30),
+      ]),
       password: new FormControl('', [Validators.required, validatePassword]),
     });
   }
@@ -44,7 +56,10 @@ export class RegisterDialogComponent {
 
   async registerUser() {
     if (!this.isFormValid) {
-      this.dialogService.infoDialog('Error', 'Complete todos los campos correctamente.');
+      this.dialogService.infoDialog(
+        'Error',
+        'Complete todos los campos correctamente.'
+      );
       return;
     }
 
@@ -65,5 +80,17 @@ export class RegisterDialogComponent {
 
   closeDialog() {
     this.dialogRef.close();
+  }
+  backToLogin() {
+    this.dialogRef.close(); // cierras este dialog
+
+    const dialogRef = this.dialog.open(LoginDialogComponent, {
+      data: { email: '', password: '' },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      // Se puede manejar algo después de cerrar el diálogo
+    });
   }
 }

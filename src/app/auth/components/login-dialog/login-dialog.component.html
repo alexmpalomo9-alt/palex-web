@@ -1,19 +1,21 @@
-<div mat-dialog-content class="medidas-dialog">
+<div mat-dialog-content class="medidas-dialog glass">
   <button class="close-button" mat-icon-button (click)="closeDialog()">
     <mat-icon>close</mat-icon>
   </button>
 
   <div class="text-center form-wrapper">
+    <div class="img-logo">
     <img
       class="logo mb-4"
-      src="https://avellaneda.ibeltran.com.ar/img/logo/logo.png"
+      src="assets/img/small_logo.png"
       alt="Logo"
     />
-
+</div>
     <h2 class="title">Iniciar Sesión</h2>
     <p class="subtitle">Ingresá tus datos para continuar</p>
 
     <form [formGroup]="loginUser" (ngSubmit)="login()">
+      
       <mat-form-field appearance="fill" class="w100">
         <mat-label>Correo Electrónico</mat-label>
         <input
@@ -47,8 +49,7 @@
           mode="indeterminate"
           color="accent"
           class="spinner-button"
-        >
-        </mat-progress-spinner>
+        ></mat-progress-spinner>
       </button>
 
       <button

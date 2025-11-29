@@ -70,14 +70,20 @@ export class AuthService {
   }
 
   // -------------------- LOGIN GOOGLE --------------------
-  async loginWithGoogle() {
-    try {
-      const credentials = await signInWithPopup(
-        this.auth,
-        new GoogleAuthProvider()
-      );
-      const user = credentials.user;
+async loginWithGoogle() {
+  try {
+    const credentials = await signInWithPopup(
+      this.auth,
+      new GoogleAuthProvider()
+    );
 
+    const user = credentials.user;
+
+    // Verificar si el usuario ya existe en Firestore
+    const existingUser = await this.getUserData(user.uid);
+
+    if (!existingUser) {
+      // Crear nuevo usuario solo si no existe
       const displayName = user.displayName ?? '';
       const names = displayName.split(' ');
       const name = names.shift() || '';
@@ -103,12 +109,14 @@ export class AuthService {
         enabled: true,
         createdAt: new Date().toISOString(),
       });
-
-      return { uid: user.uid };
-    } catch (error) {
-      this.handleError(error);
     }
+
+    return { uid: user.uid };
+  } catch (error) {
+    this.handleError(error);
   }
+}
+
 
   // -------------------- REGISTER --------------------
   async registerUser({ name, lastname, email, password }: any) {

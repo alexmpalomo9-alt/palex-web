@@ -24,5 +24,11 @@ export const routes: Routes = [
       ),
   },
 
+  {
+    path: 'users',
+    loadChildren: () =>
+      import('./users/routes/user.routes').then((m) => m.USER_ROUTES),
+  },
+
   { path: '', component: HomePageComponent },
 ];

@@ -15,7 +15,7 @@ export interface Product {
 
 export const PRODUCT_CATEGORIES = [
   'Entradas',
-  'Platos principales',
+  'Platos Principales',
   'Bebidas',
   'Postres',
 ];

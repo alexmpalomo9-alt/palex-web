@@ -1,0 +1,29 @@
+.restaurant-menu-container {
+  padding: 1.5rem;
+
+  .menu-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-header {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 0.5rem;
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+
+      mat-icon {
+        font-size: 20px;
+      }
+    }
+  }
+}

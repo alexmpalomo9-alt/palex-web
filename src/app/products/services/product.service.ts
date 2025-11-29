@@ -4,6 +4,7 @@ import {
   addDoc,
   collection,
   collectionData,
+  deleteDoc,
   doc,
   docData,
   query,
@@ -13,12 +14,17 @@ import {
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Product } from '../model/product.model';
+import { FirebaseError } from 'firebase/app';
+import { ErrorHandlerService } from '../../core/services/error-handler.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
-  constructor(private firestore: Firestore) { }
+  constructor(
+    private firestore: Firestore,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
   /* =====================================================
    * GETTERS
@@ -36,10 +42,7 @@ export class ProductService {
   }
 
   /** Obtiene un solo producto por ID */
-  getProductById(
-    restaurantId: string,
-    productId: string
-  ): Observable<Product> {
+  getProductById(restaurantId: string, productId: string): Observable<Product> {
     const ref = doc(
       this.firestore,
       `restaurants/${restaurantId}/products/${productId}`
@@ -63,9 +66,7 @@ export class ProductService {
       where('available', '==', true)
     );
 
-    return collectionData(q, { idField: 'productId' }) as Observable<
-      Product[]
-    >;
+    return collectionData(q, { idField: 'productId' }) as Observable<Product[]>;
   }
 
   /** Productos en oferta */
@@ -81,9 +82,7 @@ export class ProductService {
       where('isOffer', '==', true)
     );
 
-    return collectionData(q, { idField: 'productId' }) as Observable<
-      Product[]
-    >;
+    return collectionData(q, { idField: 'productId' }) as Observable<Product[]>;
   }
 
   /* =====================================================
@@ -134,8 +133,22 @@ export class ProductService {
         updatedAt: serverTimestamp(),
       });
     })();
-
   }
+
+/** Elimina un producto físicamente */
+async deleteProduct(restaurantId: string, productId: string): Promise<void> {
+  const productRef = doc(this.firestore, `restaurants/${restaurantId}/products/${productId}`);
+  try {
+    await deleteDoc(productRef);
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      throw new Error(this.errorHandler.handleFirebaseError(error));
+    } else {
+      this.errorHandler.log(error);
+      throw new Error('Error desconocido al eliminar el recurso.');
+    }
+  }
+}
 
   /** Activa / Desactiva un producto (evita duplicación) */
   async setProductAvailable(

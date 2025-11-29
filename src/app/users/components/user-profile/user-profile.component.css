@@ -1,6 +1,6 @@
 /* Fondo */
 .background {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -12,7 +12,7 @@
 
   padding: 1em;
 
-  background: linear-gradient(rgba(44,62,80,0.8), rgba(149,175,192,0.8));
+  background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(149, 175, 192, 0.8));
 }
 
 /* Card */
@@ -20,7 +20,7 @@
   width: 100%;
   max-width: 650px;
 
-  background: rgba(255,255,255,0.88);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(4px);
 
   border-radius: 20px;
@@ -59,7 +59,7 @@
 .upload-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,7 +81,8 @@
 
 /* Secciones */
 .profile-section {
-  margin-top: 20px;
+  margin: 10px;
+  text-align: center;
 }
 
 .profile-section h3 {
@@ -92,7 +93,9 @@
   margin-bottom: 15px;
 }
 
-.w-100 { width: 100%; }
+.w-100 {
+  width: 100%;
+}
 
 /* Botón guardar */
 .save-btn {

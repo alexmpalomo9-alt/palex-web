@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Product } from '../../model/product.model';
+import { Product, PRODUCT_CATEGORIES } from '../../model/product.model';
 import {
   FormBuilder,
   FormGroup,
@@ -23,17 +23,14 @@ export type ProductDialogMode = 'create' | 'edit';
 export class ProductDialogComponent {
   mode: ProductDialogMode;
   editForm: FormGroup;
-
-  categories: string[] = [
-    'Entradas',
-    'Platos Principales',
-    'Bebidas',
-    'Postres',
-  ];
-
+  categories: string[] = PRODUCT_CATEGORIES;
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { mode: ProductDialogMode; data?: Product; restaurantId: string },
+    public data: {
+      mode: ProductDialogMode;
+      data?: Product;
+      restaurantId: string;
+    },
     private dialogRef: MatDialogRef<ProductDialogComponent>,
     private fb: FormBuilder
   ) {

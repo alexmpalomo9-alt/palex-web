@@ -12,8 +12,60 @@ type DialogMode = 'create' | 'edit';
 export class UserDialogService {
   constructor(private dialog: MatDialog) {}
 
-  openUserDialog(options: { mode: DialogMode; data?: User }): Observable<any> {
-    const emptyUser: User = {
+  // openUserDialog(options: { mode: DialogMode; data?: User }): Observable<any> {
+  //   const emptyUser: User = {
+  //     uid: '',
+  //     email: '',
+  //     name: '',
+  //     lastname: '',
+  //     birthdate: null,
+  //     address: '',
+  //     phone: '',
+  //     photoURL: '',
+  //     roles: {
+  //       adminGlobal: false,
+  //       adminLocal: false,
+  //       mozo: false,
+  //       cocina: false,
+  //       gerencia: false,
+  //       customer: false,
+  //       guest: false,
+  //     },
+  //     restaurantsOwner: [],
+  //     restaurantsStaff: [],
+  //     enabled: true,
+  //     createdAt: null,
+  //   };
+
+  //   const dialogRef = this.dialog.open(UserDialogComponent, {
+  //     disableClose: true,
+  //     data: {
+  //       modo: options.mode === 'edit' ? 'editar-usuario' : 'editar-perfil',
+  //       user: options.data ?? emptyUser,
+  //     },
+  //   });
+
+  //   return dialogRef.afterClosed();
+  // }
+
+
+
+  openUserDialog(options: {
+    mode: DialogMode;
+    data?: User;
+  }): Observable<User> {
+    const dialogRef = this.dialog.open(UserDialogComponent, {
+      disableClose: true,
+      width: '600px',
+      maxHeight: '90vh',
+      panelClass: 'custom-dialog-container',
+      hasBackdrop: true,
+      data: {
+        mode: options.mode,
+        restaurant:
+          options.mode === 'edit'
+            ? options.data
+            : {
       uid: '',
       email: '',
       name: '',
@@ -35,13 +87,7 @@ export class UserDialogService {
       restaurantsStaff: [],
       enabled: true,
       createdAt: null,
-    };
-
-    const dialogRef = this.dialog.open(UserDialogComponent, {
-      disableClose: true,
-      data: {
-        modo: options.mode === 'edit' ? 'editar-usuario' : 'editar-perfil',
-        user: options.data ?? emptyUser,
+              },
       },
     });
 
