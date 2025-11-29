@@ -1,0 +1,16 @@
+.restaurant-layout {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  height: 100%;
+}
+
+.sidebar {
+  // background: #0f2137;
+  padding-top: 20px;
+}
+
+.content-area {
+  padding: 30px;
+  background: #faf5f3;
+  overflow-y: auto;
+}

@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { BaseTableComponent } from '../../../shared/components/base-table/base-table.component';
-import { Restaurant } from '../../model/restaurant.model';
+import { Restaurant } from '../../../features/restaurant/model/restaurant.model';
 
 interface TableColumn {
   id: string;

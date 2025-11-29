@@ -3,8 +3,8 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { SearchBoxComponent } from '../../../shared/components/search-box/search-box.component';
-import { Restaurant } from '../../../restaurant/model/restaurant.model';
-import { RestaurantService } from '../../../restaurant/services/restaurant.service';
+import { Restaurant } from '../../../features/restaurant/model/restaurant.model';
+import { RestaurantService } from '../../../features/restaurant/services/restaurant.service';
 
 @Component({
   selector: 'app-home-page',

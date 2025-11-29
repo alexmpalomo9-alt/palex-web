@@ -11,7 +11,7 @@ export const routes: Routes = [
   {
     path: 'restaurant',
     loadChildren: () =>
-      import('./restaurant/routes/restaurant.routes').then(
+      import('./features/restaurant/routes/restaurant.routes').then(
         (m) => m.RESTAURANT_ROUTES
       ),
   },

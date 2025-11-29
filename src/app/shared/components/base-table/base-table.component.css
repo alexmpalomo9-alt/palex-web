@@ -26,6 +26,13 @@ table {
   border-spacing: 0 8px;
   font-family: "Roboto", sans-serif;
 }
+.table-container {
+  overflow-x: auto; /* scroll horizontal si no cabe */
+  width: 100%;
+}
+td.mat-cell, th.mat-header-cell {
+  min-width: 120px; /* columna mínima */
+}
 
 /* Encabezados */
 th.mat-header-cell {
@@ -91,19 +98,17 @@ mat-paginator {
 @media (max-width: 768px) {
   th.mat-header-cell,
   td.mat-cell {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-
-  mat-form-field {
-    margin-bottom: 16px;
-    /* width: 50%; ancho */
-    min-width: unset;
-    width: 50%;
+    padding: 6px 8px;
+    font-size: 12px;
+    white-space: nowrap; /* evita que se rompa el texto en varias líneas */
   }
 
   .actions-container {
-    flex-direction: row; /* iconos horizontal en pantallas pequeñas */
-    gap: 6px;
+    flex-direction: column; /* botones apilados vertical en móvil */
+    gap: 4px;
+  }
+
+  mat-form-field {
+    width: 100%; /* buscador ocupa todo el ancho */
   }
 }

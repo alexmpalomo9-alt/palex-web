@@ -5,11 +5,11 @@ import { Product, PRODUCT_CATEGORIES } from '../../model/product.model';
 import { MatSidenav } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../services/product.service';
-import { Restaurant } from '../../../restaurant/model/restaurant.model';
-import { RestaurantService } from '../../../restaurant/services/restaurant.service';
+import { Restaurant } from '../../../features/restaurant/model/restaurant.model';
 import { CartService } from '../../../customer/services/cart.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { CartComponent } from '../../../customer/components/cart/cart.component';
+import { RestaurantService } from '../../../features/restaurant/services/restaurant.service';
 
 @Component({
   selector: 'app-products',

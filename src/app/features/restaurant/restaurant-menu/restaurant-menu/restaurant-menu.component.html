@@ -1,0 +1,15 @@
+<div *ngIf="restaurant">
+  <div class="section-header">
+    <h2>Productos</h2>
+    <button mat-stroked-button color="primary" (click)="createProduct()">
+      <mat-icon>add</mat-icon>
+      Agregar Producto
+    </button>
+  </div>
+
+  <app-product-list
+    [products]="dataSource.data"
+    [restaurantId]="restaurant.restaurantId"
+    (edit)="editProduct($event)"
+  ></app-product-list>
+</div>

@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Restaurant } from '../../model/restaurant.model';
-import { RestaurantService } from '../../services/restaurant.service';
-import { RestaurantDialogService } from '../../services/restaurant-dialog.service';
+import { Restaurant } from '../../../features/restaurant/model/restaurant.model';
 import { DialogService } from '../../../core/services/dialog.service';
 import { Subject, takeUntil } from 'rxjs';
 import { RestaurantListComponent } from '../restaurant-list/restaurant-list.component';
 import { SharedModule } from '../../../shared/shared.module';
+import { RestaurantDialogService } from '../../../features/restaurant/services/restaurant-dialog.service';
+import { RestaurantService } from '../../../features/restaurant/services/restaurant.service';
 
 @Component({
   selector: 'app-restaurant-page',

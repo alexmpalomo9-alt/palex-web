@@ -1,0 +1,22 @@
+.staff-card {
+  padding: 16px;
+  margin: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+button[mat-icon-button] mat-icon {
+  font-size: 20px;
+}

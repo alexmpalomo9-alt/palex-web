@@ -8,10 +8,10 @@ import { ProductListComponent } from '../../../products/components/product-list/
 import { Product } from '../../../products/model/product.model';
 import { ProductDialogService } from '../../../products/services/product-dialog.service';
 import { ProductService } from '../../../products/services/product.service';
-import { Restaurant } from '../../model/restaurant.model';
-import { RestaurantDialogService } from '../../services/restaurant-dialog.service';
-import { RestaurantService } from '../../services/restaurant.service';
+import { Restaurant } from '../../../features/restaurant/model/restaurant.model';
 import { StaffManagementComponent } from '../../staff-management/staff-management.component';
+import { RestaurantDialogService } from '../../../features/restaurant/services/restaurant-dialog.service';
+import { RestaurantService } from '../../../features/restaurant/services/restaurant.service';
 
 @Component({
   selector: 'app-restaurant-profile',

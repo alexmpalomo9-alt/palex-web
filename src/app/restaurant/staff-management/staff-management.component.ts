@@ -24,7 +24,7 @@ import { User } from '../../users/model/user.model';
 import { UserService } from '../../users/services/user.service';
 import { DialogService } from '../../core/services/dialog.service';
 import { UserDialogComponent } from '../../users/components/user-dialog/user-dialog.component';
-import { RestaurantStaffService } from '../../restaurant-staff/services/restaurant-staff.service';
+import { RestaurantStaffService } from '../../features/restaurant/services/restaurant-staff.service';
 
 @Component({
   selector: 'app-staff-management',

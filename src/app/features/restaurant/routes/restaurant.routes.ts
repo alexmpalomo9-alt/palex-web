@@ -1,0 +1,34 @@
+import { Routes } from '@angular/router';
+import { RestaurantPageComponent } from '../../../restaurant/components/restaurant-page/restaurant-page.component';
+import { RestaurantInfoComponent } from '../restaurant-info/restaurant-info/restaurant-info.component';
+import { RestaurantMenuComponent } from '../restaurant-menu/restaurant-menu/restaurant-menu.component';
+import { RestaurantOrdersComponent } from '../restaurant-orders/restaurant-orders/restaurant-orders.component';
+import { RestaurantStaffComponent } from '../restaurant-staff/restaurant-staff/restaurant-staff.component';
+import { RestaurantStatsComponent } from '../restaurant-stats/restaurant-stats/restaurant-stats.component';
+import { RestaurantTablesComponent } from '../restaurant-tables/restaurant-tables/restaurant-tables.component';
+import { RestaurantShellComponent } from '../restaurant-shell/restaurant-shell/restaurant-shell.component';
+
+export const RESTAURANT_ROUTES: Routes = [
+  // Listado de restaurantes
+  // {
+  //   path: 'list',
+  //   loadComponent: () =>
+  //     import('../../../restaurant/components/restaurant-page/restaurant-page.component')
+  //       .then(c => c.RestaurantPageComponent),
+  // },
+
+  {
+    path: ':restaurantId', // o :slug
+    component: RestaurantShellComponent,
+    children: [
+      { path: '', redirectTo: 'info', pathMatch: 'full' },
+
+      { path: 'info', component: RestaurantInfoComponent },
+      { path: 'menu', component: RestaurantMenuComponent },
+      { path: 'staff', component: RestaurantStaffComponent },
+      { path: 'tables', component: RestaurantTablesComponent },
+      { path: 'orders', component: RestaurantOrdersComponent },
+      { path: 'stats', component: RestaurantStatsComponent },
+    ],
+  },
+];

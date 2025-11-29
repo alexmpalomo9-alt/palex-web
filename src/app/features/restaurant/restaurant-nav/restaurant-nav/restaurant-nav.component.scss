@@ -1,0 +1,26 @@
+/* Aplica a los elementos dentro de app-restaurant-nav */
+::ng-deep mat-nav-list a {
+  color: white; /* Cambiar color de las letras a blanco */
+  font-size: 18px; /* Aumentar tamaño de la fuente */
+  font-weight: 500;
+  padding: 12px 20px; /* Ajustar padding si se necesita más espacio */
+  border-radius: 6px;
+  transition: background 0.2s;
+  display: flex; /* Para que el icono y el texto estén en línea */
+  align-items: center; /* Centrar el texto y el icono verticalmente */
+}
+
+::ng-deep mat-nav-list a.active {
+  background-color: #5b97f0;
+  color: white;
+}
+
+::ng-deep mat-nav-list a:hover {
+  background: #f3f3f3;
+  color: #333; /* Si quieres que el color cambie al pasar el mouse */
+}
+
+::ng-deep .nav-icon {
+  margin-right: 15px; /* Aumentar espacio entre el icono y el texto */
+  font-size: 24px; /* Aumentar el tamaño del icono */
+}
