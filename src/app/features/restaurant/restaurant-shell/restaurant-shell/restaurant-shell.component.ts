@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { RestaurantNavComponent } from '../../restaurant-nav/restaurant-nav/restaurant-nav.component';
 import { RestaurantService } from '../../services/restaurant.service';
@@ -18,6 +18,13 @@ export class RestaurantShellComponent implements OnInit {
     private route: ActivatedRoute,
     private restaurantService: RestaurantService
   ) {}
+  
+  isMobile = window.innerWidth < 1000;
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile = window.innerWidth < 1000;
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {

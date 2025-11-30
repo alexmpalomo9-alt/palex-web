@@ -36,4 +36,8 @@ export const RESTAURANT_ROUTES: Routes = [
     path: ':slug/menu',
     component: RestaurantMenuComponent,
   },
+  {
+    path: 'r/:slug/menu/:tableId',
+    component: RestaurantMenuComponent,
+  },
 ];

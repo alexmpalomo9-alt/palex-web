@@ -48,7 +48,7 @@ export class RestaurantTablesComponent implements OnInit {
     });
   }
   openQr(table: any) {
-    const url = `https://palex.com/r/${this.restaurant?.slug}/tables/${table.tableId}`;
+    const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
 
     this.dialog.open(TableQrDialogComponent, {
       data: {

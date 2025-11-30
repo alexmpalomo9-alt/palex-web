@@ -1,11 +1,30 @@
-<div class="restaurant-layout">
-  <div class="sidebar">
-    <app-restaurant-nav></app-restaurant-nav>
-  </div>
+<mat-sidenav-container class="main-container">
 
-  <div class="content-area">
-    <!-- <app-restaurant-header [restaurant]="restaurant"></app-restaurant-header> -->
-    <router-outlet></router-outlet>
-  </div>
-  
-</div>
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile ? 'over' : 'side'"
+    [opened]="!isMobile"
+  >
+    <app-restaurant-nav></app-restaurant-nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+
+    <!-- Botón hamburguesa cuando es mobile -->
+    <button
+      *ngIf="isMobile"
+      mat-icon-button
+      (click)="sidenav.toggle()"
+      class="mobile-menu-button"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <!-- Aquí va TODO el contenido -->
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>
