@@ -71,6 +71,10 @@
           <mat-icon>delete</mat-icon>
         </button>
 
+        <button mat-icon-button color="accent" (click)="openQr(t)">
+          <mat-icon>qr_code</mat-icon>
+        </button>
+
       </td>
     </ng-container>
 
@@ -83,5 +87,6 @@
   <div *ngIf="!loading && tables.length === 0" class="empty-state">
     <p>No hay mesas registradas.</p>
   </div>
+
 
 </div>

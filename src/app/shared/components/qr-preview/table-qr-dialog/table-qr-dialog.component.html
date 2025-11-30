@@ -1,0 +1,16 @@
+<button mat-icon-button class="close-btn" (click)="close()">
+  <mat-icon>close</mat-icon>
+</button>
+
+<h2 mat-dialog-title class="dialog-title">
+  QR de la mesa {{ data.table.number }}
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="qr-container">
+    <app-qr-preview 
+      [data]="data.url" 
+      [logoUrl]="data.logoUrl">
+    </app-qr-preview>
+  </div>
+</mat-dialog-content>

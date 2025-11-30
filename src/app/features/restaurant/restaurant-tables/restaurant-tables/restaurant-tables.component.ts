@@ -2,14 +2,13 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TableService } from '../services/table.service';
 import { Table } from '../model/tables.model';
-import { ConfirmDialogComponent } from '../../../../core/components/confirm-dialog/confirm-dialog.component';
-import { TableDialogComponent } from '../table-dialog/table-dialog.component';
 import { SharedModule } from '../../../../shared/shared.module';
 import { ActivatedRoute } from '@angular/router';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { TableDialogService } from '../services/table-dialog/table-dialog.service';
+import { TableQrDialogComponent } from '../../../../shared/components/qr-preview/table-qr-dialog/table-qr-dialog.component';
 
 @Component({
   selector: 'app-restaurant-tables',
@@ -46,6 +45,17 @@ export class RestaurantTablesComponent implements OnInit {
           this.loadTables();
         }
       });
+    });
+  }
+  openQr(table: any) {
+    const url = `https://palex.com/r/${this.restaurant?.slug}/tables/${table.tableId}`;
+
+    this.dialog.open(TableQrDialogComponent, {
+      data: {
+        table,
+        url,
+        logoUrl: 'assets/img/logo-palex.png',
+      },
     });
   }
 
