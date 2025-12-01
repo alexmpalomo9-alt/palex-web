@@ -16,12 +16,6 @@
       Invitar empleado
     </button>
 
-    <button mat-raised-button color="accent" (click)="toggleDisabled()">
-      <mat-icon class="me-1">
-        {{ showDisabled ? "visibility" : "visibility_off" }}
-      </mat-icon>
-      {{ showDisabled ? "Ver habilitados" : "Ver deshabilitados" }}
-    </button>
   </div>
 
   <mat-divider></mat-divider>
@@ -62,26 +56,16 @@
         <mat-icon>manage_accounts</mat-icon>
       </button>
 
-      <button
-        *ngIf="!showDisabled"
-        mat-icon-button
-        matTooltip="Deshabilitar"
-        color="warn"
-        (click)="disable(user)"
-      >
-        <mat-icon>person_off</mat-icon>
-      </button>
+<button
+  mat-icon-button
+  matTooltip="Eliminar del restaurante"
+  color="warn"
+  (click)="deleteStaffMember(user)"
+>
+  <mat-icon>person_remove</mat-icon>
+</button>
 
-      <button
-        *ngIf="showDisabled"
-        mat-icon-button
-        matTooltip="Habilitar"
-        color="accent"
-        (click)="enable(user)"
-      >
-        <mat-icon>person_add</mat-icon>
-      </button>
-    </div>
+</div>
   </ng-template>
 
   <mat-divider class="my-4"></mat-divider>

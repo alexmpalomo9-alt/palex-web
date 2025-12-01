@@ -87,10 +87,7 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
     if (!this.restaurantId) return;
 
     this.restaurantStaffService
-      .getRestaurantEmployeesByRestaurantId(
-        this.restaurantId,
-        this.showDisabled
-      )
+      .getRestaurantEmployeesByRestaurantId(this.restaurantId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((users) => {
         this.staff = users.map((u) => ({
@@ -115,33 +112,6 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
           ],
         }));
       });
-  }
-
-  toggleDisabled() {
-    this.showDisabled = !this.showDisabled;
-    this.loadStaff();
-  }
-
-  disable(user: User) {
-    this.dialogService
-      .confirmDialog({
-        title: 'Deshabilitar empleado',
-        message: '¿Deseas deshabilitar este empleado?',
-        type: 'question',
-      })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(async (ok) => {
-        if (!ok || !user.uid) return;
-        await this.restaurantStaffService.disableStaffMember(user.uid);
-        this.dialogService.infoDialog('OK', 'Empleado deshabilitado.');
-        this.loadStaff();
-      });
-  }
-
-  enable(user: User) {
-    this.restaurantStaffService
-      .enableStaffMember(user.uid)
-      .then(() => this.loadStaff());
   }
 
   async changeRole(user: User) {
@@ -193,6 +163,31 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
         );
       }
     });
+  }
+
+  async deleteStaffMember(user: User) {
+    this.dialogService
+      .confirmDialog({
+        title: 'Eliminar empleado del restaurante',
+        message:
+          '¿Deseas eliminar a este usuario del restaurante? No se eliminará su cuenta global.',
+        type: 'question',
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (ok) => {
+        if (!ok || !user.uid) return;
+
+        await this.restaurantStaffService.removeUserFromRestaurant(
+          user.uid,
+          this.restaurantId
+        );
+
+        this.dialogService.infoDialog(
+          'OK',
+          'Empleado eliminado del restaurante.'
+        );
+        this.loadStaff();
+      });
   }
 
   ngOnDestroy() {
