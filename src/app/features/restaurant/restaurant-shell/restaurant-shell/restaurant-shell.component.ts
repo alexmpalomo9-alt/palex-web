@@ -12,25 +12,29 @@ import { SharedModule } from '../../../../shared/shared.module';
   styleUrls: ['./restaurant-shell.component.scss'],
 })
 export class RestaurantShellComponent implements OnInit {
-  restaurant: any; // O el tipo adecuado de tu restaurante
+  restaurant: any; // Info del restaurante obtenida por slug
 
   constructor(
     private route: ActivatedRoute,
     private restaurantService: RestaurantService
   ) {}
-  
+
+  // Detecta si la ventana tiene tamaño mobile (< 1000px)
   isMobile = window.innerWidth < 1000;
 
+  // Se ejecuta cuando el usuario cambia el tamaño de la ventana
   @HostListener('window:resize')
   onResize() {
     this.isMobile = window.innerWidth < 1000;
   }
 
   ngOnInit() {
+    // Obtiene el parámetro del URL: /restaurant/:slug
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug');
       if (!slug) return;
 
+      // Busca el restaurante por slug
       this.restaurantService.getRestaurantBySlug(slug).subscribe((res) => {
         this.restaurant = res[0] ?? null;
 

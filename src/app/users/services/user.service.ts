@@ -46,25 +46,6 @@ export class UserService {
     });
   }
   // -------------------------------------------------------------------
-  // 🟩 Crear usuario
-  // -------------------------------------------------------------------
-
-  async createUser(user: User): Promise<void> {
-    const userRef = doc(this.firestore, `users/${user.uid}`);
-
-    const now = new Date().toISOString();
-
-    await setDoc(userRef, {
-      ...user,
-      restaurantsOwner: user.restaurantsOwner || [],
-      restaurantsStaff: user.restaurantsStaff || [],
-      enabled: true,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
-
-  // -------------------------------------------------------------------
   // 🟦 Actualizar usuario
   // -------------------------------------------------------------------
 

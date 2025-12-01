@@ -7,9 +7,9 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  collectionData,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
 import { User } from '../../../users/model/user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -37,44 +37,31 @@ export class RestaurantStaffService {
     });
   }
 
-  // 🔹 Obtener empleados por slug
-  getRestaurantEmployeesBySlug(
-    slug: string,
-    showDisabled = false
+  // 🔥 OBTENER EMPLEADOS POR ID REAL DEL RESTAURANTE
+  getRestaurantEmployeesByRestaurantId(
+    restaurantId: string,
+    showDisabled: boolean
   ): Observable<User[]> {
-    return this.getRestaurantIdBySlug(slug).pipe(
-      switchMap(
-        (restaurantId) =>
-          new Observable<User[]>((subscriber) => {
-            const q = query(
-              collection(this.firestore, 'users'),
-              where('restaurantsStaff', 'array-contains', restaurantId),
-              where('enabled', '==', !showDisabled)
-            );
+    const usersRef = collection(this.firestore, 'users');
 
-            const unsubscribe = onSnapshot(
-              q,
-              (snapshot) => {
-                const staff = snapshot.docs.map(
-                  (doc) => ({ uid: doc.id, ...doc.data() } as User)
-                );
-                subscriber.next(staff);
-              },
-              (err) => subscriber.error(err)
-            );
-
-            return () => unsubscribe();
-          })
-      )
+    const q = query(
+      usersRef,
+      where('restaurantIds', 'array-contains', restaurantId),
+      where('enabled', '==', !showDisabled) // enabled true o false
     );
-  }
-  async disableStaffMember(userUid: string) {
-    const userRef = doc(this.firestore, `users/${userUid}`);
-    await updateDoc(userRef, { enabled: false });
+
+    return collectionData(q, { idField: 'uid' }) as Observable<User[]>;
   }
 
-  async enableStaffMember(userUid: string) {
-    const userRef = doc(this.firestore, `users/${userUid}`);
-    await updateDoc(userRef, { enabled: true });
+  // 🔥 DESHABILITAR USUARIO
+  async disableStaffMember(userId: string) {
+    const ref = doc(this.firestore, `users/${userId}`);
+    await updateDoc(ref, { enabled: false });
+  }
+
+  // 🔥 HABILITAR USUARIO
+  async enableStaffMember(userId: string) {
+    const ref = doc(this.firestore, `users/${userId}`);
+    return await updateDoc(ref, { enabled: true });
   }
 }

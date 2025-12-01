@@ -1,0 +1,94 @@
+<div class="invite-container">
+
+  <!-- Invitación inválida -->
+  <ng-container *ngIf="invitation === null">
+    <mat-card class="invite-card error-card">
+      <mat-card-header>
+        <mat-icon color="warn">error_outline</mat-icon>
+        <mat-card-title>Invitación no válida</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>
+          Esta invitación ya expiró o no existe.  
+          Verifica el enlace o solicita una nueva invitación.
+        </p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="goHome()">
+          Volver al inicio
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </ng-container>
+
+  <!-- Invitación válida -->
+  <ng-container *ngIf="invitation">
+
+    <mat-card class="invite-card">
+
+      <mat-card-header>
+        <mat-icon color="primary">mail</mat-icon>
+        <mat-card-title>Te invitaron a un restaurante</mat-card-title>
+        <mat-card-subtitle>
+          Revisa los detalles y acepta la invitación.
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-divider></mat-divider>
+
+      <mat-card-content>
+
+        <div class="details">
+          <p><strong>Rol asignado:</strong> {{ invitation.role }}</p>
+          <p><strong>ID del restaurante:</strong> {{ invitation.restaurantId }}</p>
+        </div>
+
+        <!-- Usuario NO logueado -->
+        <button
+          *ngIf="!(auth.currentUser$ | async)"
+          mat-raised-button
+          color="primary"
+          class="full-width"
+          (click)="goLogin()"
+        >
+          Iniciar sesión para aceptar
+        </button>
+
+        <!-- Usuario logueado -->
+        <ng-container *ngIf="auth.currentUser$ | async as user">
+
+          <!-- Invitación privada a email distinto -->
+          <div *ngIf="invitation.email && invitation.email !== user.email" class="warning-box">
+            <mat-icon color="warn">warning</mat-icon>
+            <p>
+              Esta invitación es para <strong>{{ invitation.email }}</strong>,
+              pero estás logueado como <strong>{{ user.email }}</strong>.
+            </p>
+
+            <button mat-stroked-button color="warn" (click)="switchAccount()">
+              Cambiar de cuenta
+            </button>
+          </div>
+
+          <!-- Aceptar si email coincide o invitación pública -->
+          <button
+            *ngIf="!invitation.email || invitation.email === user.email"
+            mat-raised-button
+            color="accent"
+            class="full-width"
+            (click)="accept()"
+          >
+            Aceptar invitación
+          </button>
+
+        </ng-container>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </ng-container>
+
+</div>

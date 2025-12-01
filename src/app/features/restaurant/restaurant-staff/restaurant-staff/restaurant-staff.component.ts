@@ -1,3 +1,4 @@
+// restaurant-staff.component.ts
 import {
   Component,
   OnInit,
@@ -20,13 +21,21 @@ import { UserService } from '../../../../users/services/user.service';
 import { UserDialogComponent } from '../../../../users/components/user-dialog/user-dialog.component';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { MatDialog } from '@angular/material/dialog';
+import { InvitationService } from '../../../invitations/services/invitation.service';
+import { InvitationDialogComponent } from '../../../invitations/components/invitation-dialog/invitation-dialog.component';
+import { RolePermissionsInfoComponent } from '../role-permissions-info/role-permissions-info.component';
 
 @Component({
   selector: 'app-restaurant-staff',
   standalone: true,
-  imports: [SharedModule, BaseTableComponent, MatChipsModule],
+  imports: [
+    SharedModule,
+    BaseTableComponent,
+    MatChipsModule,
+    RolePermissionsInfoComponent,
+  ],
   templateUrl: './restaurant-staff.component.html',
-  styleUrl: './restaurant-staff.component.scss',
+  styleUrls: ['./restaurant-staff.component.scss'],
 })
 export class RestaurantStaffComponent implements OnInit, OnDestroy {
   restaurantId!: string;
@@ -38,9 +47,19 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
   private dialogService = inject(DialogService);
   private dialog = inject(MatDialog);
   private restaurantStaffService = inject(RestaurantStaffService);
+  private invitationService = inject(InvitationService);
+
+  private internalRoles = [
+    'adminGlobal',
+    'adminLocal',
+    'mozo',
+    'cocina',
+    'manager',
+  ];
 
   @ViewChild('rolesTemplate', { static: true })
   rolesTemplate!: TemplateRef<any>;
+
   @ViewChild('actionsTemplate', { static: true })
   actionsTemplate!: TemplateRef<any>;
 
@@ -55,9 +74,10 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.columns.find((c) => c.id === 'roles')!.template = this.rolesTemplate;
 
-    // Obtenemos restaurantId desde la ruta padre
+    // 🔥 USAMOS DIRECTAMENTE EL ID REAL DEL RESTAURANTE DESDE LA RUTA
     this.restaurantId =
       this.route.parent?.snapshot.paramMap.get('restaurantId') ?? '';
+
     if (this.restaurantId) {
       this.loadStaff();
     }
@@ -65,17 +85,34 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
 
   loadStaff() {
     if (!this.restaurantId) return;
+
     this.restaurantStaffService
-      .getRestaurantEmployeesBySlug(this.restaurantId, this.showDisabled)
+      .getRestaurantEmployeesByRestaurantId(
+        this.restaurantId,
+        this.showDisabled
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe((users) => {
         this.staff = users.map((u) => ({
           ...u,
           fullname: `${u.name} ${u.lastname}`,
-          // FILTRAMOS SOLO ROLES INTERNOS
-          rolesList: Object.keys(u.roles || {})
-            .filter((r) => (u.roles as Record<string, boolean>)[r])
-            .filter((r) => this.internalRoles.includes(r)),
+
+          rolesList: [
+            // GLOBAL ROLES
+            ...Object.keys(u.globalRoles || {}).filter(
+              (r) =>
+                (u.globalRoles as Record<string, boolean>)[r] &&
+                this.internalRoles.includes(r)
+            ),
+
+            // LOCAL ROLES DEL RESTAURANTE ACTUAL
+            ...Object.keys(u.localRoles?.[this.restaurantId] || {}).filter(
+              (r) =>
+                (u.localRoles![this.restaurantId] as Record<string, boolean>)[
+                  r
+                ] && this.internalRoles.includes(r)
+            ),
+          ],
         }));
       });
   }
@@ -95,7 +132,6 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(async (ok) => {
         if (!ok || !user.uid) return;
-
         await this.restaurantStaffService.disableStaffMember(user.uid);
         this.dialogService.infoDialog('OK', 'Empleado deshabilitado.');
         this.loadStaff();
@@ -111,27 +147,56 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
   async changeRole(user: User) {
     const dialogRef = this.dialog.open(UserDialogComponent, {
       width: '400px',
-      data: { user, modo: 'editar-usuario' },
+      data: { user, modo: 'editar-usuario', restaurantId: this.restaurantId },
     });
 
     const result = await dialogRef.afterClosed().toPromise();
     if (!result || !user.uid) return;
 
-    await this.userService.updateUser(user.uid, { roles: result.roles });
+    // 🔥 NO envies globalRoles (para evitar undefined)
+    await this.userService.updateUser(user.uid, {
+      localRoles: result.localRoles,
+    });
+
     this.dialogService.infoDialog('OK', 'Roles actualizados correctamente.');
     this.loadStaff();
+  }
+
+  async openInvitationDialog() {
+    const dialogRef = this.dialog.open(InvitationDialogComponent, {
+      width: '450px',
+      data: { restaurantId: this.restaurantId },
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (!result) return;
+
+      try {
+        if (result.method === 'email') {
+          await this.invitationService.createInvitation(
+            this.restaurantId,
+            result.email,
+            result.role
+          );
+        }
+
+        if (result.method === 'link') {
+          await this.invitationService.createJoinLink(
+            this.restaurantId,
+            result.role
+          );
+        }
+      } catch (err: any) {
+        this.dialogService.errorDialog(
+          'Error',
+          err?.message || 'No se pudo generar la invitación.'
+        );
+      }
+    });
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
-  private internalRoles = [
-    'adminGlobal',
-    'adminLocal',
-    'mozo',
-    'cocina',
-    'gerencia',
-  ];
 }

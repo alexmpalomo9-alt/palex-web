@@ -1,3 +1,19 @@
+/* Botón de cierre */
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  color: #555;
+  z-index: 9999; //asegurar que esté siempre arriba
+  transition: 0.2s ease;
+
+  &:hover {
+    color: #000;
+    transform: scale(1.1);
+  }
+}
+
 /* Estilo normal (pantallas grandes) */
 ::ng-deep mat-nav-list a {
   font-size: 18px;

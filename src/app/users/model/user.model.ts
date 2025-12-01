@@ -6,36 +6,37 @@ export interface UserCredentials {
 export interface User {
   uid: string;
   email: string;
-
-  // Información personal opcional
   name: string;
   lastname: string;
-  address?: string;
-  birthdate?: string | null;
-  phone?: string;
   photoURL?: string;
+  phone?: string;
+  address?: string;
+  birthdate?: string;
 
-  // Roles del sistema
-  roles: {
-    // Roles internos (staff)
+  enabled: boolean;
+
+  // Roles globales
+  globalRoles: {
     adminGlobal: boolean;
-    adminLocal: boolean;
-    mozo: boolean;
-    cocina: boolean;
-    gerencia: boolean;
-
-    // Roles externos (clientes)
     customer: boolean;
     guest: boolean;
   };
 
-  // Relación con locales
-  restaurantsOwner: string[]; // IDs donde es dueño - RELACIÓN DE PROPIEDAD - Permisos administrativos completos
-  restaurantsStaff: string[]; // IDs donde es empleado - RELACIÓN DE EMPLEO - Permisos limitados segun rol
+  // Roles locales por restaurante
+  localRoles?: {
+    [restaurantId: string]: {
+      adminLocal?: boolean;
+      mozo?: boolean;
+      cocina?: boolean;
+      manager?: boolean;
+    };
+  };
+  
+  // Nuevo campo para filtrado eficiente
+  restaurantIds: string[];
 
-  // Estado
-  enabled: boolean; // Habilitado o deshabilitado
-  createdAt: string | null; // o Timestamp si preferís
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export type UserDialogMode = 'editar-perfil' | 'editar-usuario';

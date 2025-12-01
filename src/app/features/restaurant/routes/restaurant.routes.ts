@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { RestaurantPageComponent } from '../../../restaurant/components/restaurant-page/restaurant-page.component';
 import { RestaurantInfoComponent } from '../restaurant-info/restaurant-info/restaurant-info.component';
 import { RestaurantMenuComponent } from '../restaurant-menu/restaurant-menu/restaurant-menu.component';
 import { RestaurantOrdersComponent } from '../restaurant-orders/restaurant-orders/restaurant-orders.component';
@@ -19,7 +18,7 @@ export const RESTAURANT_ROUTES: Routes = [
   // },
 
   {
-    path: ':restaurantId', // o :slug
+    path: ':restaurantId',
     component: RestaurantShellComponent,
     children: [
       { path: '', redirectTo: 'info', pathMatch: 'full' },
@@ -32,12 +31,10 @@ export const RESTAURANT_ROUTES: Routes = [
       { path: 'stats', component: RestaurantStatsComponent },
     ],
   },
-  {
-    path: ':slug/menu',
-    component: RestaurantMenuComponent,
-  },
-  {
-    path: 'r/:slug/menu/:tableId',
-    component: RestaurantMenuComponent,
-  },
+
+  // cliente viendo menú por slug
+  { path: ':slug/menu', component: RestaurantMenuComponent },
+
+  // QR a mesa específica
+  { path: 'r/:slug/menu/:tableId', component: RestaurantMenuComponent },
 ];

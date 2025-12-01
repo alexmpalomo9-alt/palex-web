@@ -13,16 +13,20 @@ import {
   setPersistence,
   signInWithPopup,
 } from 'firebase/auth';
-import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
+import {
+  Firestore,
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
-import { regexMail } from '../../shared/pattern/patterns';
 import { FirebaseError } from 'firebase/app';
 import { ErrorHandlerService } from '../../core/services/error-handler.service';
 import { User, UserCredentials } from '../../users/model/user.model';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
@@ -35,12 +39,10 @@ export class AuthService {
     private firestore: Firestore,
     private errorHandler: ErrorHandlerService
   ) {
-    /** Persistencia */
-    setPersistence(this.auth, browserLocalPersistence).catch((error) =>
-      console.error('Error al establecer persistencia:', error)
-    );
+    // Persistencia en localStorage
+    setPersistence(this.auth, browserLocalPersistence).catch(console.error);
 
-    /** Listener de login */
+    // Listener de cambios en auth
     onAuthStateChanged(this.auth, async (user) => {
       const logged = !!user;
       this.isLoggedInSubject.next(logged);
@@ -55,12 +57,9 @@ export class AuthService {
     });
   }
 
-  // -------------------- GETTER PÚBLICO --------------------
-  get isLoggedIn(): boolean {
-    return this.isLoggedInSubject.value;
-  }
-
-  // -------------------- LOGIN EMAIL/PASSWORD --------------------
+  // -------------------------------------------------------------
+  // LOGIN EMAIL/PASSWORD
+  // -------------------------------------------------------------
   async login({ email, password }: UserCredentials) {
     try {
       return await signInWithEmailAndPassword(this.auth, email, password);
@@ -69,101 +68,149 @@ export class AuthService {
     }
   }
 
-  // -------------------- LOGIN GOOGLE --------------------
-async loginWithGoogle() {
-  try {
-    const credentials = await signInWithPopup(
-      this.auth,
-      new GoogleAuthProvider()
-    );
+  // -------------------------------------------------------------
+  // LOGIN GOOGLE
+  // -------------------------------------------------------------
+  async loginWithGoogle() {
+    try {
+      const credentials = await signInWithPopup(
+        this.auth,
+        new GoogleAuthProvider()
+      );
+      const user = credentials.user;
 
-    const user = credentials.user;
+      let existingUser = await this.getUserData(user.uid);
 
-    // Verificar si el usuario ya existe en Firestore
-    const existingUser = await this.getUserData(user.uid);
+      if (!existingUser) {
+        const displayName = user.displayName ?? '';
+        const names = displayName.split(' ');
+        const name = names.shift() || '';
+        const lastname = names.join(' ') || '';
 
-    if (!existingUser) {
-      // Crear nuevo usuario solo si no existe
-      const displayName = user.displayName ?? '';
-      const names = displayName.split(' ');
-      const name = names.shift() || '';
-      const lastname = names.join(' ') || '';
+        await this.saveUser(user.uid, {
+          uid: user.uid,
+          email: user.email ?? '',
+          name,
+          lastname,
+          photoURL: user.photoURL ?? '',
+          // Roles globales
+          globalRoles: {
+            adminGlobal: false,
+            customer: true,
+            guest: false,
+          },
+
+          // Roles locales por restaurante (vacío por defecto)
+          localRoles: {},
+
+          enabled: true,
+          createdAt: new Date().toISOString(),
+        });
+
+        existingUser = await this.getUserData(user.uid);
+      }
+
+      return { uid: user.uid };
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // -------------------------------------------------------------
+  // REGISTER NORMAL USER
+  // -------------------------------------------------------------
+  async registerUser({ name, lastname, email, password }: any) {
+    try {
+      const cred = await createUserWithEmailAndPassword(
+        this.auth,
+        email,
+        password
+      );
+      const user = cred.user;
 
       await this.saveUser(user.uid, {
         uid: user.uid,
-        email: user.email ?? '',
+        email,
         name,
         lastname,
-        photoURL: user.photoURL ?? '',
-        roles: {
+
+        // Roles globales
+        globalRoles: {
           adminGlobal: false,
-          adminLocal: false,
-          mozo: false,
-          cocina: false,
-          gerencia: false,
           customer: true,
           guest: false,
         },
-        restaurantsOwner: [],
-        restaurantsStaff: [],
+
+        // Roles locales por restaurante (vacío por defecto)
+        localRoles: {},
+
+        // Ya no necesitas arrays separados
+        // restaurantsOwner: [],
+        // restaurantsStaff: [],
+
         enabled: true,
         createdAt: new Date().toISOString(),
       });
+
+      return user.uid;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return { uid: user.uid };
-  } catch (error) {
-    this.handleError(error);
-  }
-}
-
-
-  // -------------------- REGISTER --------------------
-  async registerUser({ name, lastname, email, password }: any) {
-    const cred = await createUserWithEmailAndPassword(
-      this.auth,
-      email,
-      password
-    );
-    const user = cred.user;
-
-    await this.saveUser(user.uid, {
-      uid: user.uid,
-      email,
-      name,
-      lastname,
-      roles: {
-        adminGlobal: false,
-        adminLocal: false,
-        mozo: false,
-        cocina: false,
-        gerencia: false,
-        customer: true,
-        guest: false,
-      },
-      restaurantsOwner: [],
-      restaurantsStaff: [],
-      enabled: true,
-      createdAt: new Date().toISOString(),
-    });
-
-    return user.uid;
   }
 
-  // -------------------- GET USER DATA --------------------
+  // -------------------------------------------------------------
+  // GET USER DATA
+  // -------------------------------------------------------------
   async getUserData(userId: string): Promise<User | null> {
     const userRef = doc(this.firestore, `users/${userId}`);
     const snap = await getDoc(userRef);
-    return snap.exists() ? (snap.data() as User) : null;
+
+    if (!snap.exists()) return null;
+
+    const data = snap.data() as any;
+
+    // Aseguramos arrays
+    data.restaurantsOwner = data.restaurantsOwner ?? [];
+    data.restaurantsStaff = data.restaurantsStaff ?? [];
+
+    // Limpiamos roles antiguos por compatibilidad
+    const oldLocalRoles = ['adminLocal', 'mozo', 'cocina', 'manager'];
+    if (data.roles) {
+      const hasOld = oldLocalRoles.some((r) => data.roles[r]);
+      if (hasOld) {
+        console.warn(
+          '⚠ Se detectaron roles locales antiguos. Se ignorarán porque no sabemos a qué restaurante pertenecen.'
+        );
+        oldLocalRoles.forEach((r) => delete data.roles[r]);
+      }
+    }
+
+    return data as User;
   }
 
-  // -------------------- SAVE USER DATA --------------------
+  // -------------------------------------------------------------
+  // SAVE USER
+  // -------------------------------------------------------------
   async saveUser(uid: string, data: Partial<User>) {
     const userRef = doc(this.firestore, `users/${uid}`);
     return setDoc(userRef, { uid, ...data }, { merge: true });
   }
 
-  // -------------------- LOGOUT --------------------
+  // -------------------------------------------------------------
+  // ADD STAFF TO RESTAURANT
+  // -------------------------------------------------------------
+  async addUserToRestaurant(userId: string, restaurantId: string) {
+    const userRef = doc(this.firestore, `users/${userId}`);
+
+    // solo agregamos el ID del restaurante al array
+    return updateDoc(userRef, {
+      restaurantsStaff: arrayUnion(restaurantId),
+    });
+  }
+
+  // -------------------------------------------------------------
+  // LOGOUT
+  // -------------------------------------------------------------
   async logout() {
     await signOut(this.auth);
     this.isLoggedInSubject.next(false);
@@ -171,13 +218,16 @@ async loginWithGoogle() {
     localStorage.removeItem('lastActivity');
   }
 
-    // -------------------- GET USER LOGUEADO --------------------
+  // -------------------------------------------------------------
+  // GET CURRENT USER
+  // -------------------------------------------------------------
   getCurrentUser(): Promise<User | null> {
-  return Promise.resolve(this.currentUserSubject.value);
-}
+    return Promise.resolve(this.currentUserSubject.value);
+  }
 
-
-  // -------------------- RESET PASSWORD --------------------
+  // -------------------------------------------------------------
+  // SEND RESET PASSWORD EMAIL
+  // -------------------------------------------------------------
   async sendPasswordReset(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(this.auth, email);
@@ -189,7 +239,9 @@ async loginWithGoogle() {
     }
   }
 
-  // -------------------- UTILITIES --------------------
+  // -------------------------------------------------------------
+  // ERROR HANDLER
+  // -------------------------------------------------------------
   private handleError(error: any): never {
     if (error instanceof FirebaseError) {
       throw new Error(this.errorHandler.handleFirebaseError(error));
@@ -198,6 +250,9 @@ async loginWithGoogle() {
     throw new Error('Error desconocido durante la autenticación.');
   }
 
+  // -------------------------------------------------------------
+  // GET USER ID DIRECTO
+  // -------------------------------------------------------------
   getUserID(): string | null {
     return this.auth.currentUser?.uid ?? null;
   }

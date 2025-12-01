@@ -56,7 +56,6 @@ export class TableDialogComponent {
       status: new FormControl(t.status, Validators.required),
 
       capacity: new FormControl(t.capacity, [
-        Validators.required,
         Validators.pattern(regexNumeros),
       ]),
 
