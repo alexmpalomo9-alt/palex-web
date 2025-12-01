@@ -29,21 +29,23 @@ export class RestaurantInfoComponent {
 
   ngOnInit() {
     const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
-    if (slug) {
-      this.restaurantService.getRestaurantBySlug(slug).subscribe((res) => {
-        this.restaurant = res[0] ?? null;
+    if (!slug) return;
 
-        // Verificamos que createdAt sea un Date, si no lo es, lo convertimos
-        if (this.restaurant?.createdAt instanceof Timestamp) {
-          this.restaurant.createdAt = this.restaurant.createdAt.toDate();
-        }
+    this.restaurantService.getRestaurantBySlug(slug).subscribe((restaurant) => {
+      if (!restaurant) return;
 
-        // También puedes hacer lo mismo para updatedAt si es necesario
-        if (this.restaurant?.updatedAt instanceof Timestamp) {
-          this.restaurant.updatedAt = this.restaurant.updatedAt.toDate();
-        }
-      });
-    }
+      this.restaurant = restaurant;
+
+      // Verificamos que createdAt sea un Date, si no lo es, lo convertimos
+      if (this.restaurant.createdAt instanceof Timestamp) {
+        this.restaurant.createdAt = this.restaurant.createdAt.toDate();
+      }
+
+      // También puedes hacer lo mismo para updatedAt si es necesario
+      if (this.restaurant.updatedAt instanceof Timestamp) {
+        this.restaurant.updatedAt = this.restaurant.updatedAt.toDate();
+      }
+    });
   }
 
   editRestaurant() {

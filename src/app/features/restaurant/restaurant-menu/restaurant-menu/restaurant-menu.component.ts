@@ -1,18 +1,16 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { switchMap, takeUntil } from 'rxjs/operators';
 import { MatSidenav } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, Subject, of } from 'rxjs';
+import { switchMap, takeUntil, tap } from 'rxjs/operators';
+
 import { SharedModule } from '../../../../shared/shared.module';
-import { CartComponent } from '../../../../customer/components/cart/cart.component';
 import { CartService } from '../../../../customer/services/cart.service';
-import {
-  Product,
-  PRODUCT_CATEGORIES,
-} from '../../../../products/model/product.model';
+import { Product, PRODUCT_CATEGORIES } from '../../../../products/model/product.model';
 import { ProductService } from '../../../../products/services/product.service';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
+import { CartComponent } from '../../../../customer/components/cart/cart/cart.component';
 
 @Component({
   selector: 'app-restaurant-menu',
@@ -23,21 +21,29 @@ import { RestaurantService } from '../../services/restaurant.service';
 })
 export class RestaurantMenuComponent implements OnInit, OnDestroy {
   @ViewChild('cartSidenav') cartSidenav!: MatSidenav;
+
   private destroy$ = new Subject<void>();
-  selectedImage: string | null = null;
-  categories: { label: string; products$: Observable<Product[]> }[] = [];
+
+  restaurant$!: Observable<Restaurant | null>;
+  restaurantId!: string;
+
+  cartQuantity$!: Observable<number>;
+
   offerProducts$!: Observable<Product[]>;
-  restaurant: Restaurant | null = null;
+  categories: { label: string; products$: Observable<Product[]> }[] = [];
+
+  selectedImage: string | null = null;
 
   constructor(
-    private productsService: ProductService,
     private route: ActivatedRoute,
     private restaurantService: RestaurantService,
+    private productsService: ProductService,
     private cartService: CartService
   ) {}
 
   ngOnInit(): void {
-    this.initializeProducts();
+    this.cartQuantity$ = this.cartService.totalQuantity$;
+    this.loadRestaurantAndMenu();
   }
 
   ngOnDestroy(): void {
@@ -45,50 +51,40 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private initializeProducts() {
-    this.route.paramMap
-      .pipe(
-        switchMap((params) => {
-          const slug = params.get('slug');
-          if (!slug) return [];
-          return this.restaurantService.getRestaurantBySlug(slug);
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((restaurantResult) => {
-        const restaurant = Array.isArray(restaurantResult)
-          ? restaurantResult[0]
-          : restaurantResult;
+  private loadRestaurantAndMenu() {
+    this.restaurant$ = this.route.paramMap.pipe(
+      switchMap(params => {
+        const slug = params.get('slug');
+        if (!slug) return of(null);
+        return this.restaurantService.getRestaurantBySlug(slug);
+      }),
+      tap(restaurant => {
         if (!restaurant) return;
-        this.restaurant = restaurant;
-        const restaurantId = restaurant.restaurantId!;
 
-        // ----- 🔥 Resetear carrito si cambia de restaurante -----
-        const currentCartRestaurant = this.cartService.getCurrentRestaurantId();
-        if (currentCartRestaurant && currentCartRestaurant !== restaurantId) {
+        this.restaurantId = restaurant.restaurantId!;
+
+        const current = this.cartService.getCurrentRestaurantId();
+        if (current && current !== this.restaurantId) {
           this.cartService.clearCart();
         }
-        this.categories = PRODUCT_CATEGORIES.map((label) => ({
+
+        this.categories = PRODUCT_CATEGORIES.map(label => ({
           label,
           products$: this.productsService.getAvailableProductsByCategory(
-            restaurantId,
+            this.restaurantId,
             label
           ),
         }));
-        this.offerProducts$ =
-          this.productsService.getOfferProducts(restaurantId);
-      });
+
+        this.offerProducts$ = this.productsService.getOfferProducts(this.restaurantId);
+      }),
+      takeUntil(this.destroy$)
+    );
   }
 
-  /** Agregar producto usando el servicio */
   addProductToCart(product: Product) {
-    if (!this.restaurant) return;
-    const restaurantId = this.restaurant.restaurantId!;
-    this.cartService.addProduct(product, restaurantId);
-  }
-
-  getCartQuantity(): number {
-    return this.cartService.getTotalQuantity();
+    if (!this.restaurantId) return;
+    this.cartService.addProduct(product, this.restaurantId);
   }
 
   openImageModal(imageUrl?: string) {

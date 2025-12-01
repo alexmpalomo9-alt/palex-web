@@ -11,10 +11,10 @@
         <div class="title-container">
           <h1 class="title">🍽️ Nuestra Carta</h1>
           <p class="subtitle">
-            {{ restaurant?.name || "Bienvenido a nuestro menú" }}
+            {{ (restaurant$ | async)?.name || "Bienvenido a nuestro menú" }}
           </p>
           <p class="subtitle">
-            {{ restaurant?.description || "Mira nuestras opciones" }}
+            {{ (restaurant$ | async)?.description || "Mira nuestras opciones" }}
           </p>
         </div>
 
@@ -26,8 +26,8 @@
           class="cart-button"
         >
           🛒 Carrito
-          <span class="cart-badge" *ngIf="getCartQuantity() > 0">
-            {{ getCartQuantity() }}
+          <span *ngIf="cartQuantity$ | async as qty">
+            {{ qty }}
           </span>
         </button>
       </div>

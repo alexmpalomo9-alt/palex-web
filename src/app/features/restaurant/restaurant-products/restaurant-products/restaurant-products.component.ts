@@ -43,65 +43,95 @@ export class RestaurantProductsComponent implements OnInit {
       const slug = params.get('restaurantId');
       if (!slug) return;
 
-      this.restaurantService.getRestaurantBySlug(slug).subscribe((res) => {
-        this.restaurant = res[0] ?? null;
-        if (this.restaurant) {
+      this.restaurantService
+        .getRestaurantBySlug(slug)
+        .subscribe((restaurant) => {
+          if (!restaurant) return;
+
+          this.restaurant = restaurant;
           this.loadProducts(this.restaurant.restaurantId);
-        }
-      });
+        });
     });
   }
 
   loadProducts(restaurantId: string) {
-    this.restaurantService.getProductsByRestaurant(restaurantId).subscribe((products) => {
-      this.dataSource.data = products;
-    });
+    this.restaurantService
+      .getProductsByRestaurant(restaurantId)
+      .subscribe((products) => {
+        this.dataSource.data = products;
+      });
   }
 
   createProduct() {
     if (!this.restaurant) return;
 
-    this.productDialogService.openProductDialog({ mode: 'create' }).subscribe(async (result) => {
-      if (!result) {
-        this.dialogService.infoDialog('Cancelar', 'No se realizaron cambios.');
-        return;
-      }
+    this.productDialogService
+      .openProductDialog({ mode: 'create' })
+      .subscribe(async (result) => {
+        if (!result) {
+          this.dialogService.infoDialog(
+            'Cancelar',
+            'No se realizaron cambios.'
+          );
+          return;
+        }
 
-      try {
-        await this.productService.createProduct({
-          ...result,
-          restaurantId: this.restaurant!.restaurantId,
-        });
+        try {
+          await this.productService.createProduct({
+            ...result,
+            restaurantId: this.restaurant!.restaurantId,
+          });
 
-        this.dialogService.infoDialog('Éxito', 'Producto creado correctamente.');
-        this.loadProducts(this.restaurant!.restaurantId);
-      } catch (e: any) {
-        this.dialogService.errorDialog('Error', e.message || 'Ocurrió un error inesperado.');
-      }
-    });
+          this.dialogService.infoDialog(
+            'Éxito',
+            'Producto creado correctamente.'
+          );
+          this.loadProducts(this.restaurant!.restaurantId);
+        } catch (e: any) {
+          this.dialogService.errorDialog(
+            'Error',
+            e.message || 'Ocurrió un error inesperado.'
+          );
+        }
+      });
   }
 
   editProduct(product: Product) {
     if (!this.restaurant) return;
 
-    this.productDialogService.openProductDialog({ mode: 'edit', data: product }).subscribe(async (result) => {
-      if (!result) {
-        this.dialogService.infoDialog('Cancelar', 'No se realizaron cambios.');
-        return;
-      }
+    this.productDialogService
+      .openProductDialog({ mode: 'edit', data: product })
+      .subscribe(async (result) => {
+        if (!result) {
+          this.dialogService.infoDialog(
+            'Cancelar',
+            'No se realizaron cambios.'
+          );
+          return;
+        }
 
-      try {
-        const restaurantId = this.restaurant!.restaurantId;
-        const { restaurantId: _ignore, ...cleanData } = result;
+        try {
+          const restaurantId = this.restaurant!.restaurantId;
+          const { restaurantId: _ignore, ...cleanData } = result;
 
-        await this.productService.updateProduct(restaurantId, product.productId!, cleanData);
+          await this.productService.updateProduct(
+            restaurantId,
+            product.productId!,
+            cleanData
+          );
 
-        this.dialogService.infoDialog('Éxito', 'Producto editado correctamente.');
-        this.loadProducts(restaurantId);
-      } catch (e: any) {
-        this.dialogService.errorDialog('Error', e.message || 'Ocurrió un error inesperado.');
-      }
-    });
+          this.dialogService.infoDialog(
+            'Éxito',
+            'Producto editado correctamente.'
+          );
+          this.loadProducts(restaurantId);
+        } catch (e: any) {
+          this.dialogService.errorDialog(
+            'Error',
+            e.message || 'Ocurrió un error inesperado.'
+          );
+        }
+      });
   }
 
   deleteProduct(product: Product) {
@@ -116,16 +146,28 @@ export class RestaurantProductsComponent implements OnInit {
       })
       .subscribe(async (result) => {
         if (!result) {
-          this.dialogService.infoDialog('Cancelado', 'No se realizó la acción.');
+          this.dialogService.infoDialog(
+            'Cancelado',
+            'No se realizó la acción.'
+          );
           return;
         }
 
         try {
-          await this.productService.deleteProduct(this.restaurant!.restaurantId, product.productId);
-          this.dialogService.infoDialog('Éxito', 'El producto ha sido eliminado correctamente.');
+          await this.productService.deleteProduct(
+            this.restaurant!.restaurantId,
+            product.productId
+          );
+          this.dialogService.infoDialog(
+            'Éxito',
+            'El producto ha sido eliminado correctamente.'
+          );
           this.loadProducts(this.restaurant!.restaurantId);
         } catch (error: any) {
-          this.dialogService.errorDialog('Error', error.message || 'Ocurrió un error inesperado.');
+          this.dialogService.errorDialog(
+            'Error',
+            error.message || 'Ocurrió un error inesperado.'
+          );
         }
       });
   }

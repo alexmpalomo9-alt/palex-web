@@ -11,7 +11,7 @@ import {
   where,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Restaurant } from '../model/restaurant.model';
 import { Product } from '../../../products/model/product.model';
 
@@ -99,17 +99,22 @@ export class RestaurantService {
   /* =========================================================
      READ
   ========================================================= */
-  getRestaurantBySlug(slug: string): Observable<Restaurant[]> {
-    const q = query(collection(this.firestore, 'restaurants'), where('slug', '==', slug));
-    return collectionData(q, { idField: 'restaurantId' }) as Observable<Restaurant[]>;
-  }
+getRestaurantBySlug(slug: string): Observable<Restaurant | null> {
+  const q = query(
+    collection(this.firestore, 'restaurants'),
+    where('slug', '==', slug)
+  );
 
+  return collectionData(q, { idField: 'restaurantId' }).pipe(
+    map((rests: any[]) => rests.length ? rests[0] : null)
+  );
+}
   getRestaurantsByStatus(enabled: boolean): Observable<Restaurant[]> {
     const q = query(collection(this.firestore, 'restaurants'), where('enabled', '==', enabled));
     return collectionData(q, { idField: 'restaurantId' }) as Observable<Restaurant[]>;
   }
   
-
+ 
   /* =========================================================
      UPDATE
   ========================================================= */

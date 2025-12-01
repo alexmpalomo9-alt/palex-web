@@ -1,5 +1,6 @@
 export interface Product {
   productId: string;
+  restaurantId: string;
   name: string;
   price: number;
   available: boolean;
@@ -8,9 +9,10 @@ export interface Product {
   category?: string;
   isOffer?: boolean;
   offerPrice?: number;
+
+  categoryId: string;
   createdAt?: string;
   updatedAt?: string;
-  restaurantId: string;
 }
 
 export const PRODUCT_CATEGORIES = [

@@ -1,181 +1,170 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
+import { Cart, CartItem } from '../model/cart.model';
 import { Product } from '../../products/model/product.model';
-
-export interface CartItem {
-  product: Product;
-  quantity: number;
-}
-
-interface PersistedCart {
-  restaurantId: string | null;
-  items: CartItem[];
-}
 
 const STORAGE_KEY = 'palex_cart_v1';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class CartService {
-  // estado reactivo del carrito
-  private cartItemsSubject = new BehaviorSubject<CartItem[]>([]);
-  cart$ = this.cartItemsSubject.asObservable();
 
-  // restaurante al que pertenecen los items guardados actualmente
-  private currentRestaurantId: string | null = null;
+  private cartSubject = new BehaviorSubject<Cart | null>(null);
+  cart$ = this.cartSubject.asObservable();
 
-  constructor() {
-    // al iniciar cargamos lo que haya en localStorage (si existe)
+  totalQuantity$ = this.cart$.pipe(
+    map(cart => cart ? cart.items.reduce((sum, i) => sum + i.quantity, 0) : 0)
+  );
+
+  constructor() { 
     this.restoreFromStorage();
-  }
 
-  /** ---------- Persistencia local ---------- */
-  private saveToStorage() {
-    const payload: PersistedCart = {
-      restaurantId: this.currentRestaurantId,
-      items: this.getCartItems(),
-    };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch (e) {
-      console.warn('No se pudo guardar carrito en localStorage', e);
-    }
+    // Permite sincronizar varias pestañas
+    window.addEventListener('storage', (ev: StorageEvent) => {
+      if (ev.key === STORAGE_KEY) this.restoreFromStorage();
+    });
   }
 
   private restoreFromStorage() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return this.cartSubject.next(null);
+
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as PersistedCart;
-      this.currentRestaurantId = parsed.restaurantId ?? null;
-      this.cartItemsSubject.next(parsed.items ?? []);
-    } catch (e) {
-      console.warn('No se pudo restaurar carrito', e);
-      this.currentRestaurantId = null;
-      this.cartItemsSubject.next([]);
+      this.cartSubject.next(JSON.parse(raw));
+    } catch {
+      this.cartSubject.next(null);
     }
   }
 
-  /** ---------- Helpers ---------- */
-  getCartItems(): CartItem[] {
-    return this.cartItemsSubject.getValue();
+  private saveToStorage(cart: Cart | null) {
+    if (!cart) localStorage.removeItem(STORAGE_KEY);
+    else localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  }
+
+  // ==================================
+  // GETTERS
+  // ==================================
+  getCartSnapshot(): Cart | null {
+    return this.cartSubject.getValue();
+  }
+
+  loadCart(): Cart | null {
+    return this.getCartSnapshot();
+  }
+
+  getTotal(restaurantId: string): number {
+    const cart = this.getCartSnapshot();
+    if (!cart || cart.restaurantId !== restaurantId) return 0;
+
+    return cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+  }
+
+  // ==================================
+  // HELPERS
+  // ==================================
+  private updateCart(cart: Cart | null) {
+    this.cartSubject.next(cart);
+    this.saveToStorage(cart);
+  }
+
+  clearCart() {
+    this.updateCart(null);
+  }
+
+  // ==================================
+  // OPERACIONES
+  // ==================================
+  addProduct(product: Product, restaurantId: string) {
+    this.addProductToCart(
+      {
+        productId: product.productId!,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl ?? null,
+        categoryId: product.categoryId
+      },
+      restaurantId
+    );
+  }
+
+  addProductToCart(
+    product: { productId: string; name: string; price: number; imageUrl: string | null; categoryId?: string },
+    restaurantId: string
+  ) {
+    const current = this.getCartSnapshot();
+
+    // Nuevo carrito si no existe o si pertenece a otro restaurante
+    if (!current || current.restaurantId !== restaurantId) {
+      const newCart: Cart = {
+        restaurantId,
+        items: [
+          {
+            ...product,
+            quantity: 1
+          }
+        ],
+      };
+      this.updateCart(newCart);
+      return;
+    }
+
+    // Editar carrito existente
+    const items = [...current.items];
+    const idx = items.findIndex(i => i.productId === product.productId);
+
+    if (idx >= 0) {
+      items[idx] = { ...items[idx], quantity: items[idx].quantity + 1 };
+    } else {
+      items.push({
+        ...product,
+        quantity: 1
+      });
+    }
+
+    this.updateCart({ ...current, items });
+  }
+
+  increase(item: CartItem, restaurantId: string) {
+    const current = this.getCartSnapshot();
+    if (!current || current.restaurantId !== restaurantId) return;
+
+    const updated = current.items.map(i =>
+      i.productId === item.productId
+        ? { ...i, quantity: i.quantity + 1 }
+        : i
+    );
+
+    this.updateCart({ ...current, items: updated });
+  }
+
+  decrease(item: CartItem, restaurantId: string) {
+    const current = this.getCartSnapshot();
+    if (!current || current.restaurantId !== restaurantId) return;
+
+    const updated = current.items
+      .map(i =>
+        i.productId === item.productId
+          ? { ...i, quantity: i.quantity - 1 }
+          : i
+      )
+      .filter(i => i.quantity > 0);
+
+    this.updateCart({ ...current, items: updated });
+  }
+
+  removeItem(item: CartItem, restaurantId: string) {
+    const current = this.getCartSnapshot();
+    if (!current || current.restaurantId !== restaurantId) return;
+
+    const updated = current.items.filter(i => i.productId !== item.productId);
+
+    this.updateCart({ ...current, items: updated });
   }
 
   getCurrentRestaurantId(): string | null {
-    return this.currentRestaurantId;
-  }
+  return this.getCartSnapshot()?.restaurantId ?? null;
+}
 
-  /** Vacía y resetea todo */
-  clearCart() {
-    this.currentRestaurantId = null;
-    this.cartItemsSubject.next([]);
-    this.saveToStorage();
-  }
-
-  /** Carga el carrito para el restaurantId dado.
-   * Si el storage tiene otro restaurant distinto, lo ignora/borra.
-   */
-  loadCart(restaurantId: string | null) {
-    // si no recibimos restaurantId, intentamos restaurar lo persistido (ya hecho en constructor)
-    if (!restaurantId) {
-      this.restoreFromStorage();
-      return;
-    }
-
-    // si el carrito es de otro restaurant, lo limpiamos (querés otra política: preguntar al usuario)
-    if (this.currentRestaurantId && this.currentRestaurantId !== restaurantId) {
-      this.clearCart();
-    }
-
-    // Si no hay restaurante actual, intentamos cargar lo persistido
-    if (!this.currentRestaurantId) {
-      this.restoreFromStorage();
-      if (!this.currentRestaurantId) {
-        // inicializamos con el restaurantId pasado
-        this.currentRestaurantId = restaurantId;
-      }
-    }
-
-    // si el persisted restaurant difiere, ajustamos
-    if (this.currentRestaurantId !== restaurantId) {
-      this.currentRestaurantId = restaurantId;
-      this.clearCart();
-    }
-  }
-
-  /** Añadir producto; si carrito vacío setea restaurantId; si distinto, limpia y setea. */
-  addProduct(product: Product, restaurantId: string) {
-    // valida restaurant
-    if (!this.currentRestaurantId) this.currentRestaurantId = restaurantId;
-
-    if (this.currentRestaurantId !== restaurantId) {
-      // política: limpiar y reemplazar por el nuevo restaurante
-      this.clearCart();
-      this.currentRestaurantId = restaurantId;
-    }
-
-    const items = this.getCartItems();
-    const existing = items.find((ci) => ci.product.productId === product.productId);
-
-    // precio congelado: si es oferta usar offerPrice
-    const finalPrice = product.isOffer && product.offerPrice != null ? product.offerPrice : product.price;
-    if (existing) {
-      existing.quantity++;
-    } else {
-      items.push({ product: { ...product, price: finalPrice }, quantity: 1 });
-    }
-
-    this.cartItemsSubject.next([...items]);
-    this.saveToStorage();
-  }
-
-  /** Aumenta cantidad (usa referencia a item) */
-  increase(item: CartItem, restaurantId?: string) {
-    // opcionalmente comprobamos restaurantId
-    if (restaurantId && this.currentRestaurantId !== restaurantId) return;
-    item.quantity++;
-    this.cartItemsSubject.next([...this.getCartItems()]);
-    this.saveToStorage();
-  }
-
-  /** Disminuye cantidad o elimina si llega a 0 */
-  decrease(item: CartItem, restaurantId?: string) {
-    if (restaurantId && this.currentRestaurantId !== restaurantId) return;
-    if (item.quantity > 1) {
-      item.quantity--;
-    } else {
-      this.removeItem(item, restaurantId);
-      return;
-    }
-    this.cartItemsSubject.next([...this.getCartItems()]);
-    this.saveToStorage();
-  }
-
-  /** Eliminar item */
-  removeItem(item: CartItem, restaurantId?: string) {
-    if (restaurantId && this.currentRestaurantId !== restaurantId) return;
-    const items = this.getCartItems().filter((ci) => ci !== item);
-    this.cartItemsSubject.next([...items]);
-    // si quedó vacío, resetear restaurantId
-    if (items.length === 0) this.currentRestaurantId = null;
-    this.saveToStorage();
-  }
-
-  /** Total de cantidad */
-  getTotalQuantity(): number {
-    return this.getCartItems().reduce((sum, ci) => sum + ci.quantity, 0);
-  }
-
-  /** Total precio */
-  getTotalPrice(): number {
-    return this.getCartItems().reduce((sum, ci) => sum + ci.product.price * ci.quantity, 0);
-  }
-
-  /** Compat: getTotal(restaurantId) (tu componente lo llamaba así) */
-  getTotal(restaurantId?: string): number {
-    // si se pasa restaurantId y es distinto, devolver 0
-    if (restaurantId && this.currentRestaurantId && restaurantId !== this.currentRestaurantId) return 0;
-    return this.getTotalPrice();
-  }
 }

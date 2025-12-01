@@ -36,15 +36,13 @@ export class RestaurantTablesComponent implements OnInit {
       const slug = params.get('restaurantId');
       if (!slug) return;
 
-      this.restaurantService.getRestaurantBySlug(slug).subscribe((res) => {
-        const restaurant = res[0] ?? null;
+    this.restaurantService.getRestaurantBySlug(slug).subscribe((restaurant) => {
+      if (!restaurant) return;
 
-        if (restaurant) {
-          this.restaurant = restaurant; // ← AGREGADO
-          this.restaurantId = restaurant.restaurantId;
-          this.loadTables();
-        }
-      });
+      this.restaurant = restaurant;
+      this.restaurantId = restaurant.restaurantId!;
+      this.loadTables();
+    });
     });
   }
   openQr(table: any) {

@@ -35,12 +35,16 @@ export class RestaurantShellComponent implements OnInit {
       if (!slug) return;
 
       // Busca el restaurante por slug
-      this.restaurantService.getRestaurantBySlug(slug).subscribe((res) => {
-        this.restaurant = res[0] ?? null;
+      this.restaurantService
+        .getRestaurantBySlug(slug)
+        .subscribe((restaurant) => {
+          if (!restaurant) return;
 
-        console.log('RESTAURANT CARGADO EN PADRE:', this.restaurant);
-        console.log('RESTAURANT ID EN PADRE:', this.restaurant?.restaurantId);
-      });
+          this.restaurant = restaurant;
+
+          console.log('RESTAURANT CARGADO EN PADRE:', this.restaurant);
+          console.log('RESTAURANT ID EN PADRE:', this.restaurant.restaurantId);
+        });
     });
   }
 }
