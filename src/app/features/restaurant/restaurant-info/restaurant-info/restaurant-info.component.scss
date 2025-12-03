@@ -1,124 +1,83 @@
-/* ===========================
-   CARD GENERAL
-   =========================== */
-.info-card {
-  padding: 24px;
-  margin: 20px auto;
-  max-width: 800px;
-  border-radius: 18px;
-  background: var(--card-bg);
-  color: var(--text-color);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+.restaurant-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: 'Roboto', sans-serif;
 }
 
-/* ===========================
-   HEADER
-   =========================== */
+/* ======= Card ======= */
+.info-card {
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+}
+
+/* ======= Header ======= */
 .info-card-header {
   display: flex;
   align-items: center;
-  gap: 18px;
-  margin-bottom: 18px;
-  position: relative;
+  gap: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
 }
 
-/* Logo */
 .logo {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--text-color);
-  background: #fff;
-  transition: border-color 0.3s;
-
-  .dark-theme & {
-    border-color: #ddd;
-    background: rgba(255,255,255,0.1);
-  }
-}
-
-/* ===========================
-   TEXTOS
-   =========================== */
-.header-text {
-  flex: 1;
+  border: 2px solid #1976d2;
 }
 
 .header-text h1 {
   margin: 0;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-color);
+  font-size: 1.5rem;
+  font-weight: 500;
 }
 
 .header-text p {
-  margin: 4px 0;
-  opacity: 0.85;
-  font-size: 0.95rem;
-  color: var(--text-color);
+  margin: 2px 0;
+  color: #555;
 }
 
-/* ===========================
-   BOTÓN EDITAR
-   =========================== */
 .edit-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 4px;
-  color: var(--text-color);
-  transition: transform 0.2s ease;
+  margin-left: auto;
+  color: #1976d2;
 }
 
-.edit-btn:hover {
-  transform: scale(1.1);
-}
-
-/* ===========================
-   ITEMS
-   =========================== */
+/* ======= Info Items ======= */
 .info-item {
-  margin-bottom: 12px;
   display: flex;
-  flex-direction: column;
-
-  strong {
-    font-weight: 600;
-    color: var(--text-color);
-    margin-bottom: 4px;
-  }
-
-  span {
-    color: var(--text-color);
-    opacity: 0.9;
-  }
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-/* ESTADO: ACTIVO / INACTIVO */
-.status {
-  font-weight: 600;
+.info-item:last-child {
+  border-bottom: none;
 }
 
-.enabled {
-  color: #2e7d32 !important; /* verde Material */
+.status.enabled {
+  color: green;
+  font-weight: 500;
 }
 
-.disabled {
-  color: #c62828 !important; /* rojo Material */
+.status.disabled {
+  color: red;
+  font-weight: 500;
 }
 
-/* ===========================
-   RESPONSIVE
-   =========================== */
-@media (max-width: 600px) {
-  .logo {
-    width: 65px;
-    height: 65px;
-  }
+/* ======= Menu Config ======= */
+.menu-config {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-  .header-text h1 {
-    font-size: 1.4rem;
-  }
+.menu-config button.active {
+  border: 2px solid currentColor;
 }

@@ -36,12 +36,10 @@ export class RestaurantInfoComponent {
 
       this.restaurant = restaurant;
 
-      // Verificamos que createdAt sea un Date, si no lo es, lo convertimos
       if (this.restaurant.createdAt instanceof Timestamp) {
         this.restaurant.createdAt = this.restaurant.createdAt.toDate();
       }
 
-      // También puedes hacer lo mismo para updatedAt si es necesario
       if (this.restaurant.updatedAt instanceof Timestamp) {
         this.restaurant.updatedAt = this.restaurant.updatedAt.toDate();
       }
@@ -53,7 +51,6 @@ export class RestaurantInfoComponent {
     this.restaurantDialogService
       .openRestaurantDialog({ mode: 'edit', data: this.restaurant })
       .subscribe(async (result) => {
-        // Caso CANCELAR
         if (!result) {
           this.dialogService.infoDialog(
             'Cancelar',
@@ -61,24 +58,39 @@ export class RestaurantInfoComponent {
           );
           return;
         }
-        // Caso ACEPTAR (editar restaurante)
-        if (result) {
-          try {
-            await this.restaurantService.updateRestaurantData(
-              this.restaurant!.restaurantId!,
-              result
-            );
-            this.dialogService.infoDialog(
-              'Éxito',
-              'Perfil actualizado correctamente.'
-            );
-          } catch (e: any) {
-            this.dialogService.errorDialog(
-              'Error',
-              e.message || 'Ocurrió un error inesperado.'
-            );
-          }
+
+        try {
+          await this.restaurantService.updateRestaurantData(
+            this.restaurant!.restaurantId!,
+            result
+          );
+          this.dialogService.infoDialog(
+            'Éxito',
+            'Perfil actualizado correctamente.'
+          );
+        } catch (e: any) {
+          this.dialogService.errorDialog(
+            'Error',
+            e.message || 'Ocurrió un error inesperado.'
+          );
         }
       });
+  }
+
+  // ✅ Función para cambiar el tipo de menú
+  async changeMenuType(type: 'traditional' | 'palex') {
+    if (!this.restaurant) return;
+
+    this.restaurant.menuType = type;
+
+    try {
+      await this.restaurantService.updateRestaurantData(
+        this.restaurant.restaurantId!,
+        { menuType: type }
+      );
+      console.log('Tipo de menú actualizado:', type);
+    } catch (err) {
+      console.error('Error al actualizar menú:', err);
+    }
   }
 }

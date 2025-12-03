@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CartSidebarComponent } from './cart-sidebar.component';
+import { MenuPalexComponent } from './menu-palex.component';
 
-describe('CartSidebarComponent', () => {
-  let component: CartSidebarComponent;
-  let fixture: ComponentFixture<CartSidebarComponent>;
+describe('MenuPalexComponent', () => {
+  let component: MenuPalexComponent;
+  let fixture: ComponentFixture<MenuPalexComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CartSidebarComponent]
+      imports: [MenuPalexComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CartSidebarComponent);
+    fixture = TestBed.createComponent(MenuPalexComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

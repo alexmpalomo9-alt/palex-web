@@ -76,18 +76,26 @@ export class CartService {
   // ==================================
   // OPERACIONES
   // ==================================
-  addProduct(product: Product, restaurantId: string) {
-    this.addProductToCart(
-      {
-        productId: product.productId!,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.imageUrl ?? null,
-        categoryId: product.categoryId
-      },
-      restaurantId
-    );
-  }
+addProduct(product: Product, restaurantId: string) {
+
+  // ✔️ Si el producto tiene oferta, usarla.
+  const finalPrice = product.offerPrice && product.offerPrice > 0
+    ? product.offerPrice
+    : product.price;
+
+  this.addProductToCart(
+    {
+      productId: product.productId!,
+      name: product.name,
+      price: finalPrice,      // ✔️ AQUÍ VA LA MAGIA
+      imageUrl: product.imageUrl ?? null,
+      categoryId: product.categoryId
+    },
+    restaurantId
+  );
+}
+
+
 
   addProductToCart(
     product: { productId: string; name: string; price: number; imageUrl: string | null; categoryId?: string },

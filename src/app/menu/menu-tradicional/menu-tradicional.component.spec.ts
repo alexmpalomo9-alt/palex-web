@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CheckoutComponent } from './checkout.component';
+import { MenuTradicionalComponent } from './menu-tradicional.component';
 
-describe('CheckoutComponent', () => {
-  let component: CheckoutComponent;
-  let fixture: ComponentFixture<CheckoutComponent>;
+describe('MenuTradicionalComponent', () => {
+  let component: MenuTradicionalComponent;
+  let fixture: ComponentFixture<MenuTradicionalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CheckoutComponent]
+      imports: [MenuTradicionalComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CheckoutComponent);
+    fixture = TestBed.createComponent(MenuTradicionalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

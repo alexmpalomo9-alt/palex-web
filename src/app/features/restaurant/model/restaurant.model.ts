@@ -29,6 +29,8 @@ export interface Restaurant {
   // Para valoraciones futuras
   rating?: number;
 
+  menuType: 'traditional' | 'palex'; // opción que define el menú activo
+
   // Timestamps
   createdAt: Date;  // ISO string
   updatedAt?: Date; // ISO string cargado por acción

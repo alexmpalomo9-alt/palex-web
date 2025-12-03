@@ -1,0 +1,10 @@
+.menu-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  button.active {
+    background: #b05e2c;
+    color: white;
+  }
+}

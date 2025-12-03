@@ -5,17 +5,12 @@
 
   <div class="text-center form-wrapper">
     <div class="img-logo">
-    <img
-      class="logo mb-4"
-      src="assets/img/small_logo.png"
-      alt="Logo"
-    />
-</div>
+      <img class="logo mb-4" src="assets/img/small_logo.png" alt="Logo" />
+    </div>
     <h2 class="title">Iniciar Sesión</h2>
     <p class="subtitle">Ingresá tus datos para continuar</p>
 
     <form [formGroup]="loginUser" (ngSubmit)="login()">
-      
       <mat-form-field appearance="fill" class="w100">
         <mat-label>Correo Electrónico</mat-label>
         <input
@@ -52,6 +47,8 @@
         ></mat-progress-spinner>
       </button>
 
+
+      <hr class="divider" />
       <button
         mat-button
         color="warn"
@@ -61,8 +58,6 @@
       >
         ¿Olvidaste tu contraseña?
       </button>
-
-      <hr class="divider" />
 
       <button
         mat-stroked-button

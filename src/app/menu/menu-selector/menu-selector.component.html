@@ -1,0 +1,22 @@
+<!-- Render dinámico -->
+<ng-container [ngSwitch]="menuType">
+  <app-menu-traditional
+    *ngSwitchCase="'traditional'"
+    [restaurant]="restaurant"
+    [categories]="categories"
+    [offerProducts$]="offerProducts$"
+    (addProduct)="addProduct.emit($event)"
+    (openImage)="openImage.emit($event)"
+  >
+  </app-menu-traditional>
+
+  <app-menu-palex
+    *ngSwitchCase="'palex'"
+    [restaurant]="restaurant"
+    [categories]="categories"
+    [offerProducts$]="offerProducts$"
+    (addProduct)="addProduct.emit($event)"
+    (openImage)="openImage.emit($event)"
+  >
+  </app-menu-palex>
+</ng-container>

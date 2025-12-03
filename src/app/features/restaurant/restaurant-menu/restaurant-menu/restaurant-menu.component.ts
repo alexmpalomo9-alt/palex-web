@@ -6,16 +6,20 @@ import { switchMap, takeUntil, tap } from 'rxjs/operators';
 
 import { SharedModule } from '../../../../shared/shared.module';
 import { CartService } from '../../../../customer/services/cart.service';
-import { Product, PRODUCT_CATEGORIES } from '../../../../products/model/product.model';
+import {
+  Product,
+  PRODUCT_CATEGORIES,
+} from '../../../../products/model/product.model';
 import { ProductService } from '../../../../products/services/product.service';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
 import { CartComponent } from '../../../../customer/components/cart/cart/cart.component';
+import { MenuSelectorComponent } from '../../../../menu/menu-selector/menu-selector.component';
 
 @Component({
   selector: 'app-restaurant-menu',
   standalone: true,
-  imports: [CartComponent, SharedModule],
+  imports: [CartComponent, SharedModule, MenuSelectorComponent],
   templateUrl: './restaurant-menu.component.html',
   styleUrls: ['./restaurant-menu.component.scss'],
 })
@@ -33,6 +37,9 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
   categories: { label: string; products$: Observable<Product[]> }[] = [];
 
   selectedImage: string | null = null;
+
+  // ✅ Tipo de menú dinámico
+  menuType: 'traditional' | 'palex' = 'traditional';
 
   constructor(
     private route: ActivatedRoute,
@@ -53,12 +60,12 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
 
   private loadRestaurantAndMenu() {
     this.restaurant$ = this.route.paramMap.pipe(
-      switchMap(params => {
+      switchMap((params) => {
         const slug = params.get('slug');
         if (!slug) return of(null);
         return this.restaurantService.getRestaurantBySlug(slug);
       }),
-      tap(restaurant => {
+      tap((restaurant) => {
         if (!restaurant) return;
 
         this.restaurantId = restaurant.restaurantId!;
@@ -68,7 +75,7 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
           this.cartService.clearCart();
         }
 
-        this.categories = PRODUCT_CATEGORIES.map(label => ({
+        this.categories = PRODUCT_CATEGORIES.map((label) => ({
           label,
           products$: this.productsService.getAvailableProductsByCategory(
             this.restaurantId,
@@ -76,7 +83,12 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
           ),
         }));
 
-        this.offerProducts$ = this.productsService.getOfferProducts(this.restaurantId);
+        this.offerProducts$ = this.productsService.getOfferProducts(
+          this.restaurantId
+        );
+
+        // ✅ Inicializamos el menuType según el restaurant
+        this.menuType = restaurant.menuType || 'palex';
       }),
       takeUntil(this.destroy$)
     );
@@ -97,5 +109,18 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
 
   onImageError(event: any) {
     event.target.src = 'assets/img/not-found.png';
+  }
+
+  // ✅ Cambiar menú desde UI
+  changeMenu(type: 'traditional' | 'palex') {
+    this.menuType = type;
+
+    if (!this.restaurantId) return;
+
+    // Actualizamos también en Firestore
+    this.restaurantService
+      .updateRestaurantData(this.restaurantId, { menuType: type })
+      .then(() => console.log('Menu actualizado a', type))
+      .catch((err) => console.error('Error actualizando menu:', err));
   }
 }
