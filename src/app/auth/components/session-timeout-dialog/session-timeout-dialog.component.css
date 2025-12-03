@@ -1,0 +1,37 @@
+.title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.content {
+  text-align: center;
+  padding: 0 10px;
+}
+
+.subtitle {
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.timer {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+.seconds {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
+.question {
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}

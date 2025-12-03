@@ -1,0 +1,30 @@
+.restaurant-menu-container {
+  padding: 1.5rem;
+  background: var(--card-bg);
+  color: var(--text-color); /* texto general adaptable */
+
+  .menu-card {
+    /* aquí podrías asegurar que también hereda color */
+    color: var(--text-color);
+  }
+
+  .section-header {
+    border-bottom: 1px solid rgba(0,0,0,0.12); /* un gris más neutro */
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-color); /* ¡usar variable adaptable! */
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+
+      mat-icon {
+        font-size: 20px;
+        color: var(--text-color); /* opcional, para iconos */
+      }
+    }
+  }
+}

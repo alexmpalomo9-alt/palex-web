@@ -1,0 +1,92 @@
+<div class="tables-container">
+
+  <!-- Header -->
+  <div class="header">
+    <h2>Mesas del Restaurante</h2>
+    <button mat-flat-button color="primary" (click)="openCreateTable()">
+      + Crear Mesa
+    </button>
+  </div>
+
+  <mat-progress-bar *ngIf="loading" mode="indeterminate" class="loading-bar"></mat-progress-bar>
+
+  <!-- Tabla de mesas -->
+  <table mat-table [dataSource]="tables" class="mat-elevation-z2">
+
+    <!-- number -->
+    <ng-container matColumnDef="number">
+      <th mat-header-cell *matHeaderCellDef> Nº </th>
+      <td mat-cell *matCellDef="let t"> {{ t.number }} </td>
+    </ng-container>
+
+    <!-- name -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Nombre </th>
+      <td mat-cell *matCellDef="let t"> {{ t.name || '-' }} </td>
+    </ng-container>
+
+    <!-- capacity -->
+    <ng-container matColumnDef="capacity">
+      <th mat-header-cell *matHeaderCellDef> Cap. </th>
+      <td mat-cell *matCellDef="let t"> {{ t.capacity }} </td>
+    </ng-container>
+
+    <!-- status -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef> Estado </th>
+      <td mat-cell *matCellDef="let t">
+        <span
+          class="status-pill"
+          [ngClass]="{
+            available: t.status === 'available',
+            occupied: t.status === 'occupied',
+            reserved: t.status === 'reserved'
+          }"
+        >
+          {{ t.status }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Acciones </th>
+      <td mat-cell *matCellDef="let t">
+
+        <button mat-icon-button color="primary" (click)="openEditTable(t)">
+          <mat-icon>edit</mat-icon>
+        </button>
+
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>swap_horiz</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="changeStatus(t, 'available')">Disponible</button>
+          <button mat-menu-item (click)="changeStatus(t, 'occupied')">Ocupada</button>
+          <button mat-menu-item (click)="changeStatus(t, 'reserved')">Reservada</button>
+        </mat-menu>
+
+        <button mat-icon-button color="warn" (click)="deleteTable(t)">
+          <mat-icon>delete</mat-icon>
+        </button>
+
+        <button mat-icon-button color="accent" (click)="openQr(t)">
+          <mat-icon>qr_code</mat-icon>
+        </button>
+
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="['number', 'name', 'capacity', 'status', 'actions']"></tr>
+    <tr mat-row *matRowDef="let row; columns: ['number', 'name', 'capacity', 'status', 'actions']"></tr>
+
+  </table>
+
+  <!-- Sin mesas -->
+  <div *ngIf="!loading && tables.length === 0" class="empty-state">
+    <p>No hay mesas registradas.</p>
+  </div>
+
+
+</div>

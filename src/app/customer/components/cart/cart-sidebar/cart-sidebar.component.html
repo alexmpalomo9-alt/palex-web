@@ -1,0 +1,23 @@
+<div class="cart-sidebar" *ngIf="(cart$ | async) as cart">
+  <h3>Mi Pedido</h3>
+
+  <div *ngFor="let item of cart.items" class="cart-item">
+    <img [src]="item.imageUrl" width="50" />
+    <div>
+      <p>{{ item.name }}</p>
+      <p>{{ item.price | currency }}</p>
+    </div>
+
+    <div class="controls">
+      <button (click)="decrease(item.productId)">-</button>
+      <span>{{ item.quantity }}</span>
+      <button (click)="increase(item.productId)">+</button>
+    </div>
+
+    <button class="remove" (click)="remove(item.productId)">x</button>
+  </div>
+
+  <h3>Total: {{ total$ | async | currency }}</h3>
+
+  <a routerLink="/checkout" class="btn-pay">Ir a pagar</a>
+</div>

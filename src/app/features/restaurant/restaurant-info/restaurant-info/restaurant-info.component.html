@@ -1,0 +1,69 @@
+<div *ngIf="restaurant">
+  <mat-card class="info-card">
+
+    <!-- ======= HEADER ======= -->
+    <div class="info-card-header">
+
+      <!-- Logo -->
+      <img
+        class="logo"
+        [src]="restaurant.imageLogo || 'assets/img/not-found.png'"
+        alt="Logo del restaurante"
+      />
+
+      <!-- Texto -->
+      <div class="header-text">
+        <h1>{{ restaurant.name }}</h1>
+        <p class="address">
+          {{ restaurant.address }} {{ restaurant.addressNumber }}
+        </p>
+        <p class="phone">
+          📞 {{ restaurant.phone }}
+        </p>
+      </div>
+
+      <!-- Botón editar -->
+      <button
+        mat-icon-button
+        class="edit-btn"
+        (click)="editRestaurant()"
+        matTooltip="Editar restaurante"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
+
+    <!-- ======= CONTENIDO ======= -->
+    <mat-card-content>
+
+      <div class="info-item">
+        <strong>Descripción</strong>
+        <span>{{ restaurant.description || "Sin descripción" }}</span>
+      </div>
+
+      <div class="info-item">
+        <strong>Estado</strong>
+        <span class="status"
+          [ngClass]="restaurant.enabled ? 'enabled' : 'disabled'">
+          ● {{ restaurant.enabled ? "Activo" : "Inactivo" }}
+        </span>
+      </div>
+
+      <div class="info-item">
+        <strong>Horario</strong>
+        <span>{{ restaurant.openingHours || "No especificado" }}</span>
+      </div>
+
+      <div class="info-item">
+        <strong>Rating</strong>
+        <span>⭐ {{ restaurant.rating || "Sin calificar" }}</span>
+      </div>
+
+      <div class="info-item">
+        <strong>Creado</strong>
+        <span>{{ restaurant.updatedAt | date : "d MMM yyyy" }}</span>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+</div>

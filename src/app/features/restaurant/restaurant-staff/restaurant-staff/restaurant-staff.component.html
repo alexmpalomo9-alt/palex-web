@@ -1,0 +1,75 @@
+<mat-card class="staff-card shadow-sm">
+  <!-- HEADER -->
+  <div class="header d-flex justify-content-between align-items-center mb-3">
+    <h2 class="title mb-0">
+      <mat-icon color="primary" class="me-2">groups</mat-icon>
+      Personal del Restaurante
+    </h2>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      class="ms-3"
+      (click)="openInvitationDialog()"
+    >
+      <mat-icon class="me-1">person_add_alt</mat-icon>
+      Invitar empleado
+    </button>
+
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- ROLES TEMPLATE -->
+  <ng-template #rolesTemplate let-user>
+    <mat-chip-set class="mt-2">
+      <mat-chip
+        *ngFor="let r of user.rolesList"
+        color="primary"
+        selected
+        class="chip-role"
+      >
+        {{ r }}
+      </mat-chip>
+    </mat-chip-set>
+  </ng-template>
+
+  <!-- TABLA -->
+  <div class="table-container mt-3">
+    <app-base-table
+      [columns]="columns"
+      [data]="staff"
+      [actionsTemplate]="actionsTemplate"
+      filterPlaceholder="Buscar empleado..."
+    ></app-base-table>
+  </div>
+
+  <!-- ACCIONES -->
+  <ng-template #actionsTemplate let-user>
+    <div class="actions d-flex align-items-center gap-2">
+      <button
+        mat-icon-button
+        matTooltip="Cambiar rol"
+        color="primary"
+        (click)="changeRole(user)"
+      >
+        <mat-icon>manage_accounts</mat-icon>
+      </button>
+
+<button
+  mat-icon-button
+  matTooltip="Eliminar del restaurante"
+  color="warn"
+  (click)="deleteStaffMember(user)"
+>
+  <mat-icon>person_remove</mat-icon>
+</button>
+
+</div>
+  </ng-template>
+
+  <mat-divider class="my-4"></mat-divider>
+
+  <!-- ROLES Y PERMISOS -->
+  <app-role-permissions-info></app-role-permissions-info>
+</mat-card>

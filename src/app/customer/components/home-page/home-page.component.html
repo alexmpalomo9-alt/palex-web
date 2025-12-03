@@ -1,0 +1,60 @@
+<div class="index-container">
+  <div class="title-container">
+    <h1 class="title">Explora Restaurantes</h1>
+  </div>
+
+  <app-search-box
+    placeholder="Buscar restaurantes..."
+    (search)="onSearch($event)"
+  ></app-search-box>
+
+  <div
+    class="restaurants-grid"
+    *ngIf="filteredRestaurants.length > 0; else noData"
+  >
+    <mat-card
+      class="restaurant-card"
+      *ngFor="let restaurant of filteredRestaurants"
+      matRipple
+      (click)="openRestaurant(restaurant.slug)"
+    >
+      <!-- <img
+        [src]="restaurant.mainImage || 'assets/img/not-found.png'"
+        alt="Imagen del restaurante"
+        class="restaurant-image"
+      />
+ -->
+
+      <mat-card-header>
+        <div mat-card-avatar class="logo-wrapper">
+          <img
+            [src]="restaurant.imageLogo || '/assets/img/not-found.png'"
+            alt="Logo"
+            class="restaurant-logo"
+          />
+        </div>
+
+        <mat-card-title>{{ restaurant.name }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ restaurant.address }} {{ restaurant.addressNumber }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="chips-row">
+          <mat-chip class="rating-chip" color="warn" selected>
+            ⭐ {{ restaurant.rating || "Sin calificar" }}
+          </mat-chip>
+
+          <mat-chip class="category-chip" color="primary" selected>
+            {{ restaurant.category || "General" }}
+          </mat-chip>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <ng-template #noData>
+    <p class="empty-text">No hay restaurantes disponibles por ahora.</p>
+  </ng-template>
+</div>

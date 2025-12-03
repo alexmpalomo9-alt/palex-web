@@ -1,0 +1,89 @@
+<div mat-dialog-content class="medidas-dialog glass">
+    <!-- BOTÓN VOLVER -->
+  <button class="back-button" mat-icon-button (click)="backToLogin()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <!-- BOTÓN CERRAR -->
+  <button class="close-button" mat-icon-button (click)="closeDialog()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <div class="text-center form-wrapper">
+    <div class="img-logo">
+      <img class="logo mb-3" src="assets/img/small_logo.png" alt="Logo" />
+    </div>
+
+    <h2 class="title">Crear cuenta</h2>
+    <p class="subtitle">Completá los datos para registrarte</p>
+
+    <form [formGroup]="userForm" (ngSubmit)="registerUser()">
+
+      <!-- FILA NOMBRE + APELLIDO -->
+      <div class="row-2">
+        <mat-form-field appearance="fill">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="name" placeholder="Juan" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Apellido</mat-label>
+          <input matInput formControlName="lastname" placeholder="Pérez" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="fill" class="w100">
+        <mat-label>Correo Electrónico</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="email@example.com"
+        />
+
+        <mat-error *ngIf="userForm.controls['email'].hasError('required')">
+          El campo es requerido
+        </mat-error>
+        <mat-error *ngIf="userForm.controls['email'].hasError('pattern')">
+          Mail no válido.
+        </mat-error>
+        <mat-error *ngIf="userForm.controls['email'].hasError('maxlength')">
+          Superaste los caracteres disponibles.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w100">
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="password"
+          placeholder="Escriba su contraseña"
+        />
+      </mat-form-field>
+
+      <!-- REQUISITOS -->
+      <div class="requisitosContrasena" *ngIf="userForm.get('password')?.dirty">
+        <p>La contraseña debe cumplir:</p>
+        <ul>
+          <li [ngClass]="{ valido: !passwordHasError('minuscula'), invalido: passwordHasError('minuscula') }">
+            Al menos una letra minúscula
+          </li>
+          <li [ngClass]="{ valido: !passwordHasError('mayuscula'), invalido: passwordHasError('mayuscula') }">
+            Al menos una letra mayúscula
+          </li>
+          <li [ngClass]="{ valido: !passwordHasError('numero'), invalido: passwordHasError('numero') }">
+            Al menos un número
+          </li>
+          <li [ngClass]="{ valido: !passwordHasError('minLength'), invalido: passwordHasError('minLength') }">
+            Mínimo 6 caracteres
+          </li>
+        </ul>
+      </div>
+
+      <button class="btn-primary-main w100" type="submit">
+        Registrarse
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.stat-box {
+  background: #f3f3f3;
+  border-radius: 12px;
+  text-align: center;
+  padding: 14px;
+}
+
+/* Puedes añadir media queries si quieres más responsive */
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

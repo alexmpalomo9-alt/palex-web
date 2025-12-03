@@ -1,0 +1,129 @@
+/* === Tipografía y fondo global === */
+body {
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(135deg, #d8e8ff, #f3d9ff, #ffe6e6);
+  backdrop-filter: blur(10px);
+  margin: 0;
+  padding: 0;
+}
+
+/* Logo */
+.img-logo img {
+  height: 6rem;
+}
+
+/* === GLASSMORPHISM === */
+.glass {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* === Contenedor modal === */
+.medidas-dialog {
+  max-height: 100vh;
+  max-width: 420px;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 20px;
+  position: relative;
+  overflow-y: auto;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2961b4;
+}
+
+.subtitle {
+  color: #2961b4;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* === Inputs Material === */
+mat-form-field {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.mat-form-field-appearance-fill .mat-form-field-flex {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Botón principal */
+.btn-primary-main {
+  position: relative;
+  padding: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  background: #2961b4;
+  color: #fff !important;
+  transition: 0.3s ease;
+  min-height: 48px;
+}
+.btn-primary-main:hover {
+  background: rgba(8, 0, 160, 0.95);
+}
+
+/* Cerrar */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #f5eaea;
+  background: rgba(0, 0, 0, 0.37);
+  border-radius: 50%;
+}
+
+/* === Fila de 2 inputs === */
+.row-2 {
+  display: flex;
+  gap: 10px;
+}
+.row-2 mat-form-field {
+  flex: 1;
+}
+
+/* === Requisitos contraseña === */
+.requisitosContrasena {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  color: #2961b4;
+}
+
+.requisitosContrasena ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.requisitosContrasena li {
+  margin-bottom: 6px;
+}
+
+/* Estados */
+.valido {
+  color: #2ecc71;
+}
+.invalido {
+  color: #e74c3c;
+}
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #f5eaea;
+  background: rgba(0, 0, 0, 0.37);
+  border-radius: 50%;
+}

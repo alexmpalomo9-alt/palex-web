@@ -1,0 +1,43 @@
+.staff-card {
+  padding: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+    width: 100%;
+  max-width: 80%;
+  margin: 20px auto;
+
+}
+
+.title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.header button {
+  font-weight: 500;
+}
+
+.table-container {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fafafa;
+  padding: 8px;
+}
+
+.actions button {
+  transition: transform 0.2s;
+}
+
+.actions button:hover {
+  transform: scale(1.1);
+}
+
+.chip-role {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+mat-card {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}

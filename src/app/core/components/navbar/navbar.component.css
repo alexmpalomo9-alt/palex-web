@@ -1,0 +1,48 @@
+/* =======================================
+   NAVBAR ADAPTABLE A DARK/LIGHT THEME
+   ======================================= */
+
+.app-navbar {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* LOGO */
+.logo {
+  height: 40px;
+  margin-bottom: 5px;
+}
+
+/* LINKS */
+.app-navbar .nav-link,
+.app-navbar .navbar-brand {
+  color: var(--text-color) !important;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.app-navbar .nav-link:hover {
+  opacity: 0.7;
+}
+
+/* BOTÓN HAMBURGUESA */
+.app-navbar .navbar-toggler {
+  border-color: var(--text-color) !important;
+}
+
+.app-navbar .navbar-toggler-icon {
+  /* hacer que se vea siempre */
+  filter: invert(1);
+}
+
+/* ICONO */
+.app-navbar button mat-icon {
+  color: var(--text-color) !important;
+}
+
+/* CONTENEDOR INTERNO */
+.app-navbar .container-fluid {
+  background: transparent !important;
+}

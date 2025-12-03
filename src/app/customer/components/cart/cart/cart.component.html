@@ -1,0 +1,32 @@
+<div class="cart-header">
+  <h2>Tu Carrito</h2>
+</div>
+
+<div class="cart-content">
+  <ng-container *ngIf="cartItems.length; else emptyCart">
+
+    <!-- LISTA DE ITEMS -->
+    <app-cart-item
+      *ngFor="let item of cartItems"
+      [item]="item"
+      (increase)="increase($event)"
+      (decrease)="decrease($event)"
+      (remove)="remove($event)"
+    ></app-cart-item>
+
+  </ng-container>
+
+  <!-- CARRITO VACÍO -->
+  <ng-template #emptyCart>
+    <div class="empty-message">Tu carrito está vacío 🛒</div>
+  </ng-template>
+</div>
+
+<!-- FOOTER / TOTAL -->
+<div class="cart-footer" *ngIf="cartItems.length">
+  <div class="total">
+    <span>Total:</span>
+    <span>{{ total | currency }}</span>
+    <button mat-raised-button color="primary">Ir a pagar</button>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+.tables-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.loading-bar {
+  margin-bottom: 10px;
+}
+
+.status-pill {
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: capitalize;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.available {
+  background: #d0f5d8;
+  color: #1f7a2d;
+}
+
+.occupied {
+  background: #ffe0e0;
+  color: #c62828;
+}
+
+.reserved {
+  background: #fff4d0;
+  color: #b28300;
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 25px;
+  color: #777;
+}

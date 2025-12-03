@@ -1,0 +1,55 @@
+import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
+import { UserDialogComponent } from '../components/user-dialog/user-dialog.component';
+import { User } from '../model/user.model';
+
+type DialogMode = 'create' | 'edit';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class UserDialogService {
+  constructor(private dialog: MatDialog) {}
+
+  openUserDialog(options: { mode: DialogMode; data?: User }): Observable<User> {
+    const dialogRef = this.dialog.open(UserDialogComponent, {
+      disableClose: true,
+      width: '600px',
+      maxHeight: '90vh',
+      panelClass: 'custom-dialog-container',
+      hasBackdrop: true,
+      data: {
+        mode: options.mode,
+        restaurant:
+          options.mode === 'edit'
+            ? options.data
+            : {
+                uid: '',
+                email: '',
+                name: '',
+                lastname: '',
+                birthdate: null,
+                address: '',
+                phone: '',
+                photoURL: '',
+                roles: {
+                  adminGlobal: false,
+                  adminLocal: false,
+                  mozo: false,
+                  cocina: false,
+                  gerencia: false,
+                  customer: false,
+                  guest: false,
+                },
+                restaurantsOwner: [],
+                restaurantsStaff: [],
+                enabled: true,
+                createdAt: null,
+              },
+      },
+    });
+
+    return dialogRef.afterClosed();
+  }
+}

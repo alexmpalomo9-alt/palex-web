@@ -1,0 +1,93 @@
+<div mat-dialog-content class="medidas-dialog glass">
+  <button class="close-button" mat-icon-button (click)="closeDialog()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <div class="text-center form-wrapper">
+    <div class="img-logo">
+    <img
+      class="logo mb-4"
+      src="assets/img/small_logo.png"
+      alt="Logo"
+    />
+</div>
+    <h2 class="title">Iniciar Sesión</h2>
+    <p class="subtitle">Ingresá tus datos para continuar</p>
+
+    <form [formGroup]="loginUser" (ngSubmit)="login()">
+      
+      <mat-form-field appearance="fill" class="w100">
+        <mat-label>Correo Electrónico</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="email@example.com"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w100">
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="password"
+          placeholder="Escriba su contraseña"
+        />
+      </mat-form-field>
+
+      <button
+        class="btn-primary-main w100"
+        type="submit"
+        [disabled]="!isFormValid || loading"
+      >
+        <span>Ingresar</span>
+
+        <mat-progress-spinner
+          *ngIf="loading"
+          diameter="24"
+          mode="indeterminate"
+          color="accent"
+          class="spinner-button"
+        ></mat-progress-spinner>
+      </button>
+
+      <button
+        mat-button
+        color="warn"
+        class="btn-link"
+        type="button"
+        (click)="openResetDialog()"
+      >
+        ¿Olvidaste tu contraseña?
+      </button>
+
+      <hr class="divider" />
+
+      <button
+        mat-stroked-button
+        color="accent"
+        class="btn-google"
+        type="button"
+        (click)="loginGoogle()"
+      >
+        <img
+          src="assets/img/logo-google.png"
+          alt="Google"
+          class="google-logo"
+        />
+        Ingresar con Google
+      </button>
+
+      <button
+        mat-button
+        color="warn"
+        class="btn-secondary"
+        type="button"
+        (click)="registerDialog()"
+      >
+        Registrarse
+      </button>
+    </form>
+  </div>
+</div>

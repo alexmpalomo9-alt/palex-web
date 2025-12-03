@@ -1,0 +1,123 @@
+<div class="background">
+  <mat-card class="profile-container" *ngIf="!loading">
+    <!-- FOTO + NOMBRE -->
+    <div class="profile-header">
+      <div class="photo-wrapper">
+        <img
+          class="profile-photo"
+          [src]="imagePreview || 'assets/img/default-user.png'"
+          alt="Foto de perfil"
+        />
+
+        <!-- LUPA DE CARGA -->
+        <div class="upload-overlay" *ngIf="uploading">
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="40"
+          ></mat-progress-spinner>
+        </div>
+      </div>
+
+      <h2 class="profile-name">
+        {{ profileForm.value.name }} {{ profileForm.value.lastname }}
+      </h2>
+      <p class="profile-email">{{ profileForm.value.email }}</p>
+
+      <button mat-stroked-button color="primary" (click)="fileInput.click()">
+        Cambiar foto
+      </button>
+      <input
+        hidden
+        #fileInput
+        type="file"
+        accept="image/*"
+        (change)="onPhotoSelect($event)"
+      />
+    </div>
+
+    <mat-card-content>
+      <!-- FORMULARIO -->
+      <section class="profile-section">
+        <h3>Información del Usuario</h3>
+
+        <form [formGroup]="profileForm" (ngSubmit)="save()">
+          <div class="row g-3">
+            <!-- Nombre y Apellido -->
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Nombre</mat-label>
+                <input
+                  matInput
+                  formControlName="name"
+                  placeholder="Tu nombre"
+                />
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Apellido</mat-label>
+                <input
+                  matInput
+                  formControlName="lastname"
+                  placeholder="Tu apellido"
+                />
+              </mat-form-field>
+            </div>
+
+            <!-- Email y Teléfono -->
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" />
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Teléfono</mat-label>
+                <input
+                  matInput
+                  formControlName="phone"
+                  placeholder="Tu teléfono"
+                />
+              </mat-form-field>
+            </div>
+
+            <!-- Fecha de nacimiento y Dirección -->
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Fecha de nacimiento</mat-label>
+                <input matInput type="date" formControlName="birthdate" />
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Dirección</mat-label>
+                <input
+                  matInput
+                  formControlName="address"
+                  placeholder="Tu dirección"
+                />
+              </mat-form-field>
+            </div>
+
+            <!-- Botón guardar -->
+            <div class="col-12">
+              <button
+                mat-raised-button
+                color="accent"
+                type="submit"
+                [disabled]="saving || profileForm.invalid"
+                class="save-btn"
+              >
+                {{ saving ? "Guardando..." : "Guardar cambios" }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </mat-card-content>
+  </mat-card>
+</div>

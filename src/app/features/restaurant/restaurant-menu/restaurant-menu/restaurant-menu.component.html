@@ -1,0 +1,161 @@
+<mat-sidenav-container class="menu-layout">
+  <!-- ======= SIDENAV DEL CARRITO ======= -->
+  <mat-sidenav #cartSidenav mode="over" position="end" class="cart-panel">
+    <app-cart></app-cart>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <!-- ======= HEADER PREMIUM ======= -->
+    <section class="restaurant-header">
+      <ng-container *ngIf="restaurant$ | async as restaurant">
+        <!-- Imagen de fondo del header -->
+        <img
+          [src]="restaurant.mainImage || 'assets/img/not-found.png'"
+          class="header-image"
+          (error)="onImageError($event)"
+        />
+
+        <div class="header-overlay"></div>
+
+        <div class="header-info">
+          <h1>{{ restaurant.name }}</h1>
+          <p>{{ restaurant.description }}</p>
+        </div>
+      </ng-container>
+    </section>
+
+    <!-- ======= CARRITO FLOATING ACTION BUTTON ======= -->
+    <button
+      mat-fab
+      color="primary"
+      class="cart-fab"
+      (click)="cartSidenav.toggle()"
+    >
+      <mat-icon>shopping_cart</mat-icon>
+
+      <span class="fab-badge" *ngIf="cartQuantity$ | async as qty">
+        {{ qty }}
+      </span>
+    </button>
+
+    <!-- ======= TABS ======= -->
+    <mat-tab-group class="menu-tabs" mat-stretch-tabs="true">
+      <!-- TAB OFERTAS -->
+      <mat-tab label="🔥 Ofertas">
+        <ng-container *ngIf="offerProducts$ | async as offerProducts">
+          <div
+            class="product-grid"
+            *ngIf="offerProducts.length > 0; else emptyOffer"
+          >
+            <!-- CARD OFERTA -->
+            <mat-card
+              class="product-card"
+              *ngFor="let item of offerProducts"
+              matRipple
+            >
+              <div class="product-image-wrapper">
+                <img
+                  [src]="item.imageUrl || 'assets/img/not-found.png'"
+                  (click)="openImageModal(item.imageUrl)"
+                  (error)="onImageError($event)"
+                />
+              </div>
+
+              <div class="product-info">
+                <h2>{{ item.name }}</h2>
+                <p>{{ item.description }}</p>
+
+                <div class="price-row">
+                  <span class="old" *ngIf="item.isOffer">
+                    {{ item.price | currency }}
+                  </span>
+
+                  <span class="offer" *ngIf="item.isOffer">
+                    {{ item.offerPrice | currency }}
+                  </span>
+
+                  <span class="normal-price" *ngIf="!item.isOffer">
+                    {{ item.price | currency }}
+                  </span>
+                </div>
+
+                <button
+                  mat-flat-button
+                  class="custom-blue-button"
+                  (click)="addProductToCart(item)"
+                >
+                  Añadir
+                  <mat-icon>add_shopping_cart</mat-icon>
+                </button>
+              </div>
+            </mat-card>
+          </div>
+
+          <ng-template #emptyOffer>
+            <div class="empty-message">No hay ofertas disponibles.</div>
+          </ng-template>
+        </ng-container>
+      </mat-tab>
+
+      <!-- TABS CATEGORÍAS -->
+      <mat-tab *ngFor="let category of categories" [label]="category.label">
+        <ng-container *ngIf="category.products$ | async as products">
+          <div
+            class="product-grid"
+            *ngIf="products.length > 0; else emptyCategory"
+          >
+            <mat-card
+              class="product-card"
+              *ngFor="let item of products"
+              matRipple
+            >
+              <div class="product-image-wrapper">
+                <img
+                  [src]="item.imageUrl || 'assets/img/not-found.png'"
+                  (click)="openImageModal(item.imageUrl)"
+                  (error)="onImageError($event)"
+                />
+              </div>
+
+              <div class="product-info">
+                <h2>{{ item.name }}</h2>
+                <p>{{ item.description }}</p>
+
+                <div class="price-row">
+                  <span class="old" *ngIf="item.isOffer">
+                    {{ item.price | currency }}
+                  </span>
+                  <span class="offer" *ngIf="item.isOffer">
+                    {{ item.offerPrice | currency }}
+                  </span>
+
+                  <span class="normal-price" *ngIf="!item.isOffer">
+                    {{ item.price | currency }}
+                  </span>
+                </div>
+
+                <button
+                  mat-flat-button
+                  class="custom-blue-button"
+                  (click)="addProductToCart(item)"
+                >
+                  Añadir
+                  <mat-icon>add_shopping_cart</mat-icon>
+                </button>
+              </div>
+            </mat-card>
+          </div>
+
+          <ng-template #emptyCategory>
+            <div class="empty-message">No hay productos disponibles.</div>
+          </ng-template>
+        </ng-container>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- MODAL IMAGEN -->
+    <div class="image-modal" *ngIf="selectedImage" (click)="closeImageModal()">
+      <img [src]="selectedImage" />
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

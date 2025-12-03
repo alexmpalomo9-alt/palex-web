@@ -1,0 +1,26 @@
+<ng-template #tplAvailable let-p>
+  {{ p.available ? 'Sí' : 'No' }}
+</ng-template>
+
+<ng-template #tplOffer let-p>
+  {{ p.isOffer ? 'Sí' : 'No' }}
+</ng-template>
+
+<!-- ACCIONES -->
+<ng-template #actions let-p>
+  <button mat-icon-button color="primary" (click)="onEdit(p)">
+    <mat-icon>edit</mat-icon>
+  </button>
+
+  <button mat-icon-button color="warn" (click)="onRemove(p)" *ngIf="p.available">
+    <mat-icon>delete</mat-icon>
+  </button>
+</ng-template>
+
+<!-- TABLA -->
+<app-base-table
+  [columns]="columns"
+  [data]="products"
+  [actionsTemplate]="actions"
+  filterPlaceholder="Buscar productos: "
+></app-base-table>

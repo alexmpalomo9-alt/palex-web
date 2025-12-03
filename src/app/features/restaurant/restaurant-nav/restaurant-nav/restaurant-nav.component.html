@@ -1,0 +1,50 @@
+<mat-nav-list>
+
+  <!-- BOTÓN DE CERRAR -->
+  <!-- Solo cierra el sidenav si es mobile (isMobile = true) -->
+<button 
+  *ngIf="isMobile"
+  mat-icon-button 
+  class="close-btn" 
+  (click)="close()"
+>
+  <mat-icon>close</mat-icon>
+</button>
+  <!-- Cada opción del menú utiliza close(), pero solo cerrará si isMobile es true -->
+  <a mat-list-item routerLink="info" routerLinkActive="active" (click)="close()">
+    <mat-icon class="nav-icon">info</mat-icon>
+    <span>Información</span>
+  </a>
+
+  <a mat-list-item routerLink="products" routerLinkActive="active" (click)="close()">
+    <mat-icon class="nav-icon">restaurant</mat-icon>
+    <span>Menú</span>
+  </a>
+
+  <a mat-list-item routerLink="staff" routerLinkActive="active" (click)="close()">
+    <mat-icon class="nav-icon">group</mat-icon>
+    <span>Staff</span>
+  </a>
+
+  <a mat-list-item routerLink="tables" routerLinkActive="active" (click)="close()">
+    <mat-icon class="nav-icon">table_restaurant</mat-icon>
+    <span>Mesas</span>
+  </a>
+
+  <a mat-list-item routerLink="orders" routerLinkActive="active" (click)="close()">
+    <mat-icon class="nav-icon">receipt_long</mat-icon>
+    <span>Pedidos</span>
+  </a>
+
+  <a mat-list-item routerLink="stats" routerLinkActive="active" (click)="close()">
+    <mat-icon class="nav-icon">bar_chart</mat-icon>
+    <span>Estadísticas</span>
+  </a>
+  <mat-divider></mat-divider>
+
+  <a mat-list-item routerLink="menu" routerLinkActive="active" (click)="close()">
+    <mat-icon class="nav-icon">restaurant_menu</mat-icon>
+    <span>Ver Menú Digital</span>
+  </a>
+
+</mat-nav-list>

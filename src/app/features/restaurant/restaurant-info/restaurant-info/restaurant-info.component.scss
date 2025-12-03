@@ -1,0 +1,124 @@
+/* ===========================
+   CARD GENERAL
+   =========================== */
+.info-card {
+  padding: 24px;
+  margin: 20px auto;
+  max-width: 800px;
+  border-radius: 18px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+/* ===========================
+   HEADER
+   =========================== */
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+/* Logo */
+.logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--text-color);
+  background: #fff;
+  transition: border-color 0.3s;
+
+  .dark-theme & {
+    border-color: #ddd;
+    background: rgba(255,255,255,0.1);
+  }
+}
+
+/* ===========================
+   TEXTOS
+   =========================== */
+.header-text {
+  flex: 1;
+}
+
+.header-text h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.header-text p {
+  margin: 4px 0;
+  opacity: 0.85;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+/* ===========================
+   BOTÓN EDITAR
+   =========================== */
+.edit-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 4px;
+  color: var(--text-color);
+  transition: transform 0.2s ease;
+}
+
+.edit-btn:hover {
+  transform: scale(1.1);
+}
+
+/* ===========================
+   ITEMS
+   =========================== */
+.info-item {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+
+  strong {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+  }
+
+  span {
+    color: var(--text-color);
+    opacity: 0.9;
+  }
+}
+
+/* ESTADO: ACTIVO / INACTIVO */
+.status {
+  font-weight: 600;
+}
+
+.enabled {
+  color: #2e7d32 !important; /* verde Material */
+}
+
+.disabled {
+  color: #c62828 !important; /* rojo Material */
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (max-width: 600px) {
+  .logo {
+    width: 65px;
+    height: 65px;
+  }
+
+  .header-text h1 {
+    font-size: 1.4rem;
+  }
+}

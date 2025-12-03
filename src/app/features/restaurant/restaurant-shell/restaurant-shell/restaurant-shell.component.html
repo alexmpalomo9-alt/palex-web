@@ -1,0 +1,41 @@
+<!-- CONTENEDOR PRINCIPAL DE SIDENAV + CONTENIDO -->
+<mat-sidenav-container class="main-container">
+
+  <!-- MENÚ LATERAL en mobile es 'over' (flotante), en desktop 'side' (fijo)
+       Abierto por defecto en desktop, cerrado en mobile -->
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile ? 'over' : 'side'"
+    [opened]="!isMobile"
+    class="restaurant-sidenav"
+  >
+    <!-- Componente hijo del menú, recibe:
+         - la referencia al sidenav (para cerrarlo)
+         - si es mobile (para decidir cuándo cerrarlo) -->
+    <app-restaurant-nav
+      [sidenav]="sidenav"
+      [isMobile]="isMobile">
+    </app-restaurant-nav>
+  </mat-sidenav>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <mat-sidenav-content>
+
+    <!-- Botón hamburguesa: solo visible en mobile
+         Abre/cierra el sidenav -->
+    <button
+      mat-icon-button
+      (click)="sidenav.toggle()"
+      class="mobile-menu-button"
+      matTooltip="Abrir menú"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <!-- El contenido de cada ruta se muestra aquí -->
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>

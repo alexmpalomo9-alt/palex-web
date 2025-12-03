@@ -1,0 +1,24 @@
+<mat-list-item class="cart-item-card" [@fadeInOut]>
+  <div class="cart-item-wrapper">
+
+    <!-- BOTÓN ELIMINAR -->
+    <button mat-icon-button color="warn" class="remove-btn" (click)="remove.emit(item)">
+      <mat-icon>close</mat-icon>
+    </button>
+
+
+    <!-- INFORMACIÓN DEL ÍTEM -->
+    <div class="item-info">
+      <h4>{{ item.name }}</h4>
+      <span class="price">{{ item.price | currency }}</span>
+
+      <!-- CONTROLES DE CANTIDAD -->
+      <div class="quantity-controls">
+        <button class="qty-btn" (click)="decrease.emit(item)">-</button>
+        <span class="qty-number">{{ item.quantity }}</span>
+        <button class="qty-btn" (click)="increase.emit(item)">+</button>
+      </div>
+    </div>
+
+  </div>
+</mat-list-item>

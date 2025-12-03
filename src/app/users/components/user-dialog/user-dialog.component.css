@@ -1,0 +1,64 @@
+/* Título del diálogo */
+.dialog-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Tarjetas */
+.card-user,
+.card-roles {
+  border-radius: 12px;
+  padding: 15px;
+}
+
+mat-card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+/* Grid de roles */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+/* Alinear Nombre y Apellido a la misma altura */
+.card-user .row.g-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card-user .col-md-6 {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Todos los mat-form-field a ancho completo */
+mat-form-field {
+  width: 100%;
+}
+
+/* Checkbox tamaño y estilo */
+mat-checkbox {
+  font-size: 0.95rem;
+}
+
+/* Botones */
+mat-dialog-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+/* Margen top */
+.mt-3 {
+  margin-top: 1rem;
+  justify-content: center;
+}

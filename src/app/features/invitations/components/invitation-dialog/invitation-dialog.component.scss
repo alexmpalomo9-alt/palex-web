@@ -1,0 +1,73 @@
+.invite-user-container {
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.invite-card {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 18px;
+  padding: 4px 8px;
+  box-shadow: var(--md-sys-elevation-level3);
+  background: var(--md-sys-color-surface);
+
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    .header-icon {
+      font-size: 38px;
+    }
+  }
+
+  mat-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  mat-card-subtitle {
+    margin-top: 2px;
+    opacity: 0.75;
+  }
+
+  mat-divider {
+    margin: 10px 0 18px;
+  }
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+/* Box del link generado */
+.link-box {
+  margin-top: 28px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.04);
+
+  .link-header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 10px;
+
+    mat-icon {
+      font-size: 20px;
+    }
+  }
+}

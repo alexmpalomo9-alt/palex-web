@@ -1,0 +1,55 @@
+<div class="invite-user-container">
+  <mat-card class="invite-card">
+    <mat-card-header>
+      <mat-icon class="header-icon" color="primary">person_add</mat-icon>
+      <mat-card-title>Invitar usuario al restaurante</mat-card-title>
+      <mat-card-subtitle>
+        Completá los datos y generá una invitación personalizada.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content>
+      <form [formGroup]="form" class="form-container">
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email (opcional)</mat-label>
+          <input matInput formControlName="email" />
+        </mat-form-field>
+
+        <!-- Rol -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="role">
+            <mat-option value="adminLocal">Propietario</mat-option>
+            <mat-option value="mozo">Mozo</mat-option>
+            <mat-option value="cocina">Cocina</mat-option>
+            <mat-option value="manager">Encargado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          class="full-width mt-20"
+          (click)="generate()"
+        >
+          Generar invitación
+        </button>
+      </form>
+
+      <!-- Link generado -->
+      <div *ngIf="generatedLink" class="link-box">
+        <div class="link-header">
+          <mat-icon color="primary">link</mat-icon>
+          <span>Enlace generado</span>
+        </div>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <input matInput [value]="generatedLink" readonly />
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

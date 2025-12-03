@@ -1,0 +1,52 @@
+.invite-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.invite-card {
+  max-width: max-content;
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    mat-icon {
+      margin-right: 10px;
+      font-size: 32px;
+    }
+  }
+
+  .details {
+    margin: 18px 0;
+    p {
+      margin: 4px 0;
+    }
+  }
+
+  .full-width {
+    width: 100%;
+    margin-top: 18px;
+  }
+}
+
+.error-card {
+  border-left: 6px solid #d32f2f;
+}
+
+.warning-box {
+  background: #fff3e0;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+
+  mat-icon {
+    margin-top: 3px;
+  }
+}
