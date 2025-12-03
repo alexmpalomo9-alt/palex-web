@@ -1,15 +1,40 @@
 <div *ngIf="restaurant" class="restaurant-menu-container">
+
   <mat-card class="menu-card">
-    <div
-      class="section-header d-flex justify-content-between align-items-center mb-3"
-    >
-      <h2 class="section-title">Productos</h2>
-      <button mat-stroked-button color="primary" (click)="createProduct()">
-        <mat-icon class="me-1">add</mat-icon>
+
+    <!-- HEADER STICKY SIMPLE -->
+    <div class="section-header sticky-header">
+
+      <div class="section-info">
+
+        <!-- Ícono -->
+        <div class="section-icon">
+          <mat-icon>restaurant_menu</mat-icon>
+        </div>
+
+        <!-- Títulos alineados a la derecha del ícono -->
+        <div class="section-texts">
+          <h2 class="section-title">Productos del Restaurante</h2>
+          <p class="section-subtitle">
+            Administra el catálogo de productos, edita precios y gestiona la oferta.
+          </p>
+        </div>
+
+      </div>
+
+      <button
+        mat-flat-button
+        color="primary"
+        class="add-btn pulse"
+        (click)="createProduct()"
+      >
+        <mat-icon>add</mat-icon>
         Agregar Producto
       </button>
+
     </div>
 
+    <!-- Lista -->
     <app-product-list
       [products]="dataSource.data"
       [restaurantId]="restaurant.restaurantId"
@@ -17,9 +42,6 @@
       (remove)="deleteProduct($event)"
     ></app-product-list>
 
-    <button mat-raised-button color="accent" (click)="goToMenu()">
-      <mat-icon class="nav-icon">restaurant_menu</mat-icon>
-      Ver Menú Digital
-    </button>
   </mat-card>
+
 </div>

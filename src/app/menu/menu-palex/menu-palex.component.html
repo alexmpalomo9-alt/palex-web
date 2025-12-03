@@ -1,149 +1,94 @@
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav-content>
-    <div class="menu-container">
-      <!-- Header -->
-      <div class="header-menu">
-        <div class="title-container">
-          <h1 class="title">🍽️ Nuestra Carta</h1>
+<div class="menu-container">
 
-          <p class="subtitle">
-            {{ restaurant?.name || "Bienvenido a nuestro menú" }}
-          </p>
+  <!-- HEADER -->
+  <div class="header-menu">
+    <div class="title-container">
+      <h1 class="title">🍽️ Nuestra Carta</h1>
+      <p class="subtitle">{{ restaurant?.name || "Bienvenido a nuestro menú" }}</p>
+      <p class="subtitle">{{ restaurant?.description || "Mira nuestras opciones" }}</p>
+    </div>
+  </div>
 
-          <p class="subtitle">
-            {{ restaurant?.description || "Mira nuestras opciones" }}
-          </p>
+  <!-- SWIPER DE CATEGORÍAS -->
+<!-- <swiper-container
+  class="category-swiper"
+  slides-per-view="auto"
+  space-between="12"
+  navigation="true"
+  scrollbar="true"
+  style="padding: 10px 0;"
+>
+  <swiper-slide *ngFor="let category of allCategories; let i = index" class="category-slide">
+    <div
+      class="category-tab"
+      [class.active]="selectedCategoryIndex === i"
+      (click)="selectCategory(i)"
+    >
+      {{ category.label }}
+    </div>
+  </swiper-slide>
+</swiper-container>
+ -->
+<swiper-container
+  class="category-swiper"
+    navigation="true"
+
+  slides-per-view="auto"
+  space-between="12"
+  style="padding: 10px 0;"
+>
+  <swiper-slide *ngFor="let category of allCategories; let i = index" class="category-slide">
+    <div
+      class="category-tab"
+      [class.active]="selectedCategoryIndex === i"
+      (click)="selectCategory(i)"
+    >
+      {{ category.label }}
+    </div>
+  </swiper-slide>
+</swiper-container>
+
+
+  <!-- GRID DE PRODUCTOS -->
+  <div class="grid" *ngIf="currentProducts$ | async as currentProducts; else emptyCategory">
+    <mat-card class="menu-card" *ngFor="let item of currentProducts" [class.offer]="item.isOffer">
+      <div class="card-content-wrapper">
+        <div class="image-section">
+          <img
+            mat-card-image
+            [src]="item.imageUrl || 'assets/img/not-found.png'"
+            alt="{{ item.name }}"
+            (click)="onOpenImage(item.imageUrl)"
+            (error)="onImageError($event)"
+          />
+        </div>
+
+        <div class="text-section">
+          <h2>{{ item.name }}</h2>
+          <p>{{ item.description }}</p>
+
+          <div class="price-wrapper">
+            <ng-container *ngIf="item.isOffer; else priceNormal">
+              <span class="old-price">{{ item.price | currency }}</span>
+              <span class="offer-price">{{ item.offerPrice | currency }}</span>
+            </ng-container>
+
+            <ng-template #priceNormal>
+              <span class="price-normal">{{ item.price | currency }}</span>
+            </ng-template>
+          </div>
+
+          <div class="button-wrapper">
+            <button mat-raised-button color="primary" (click)="onAddProduct(item)">
+              Añadir 🛒
+            </button>
+          </div>
         </div>
       </div>
+    </mat-card>
+  </div>
 
-      <!-- Tabs -->
-      <mat-tab-group mat-stretch-tabs="true">
-        <!-- OFERTAS -->
-        <mat-tab label="🔥 Ofertas">
-          <ng-container *ngIf="offerProducts$ | async as offerProducts">
-            <div class="grid" *ngIf="offerProducts.length > 0; else emptyOffer">
-              <mat-card
-                class="menu-card"
-                *ngFor="let item of offerProducts"
-                [class.offer]="item.isOffer"
-              >
-                <div class="card-content-wrapper">
-                  <!-- Imagen -->
-                  <div class="image-section">
-                    <img
-                      mat-card-image
-                      [src]="item.imageUrl || 'assets/img/not-found.png'"
-                      alt="{{ item.name }}"
-                      (click)="onOpenImage(item.imageUrl)"
-                      (error)="onImageError($event)"
-                    />
-                  </div>
-
-                  <!-- Info -->
-                  <div class="text-section">
-                    <h2>{{ item.name }}</h2>
-                    <p>{{ item.description }}</p>
-
-                    <div class="price-wrapper">
-                      <ng-container *ngIf="item.isOffer; else priceNormalOffer">
-                        <span class="old-price">{{
-                          item.price | currency
-                        }}</span>
-                        <span class="offer-price">{{
-                          item.offerPrice | currency
-                        }}</span>
-                      </ng-container>
-
-                      <ng-template #priceNormalOffer>
-                        <span class="price-normal">{{
-                          item.price | currency
-                        }}</span>
-                      </ng-template>
-                    </div>
-
-                    <div class="button-wrapper">
-                      <button
-                        mat-raised-button
-                        color="primary"
-                        (click)="onAddProduct(item)"
-                      >
-                        Añadir 🛒
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </mat-card>
-            </div>
-
-            <ng-template #emptyOffer>
-              <div class="empty-message">No hay ofertas disponibles.</div>
-            </ng-template>
-          </ng-container>
-        </mat-tab>
-
-        <!-- CATEGORÍAS -->
-        <mat-tab *ngFor="let category of categories" [label]="category.label">
-          <ng-container *ngIf="category.products$ | async as products">
-            <div class="grid" *ngIf="products.length > 0; else emptyCategory">
-              <mat-card
-                class="menu-card"
-                *ngFor="let item of products"
-                [class.offer]="item.isOffer"
-              >
-                <div class="card-content-wrapper">
-                  <!-- Imagen -->
-                  <div class="image-section">
-                    <img
-                      mat-card-image
-                      [src]="item.imageUrl || 'assets/img/not-found.png'"
-                      alt="{{ item.name }}"
-                      (click)="onOpenImage(item.imageUrl)"
-                      (error)="onImageError($event)"
-                    />
-                  </div>
-
-                  <!-- Info -->
-                  <div class="text-section">
-                    <h2>{{ item.name }}</h2>
-                    <p>{{ item.description }}</p>
-
-                    <div class="price-wrapper">
-                      <ng-container *ngIf="item.isOffer; else priceNormalCat">
-                        <span class="old-price">{{
-                          item.price | currency
-                        }}</span>
-                        <span class="offer-price">{{
-                          item.offerPrice | currency
-                        }}</span>
-                      </ng-container>
-
-                      <ng-template #priceNormalCat>
-                        <span class="price-normal">{{
-                          item.price | currency
-                        }}</span>
-                      </ng-template>
-                    </div>
-
-                    <div class="button-wrapper">
-                      <button
-                        mat-raised-button
-                        color="primary"
-                        (click)="onAddProduct(item)"
-                      >
-                        Añadir 🛒
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </mat-card>
-            </div>
-
-            <ng-template #emptyCategory>
-              <div class="empty-message">No hay productos disponibles.</div>
-            </ng-template>
-          </ng-container>
-        </mat-tab>
-      </mat-tab-group>
-    </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  <ng-template #emptyCategory>
+    <div class="empty-message">No hay productos disponibles.</div>
+  </ng-template>
+</div>

@@ -5,6 +5,7 @@
        Abierto por defecto en desktop, cerrado en mobile -->
   <mat-sidenav
     #sidenav
+  [position]="isMobile ? 'end' : 'start'"
     [mode]="isMobile ? 'over' : 'side'"
     [opened]="!isMobile"
     class="restaurant-sidenav"

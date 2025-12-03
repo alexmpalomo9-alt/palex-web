@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -175,5 +175,13 @@ export class RestaurantProductsComponent implements OnInit {
   goToMenu() {
     if (!this.restaurant) return;
     this.router.navigate(['menu'], { relativeTo: this.route.parent });
+  }
+  @HostListener('window:scroll')
+  onScroll() {
+    const header = document.querySelector('.sticky-header');
+    if (!header) return;
+
+    if (window.scrollY > 20) header.classList.add('scrolled');
+    else header.classList.remove('scrolled');
   }
 }

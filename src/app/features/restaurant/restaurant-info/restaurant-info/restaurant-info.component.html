@@ -1,63 +1,77 @@
 <div *ngIf="restaurant" class="restaurant-container">
-  <mat-card class="info-card">
+  <mat-card class="info-card shadow-sm">
     <!-- ======= HEADER ======= -->
-    <div class="info-card-header">
-      <img
-        class="logo"
-        [src]="restaurant.imageLogo || 'assets/img/not-found.png'"
-        alt="Logo del restaurante"
-      />
-      <div class="header-text">
-        <h1>{{ restaurant.name }}</h1>
-        <p class="address">
-          {{ restaurant.address }} {{ restaurant.addressNumber }}
-        </p>
-        <p class="phone">📞 {{ restaurant.phone }}</p>
+    <div class="restaurant-header sticky-header">
+      <div class="restaurant-info">
+        <!-- Logo -->
+        <div class="restaurant-logo">
+          <img
+            [src]="restaurant.imageLogo || 'assets/img/not-found.png'"
+            alt="Logo del restaurante"
+          />
+        </div>
+
+        <!-- Títulos -->
+        <div class="restaurant-texts">
+          <h1 class="restaurant-title">{{ restaurant.name }}</h1>
+          <p class="restaurant-subtitle">
+            {{ restaurant.address }} {{ restaurant.addressNumber }}
+          </p>
+          <p class="restaurant-phone">📞 {{ restaurant.phone }}</p>
+        </div>
       </div>
+
+      <!-- Botón editar -->
       <button
-        mat-icon-button
-        class="edit-btn"
+        mat-flat-button
+        color="primary"
+        class="edit-btn pulse"
         (click)="editRestaurant()"
         matTooltip="Editar restaurante"
       >
         <mat-icon>edit</mat-icon>
+        Editar restaurante
       </button>
     </div>
 
     <!-- ======= CONTENIDO ======= -->
     <mat-card-content>
       <div class="info-item">
-        <strong>Descripción</strong>
+        <strong>Descripción: </strong>
         <span>{{ restaurant.description || "Sin descripción" }}</span>
       </div>
       <div class="info-item">
-        <strong>Estado</strong>
+        <strong>Estado: </strong>
         <span
           class="status"
-          [ngClass]="restaurant.enabled ? 'enabled' : 'disabled'"
+          [ngClass]="restaurant.enabled ? 'active' : 'inactive'"
         >
           ● {{ restaurant.enabled ? "Activo" : "Inactivo" }}
         </span>
       </div>
-      <!-- y así con los demás campos -->
+
       <div class="menu-config">
-        <span>Diseño de menú:</span>
-        <button
-          mat-raised-button
-          color="accent"
-          (click)="changeMenuType('palex')"
-          [class.active]="restaurant.menuType === 'palex'"
-        >
-          Palex
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="changeMenuType('traditional')"
-          [class.active]="restaurant.menuType === 'traditional'"
-        >
-          Tradicional
-        </button>
+        <span class="menu-label">Diseño de menú:</span>
+
+        <div class="menu-buttons">
+          <button
+            mat-button
+            class="menu-btn"
+            [class.selected]="restaurant.menuType === 'palex'"
+            (click)="changeMenuType('palex')"
+          >
+            Palex
+          </button>
+
+          <button
+            mat-button
+            class="menu-btn"
+            [class.selected]="restaurant.menuType === 'traditional'"
+            (click)="changeMenuType('traditional')"
+          >
+            Tradicional
+          </button>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>

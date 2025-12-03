@@ -1,18 +1,33 @@
 <mat-card class="staff-card shadow-sm">
-  <!-- HEADER -->
-  <div class="header d-flex justify-content-between align-items-center mb-3">
-    <h2 class="title mb-0">
-      <mat-icon color="primary" class="me-2">groups</mat-icon>
-      Personal del Restaurante
-    </h2>
 
+  <!-- HEADER STICKY -->
+  <div class="staff-header sticky-header">
+
+    <div class="staff-info">
+
+      <!-- Ícono -->
+      <div class="staff-icon">
+        <mat-icon color="primary">groups</mat-icon>
+      </div>
+
+      <!-- Títulos -->
+      <div class="staff-texts">
+        <h2 class="staff-title">Personal del Restaurante</h2>
+        <p class="staff-subtitle">
+          Administra los empleados, roles y permisos del restaurante.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Botón invitar -->
     <button
-      mat-stroked-button
+      mat-flat-button
       color="primary"
-      class="ms-3"
+      class="invite-btn pulse"
       (click)="openInvitationDialog()"
     >
-      <mat-icon class="me-1">person_add_alt</mat-icon>
+      <mat-icon>person_add_alt</mat-icon>
       Invitar empleado
     </button>
 
@@ -56,16 +71,15 @@
         <mat-icon>manage_accounts</mat-icon>
       </button>
 
-<button
-  mat-icon-button
-  matTooltip="Eliminar del restaurante"
-  color="warn"
-  (click)="deleteStaffMember(user)"
->
-  <mat-icon>person_remove</mat-icon>
-</button>
-
-</div>
+      <button
+        mat-icon-button
+        matTooltip="Eliminar del restaurante"
+        color="warn"
+        (click)="deleteStaffMember(user)"
+      >
+        <mat-icon>person_remove</mat-icon>
+      </button>
+    </div>
   </ng-template>
 
   <mat-divider class="my-4"></mat-divider>
