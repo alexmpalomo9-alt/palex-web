@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/palex-web-clean/browser",
+    "public": "dist/palex/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

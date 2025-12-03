@@ -147,8 +147,9 @@
 }
 
 .button-wrapper button {
-  width: 100%;
+  width: 50%;
   transition: background 0.3s, transform 0.2s;
+  justify-content: center;
 }
 
 .button-wrapper button:hover {

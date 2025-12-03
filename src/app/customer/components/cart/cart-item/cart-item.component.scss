@@ -1,68 +1,39 @@
-/* ===== Tarjeta ===== */
 .cart-item-card {
-  position: relative;
-  display: flex;
-  padding: 1rem;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 1rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 0;
+  margin-bottom: 12px;
 }
 
-.cart-item-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-}
-
-/* Wrapper */
 .cart-item-wrapper {
   display: flex;
   align-items: center;
+  background: var(--md-sys-color-surface, #fff);
+  border-radius: 16px;
+  padding: 16px;
   width: 100%;
-  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   position: relative;
-  padding-right: 0; /* Evita que el padding interno empuje la cruz */
+  transition: 0.25s ease;
 }
 
-/* Imagen del producto */
-.item-img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+.cart-item-wrapper:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18), 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 /* Botón eliminar */
 .remove-btn {
   position: absolute;
   top: 8px;
-  right: 8px;  /* Muy cerca del borde derecho */
-  z-index: 10;
-  transition: background 0.2s, transform 0.2s;
-  border-radius: 50%;
-  opacity: 0.8;
+  right: 8px;
 }
 
-.remove-btn:hover {
-  background: rgba(211, 47, 47, 0.1);
-  transform: scale(1.1);
-  opacity: 1;
-}
-
-/* Info del item */
+/* Información del producto */
 .item-info {
-  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-
-.item-info h4 {
-  margin: 0 0 4px 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
-}
-
 .item-info .price {
   color: #d32f2f;
   font-weight: bold;
@@ -70,47 +41,33 @@
   margin-bottom: 0.5rem;
 }
 
+.item-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.price {
+  font-size: 1rem;
+  color: var(--md-sys-color-primary);
+  font-weight: 500;
+}
+
 /* Controles de cantidad */
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 12px;
 }
 
 .qty-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1px solid #1976d2;
-  background: transparent;
-  color: #1976d2;
-  font-size: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.2s;
-}
-
-.qty-btn:hover {
-  background-color: #1976d2;
-  color: #fff;
-  transform: scale(1.1);
+  width: 36px !important;
+  height: 36px !important;
 }
 
 .qty-number {
   min-width: 24px;
   text-align: center;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-/* Animaciones Angular */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-20px); }
+  font-size: 1.1rem;
+  font-weight: 500;
 }

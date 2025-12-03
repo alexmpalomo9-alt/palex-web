@@ -101,33 +101,46 @@ export class RestaurantTablesComponent implements OnInit {
       });
   }
 
-  openEditTable(table: Table) {
-    if (!this.restaurant) return;
+openEditTable(table: Table) {
+  if (!this.restaurant) return;
 
-    const restaurant = this.restaurant; // ← tipo Restaurant GARANTIZADO
+  const restaurant = this.restaurant; // ← tipo Restaurant GARANTIZADO
 
-    this.tableDialogService
-      .openTableDialog({ mode: 'edit', data: table })
-      .subscribe(async (result) => {
-        if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelado',
-            'No se realizó la acción.'
-          );
-          return;
-        }
-        const { restaurantId } = restaurant;
+  this.tableDialogService
+    .openTableDialog({ mode: 'edit', data: table })
+    .subscribe(async (result) => {
+      if (!result) {
+        this.dialogService.infoDialog(
+          'Cancelado',
+          'No se realizó la acción.'
+        );
+        return;
+      }
 
-        const { restaurantId: _ignore, ...cleanData } = result;
+      const { restaurantId } = restaurant;
+      const { restaurantId: _ignore, ...cleanData } = result;
 
+      try {
+        // Intentar actualizar (la validación en TableService puede lanzar)
         await this.tableService.updateTable(
           restaurantId,
           table.tableId!,
           cleanData
         );
+
+        // Si llegamos acá, todo salió bien
+        this.dialogService.infoDialog('Éxito', 'Mesa actualizada correctamente.');
         this.loadTables();
-      });
-  }
+      } catch (error: any) {
+        // Mostrar dialog con el mensaje del error (si existe)
+        this.dialogService.errorDialog(
+          'Error',
+          error?.message || 'Ocurrió un error inesperado al actualizar la mesa.'
+        );
+        // opcional: volver a abrir el diálogo para corregir (no obligatorio)
+      }
+    });
+}
 
   deleteTable(table: Table) {
     if (!table.tableId || !this.restaurant) return;

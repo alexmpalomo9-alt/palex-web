@@ -14,7 +14,14 @@
         class="cart-button"
       >
         🛒 Carrito
-        <span *ngIf="cartQuantity$ | async as qty">{{ qty }}</span>
+
+        <span
+          *ngIf="cartQuantity$ | async as qty"
+          class="cart-qty"
+          [class.has-items]="qty > 0"
+        >
+          {{ qty }}
+        </span>
       </button>
 
       <!-- Selector del menú + Menú final -->

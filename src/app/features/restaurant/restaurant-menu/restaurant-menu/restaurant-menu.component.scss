@@ -86,3 +86,21 @@
     opacity: 1;
   }
 }
+.cart-qty {
+  margin-top: -14px;
+  margin-left: 3px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  transition: 0.25s ease;
+  position: absolute;
+}
+
+/* Cuando hay items -> se vuelve rojo estilo badge */
+.cart-qty.has-items {
+  background-color: #d32f2f; /* Rojo Material M3 */
+  color: white;
+  box-shadow: 0 2px 6px rgba(211, 47, 47, 0.4);
+}

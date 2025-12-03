@@ -6,17 +6,23 @@
       <mat-icon>close</mat-icon>
     </button>
 
-
     <!-- INFORMACIÓN DEL ÍTEM -->
     <div class="item-info">
-      <h4>{{ item.name }}</h4>
+      <h4 class="item-title">{{ item.name }}</h4>
+
       <span class="price">{{ item.price | currency }}</span>
 
       <!-- CONTROLES DE CANTIDAD -->
       <div class="quantity-controls">
-        <button class="qty-btn" (click)="decrease.emit(item)">-</button>
+        <button mat-mini-fab color="primary" class="qty-btn" (click)="decrease.emit(item)">
+          <mat-icon>remove</mat-icon>
+        </button>
+
         <span class="qty-number">{{ item.quantity }}</span>
-        <button class="qty-btn" (click)="increase.emit(item)">+</button>
+
+        <button mat-mini-fab color="primary" class="qty-btn" (click)="increase.emit(item)">
+          <mat-icon>add</mat-icon>
+        </button>
       </div>
     </div>
 
