@@ -15,3 +15,17 @@ export interface Table {
 }
 
 export const TABLES_COLLECTION = 'tables';
+
+export interface Closing {
+  closingId: string;
+  restaurantId: string;
+  tableId: string;
+  tableNumber: number;
+  orderId: string;
+
+  total: number;
+  paymentMethod: 'cash' | 'card' | 'online' | 'other';
+
+  createdAt: string;
+  userId: string; // cajero
+}

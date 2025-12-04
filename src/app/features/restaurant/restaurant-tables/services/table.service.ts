@@ -1,7 +1,20 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, collectionData, doc, addDoc, updateDoc, deleteDoc, getDocs, query, where, getDoc } from '@angular/fire/firestore';
-import { Table } from '../model/tables.model';
+import {
+  Firestore,
+  collection,
+  collectionData,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where
+} from '@angular/fire/firestore';
+
 import { Observable } from 'rxjs';
+import { Table, TABLES_COLLECTION } from '../model/tables.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,72 +23,198 @@ export class TableService {
 
   private firestore = inject(Firestore);
 
-  /** Obtener todas las mesas del restaurante */
+  constructor() {}
+
+  /** ============================
+   *   GET ALL TABLES (RESTAURANT)
+   *  ============================ */
   getTablesByRestaurant(restaurantId: string): Observable<Table[]> {
     const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
     return collectionData(ref, { idField: 'tableId' }) as Observable<Table[]>;
   }
 
-  /** Crear mesa */
-async createTable(data: Partial<Table> & { restaurantId: string }) {
+  /** ============================
+   *   GET TABLE BY ID
+   *  ============================ */
+  async getTableById(restaurantId: string, tableId: string): Promise<Table | null> {
+    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    const snap = await getDoc(ref);
 
-  // ✔️ Verificar número repetido
-  const exists = await this.existsTableNumber(data.restaurantId, Number(data.number));
-  if (exists) {
-    throw new Error(`Ya existe una mesa con el número ${data.number}`);
+    if (!snap.exists()) return null;
+
+    return {
+      tableId: snap.id,
+      ...(snap.data() as Omit<Table, 'tableId'>)
+    };
   }
 
-  const ref = collection(this.firestore, `restaurants/${data.restaurantId}/tables`);
-  const docRef = await addDoc(ref, {
-    ...data,
-    enabled: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  });
+  /** ============================
+   *   GET TABLE BY QR SLUG
+   *  ============================ */
+  async getTableBySlug(restaurantId: string, qrSlug: string): Promise<Table | null> {
+    const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+    const q = query(ref, where('qrSlug', '==', qrSlug));
+    const snap = await getDocs(q);
 
-  return { tableId: docRef.id };
-}
-/** Verifica si ya existe una mesa con el mismo number */
-async existsTableNumber(restaurantId: string, number: number): Promise<boolean> {
-  const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
-  const q = query(ref, where('number', '==', number));
-  const snap = await getDocs(q);
-  return !snap.empty;
-}
+    if (snap.empty) return null;
 
-  /** Editar mesa */
-async updateTable(restaurantId: string, tableId: string, data: Partial<Table>) {
+    const docSnap = snap.docs[0];
 
-  // ✔️ Solo validar si se está modificando el number
-  if (data.number !== undefined) {
+    return {
+      tableId: docSnap.id,
+      ...(docSnap.data() as Omit<Table, 'tableId'>)
+    };
+  }
+
+  /** ============================
+   *   CHECK IF TABLE NUMBER EXISTS
+   *  ============================ */
+  async existsTableNumber(restaurantId: string, number: number): Promise<boolean> {
+    const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+    const q = query(ref, where('number', '==', number));
+    const snap = await getDocs(q);
+
+    return !snap.empty;
+  }
+
+  /** ============================
+   *   CREATE TABLE
+   *  ============================ */
+  async createTable(data: Partial<Table> & { restaurantId: string }) {
+    const { restaurantId } = data;
+
+    // prevent duplicate numbers
     const exists = await this.existsTableNumber(restaurantId, Number(data.number));
-
     if (exists) {
-      // Verificar que NO sea el mismo documento
-      const refCheck = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
-      const original = await getDoc(refCheck);
+      throw new Error(`Ya existe una mesa con el número ${data.number}`);
+    }
 
-      if (original.data()?.['number'] !== data.number) {
-        throw new Error(`Ya existe una mesa con el número ${data.number}`);
+    const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+    const docRef = await addDoc(ref, {
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    return { tableId: docRef.id };
+  }
+
+  /** ============================
+   *   UPDATE TABLE
+   *  ============================ */
+  async updateTable(restaurantId: string, tableId: string, data: Partial<Table>) {
+    if (data.number !== undefined) {
+      const exists = await this.existsTableNumber(restaurantId, Number(data.number));
+
+      if (exists) {
+        const refCheck = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+        const original = await getDoc(refCheck);
+
+        if (original.data()?.['number'] !== data.number) {
+          throw new Error(`Ya existe una mesa con el número ${data.number}`);
+        }
       }
     }
-  }
 
-  const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
-  await updateDoc(ref, { ...data, updatedAt: new Date().toISOString() });
-}
-  /** Eliminar mesa */
-  async deleteTable(restaurantId: string, tableId: string) {
     const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
-    await deleteDoc(ref);
+    await updateDoc(ref, {
+      ...data,
+      updatedAt: new Date().toISOString()
+    });
   }
 
-  /** Habilitar/deshabilitar */
+  /** ============================
+   *   SET ENABLED / DISABLED
+   *  ============================ */
   async setTableEnabled(restaurantId: string, tableId: string, enabled: boolean) {
     const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
     await updateDoc(ref, {
       enabled,
       updatedAt: new Date().toISOString()
     });
+  }
+
+  /** ============================
+   *   UPDATE STATUS
+   *  ============================ */
+  async updateStatus(
+    restaurantId: string,
+    tableId: string,
+    status: Table['status']
+  ) {
+    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    await updateDoc(ref, {
+      status,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  /** ============================
+   *   ASSIGN ORDER TO TABLE
+   *  ============================ */
+  async assignOrder(
+    restaurantId: string,
+    tableId: string,
+    orderId: string
+  ) {
+    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    await updateDoc(ref, {
+      currentOrderId: orderId,
+      status: 'occupied',
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  /** ============================
+   *   CLEAR ORDER (AFTER PAYMENT)
+   *  ============================ */
+  async clearOrder(restaurantId: string, tableId: string) {
+    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    await updateDoc(ref, {
+      currentOrderId: null,
+      status: 'available',
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  /** ============================
+   *   CHANGE TABLE (MOVER CLIENTE)
+   *  ============================ */
+  async moveOrderToAnotherTable(
+    restaurantId: string,
+    fromTableId: string,
+    toTableId: string
+  ) {
+    const fromRef = doc(this.firestore, `restaurants/${restaurantId}/tables/${fromTableId}`);
+    const toRef = doc(this.firestore, `restaurants/${restaurantId}/tables/${toTableId}`);
+
+    const fromSnap = await getDoc(fromRef);
+
+    if (!fromSnap.exists()) throw new Error('Mesa origen no existe');
+
+    const orderId = fromSnap.data()?.['currentOrderId'];
+    if (!orderId) throw new Error('La mesa origen no tiene pedido activo');
+
+    // liberar mesa origen
+    await updateDoc(fromRef, {
+      currentOrderId: null,
+      status: 'available',
+      updatedAt: new Date().toISOString()
+    });
+
+    // asignar a mesa destino
+    await updateDoc(toRef, {
+      currentOrderId: orderId,
+      status: 'occupied',
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  /** ============================
+   *   DELETE TABLE
+   *  ============================ */
+  async deleteTable(restaurantId: string, tableId: string) {
+    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    await deleteDoc(ref);
   }
 }

@@ -1,16 +1,37 @@
-import { CartItem } from "../customer/components/cart/model/cart.model";
-
-export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'on-the-way' | 'delivered' | 'cancelled';
-
 export interface Order {
-  orderId?: string;
+  orderId: string;
   restaurantId: string;
-  mesaId?: string | null;      // si aplica
-  userId?: string | null;
-  items: CartItem[];
+  tableId: string;
+  tableNumber: number;
+
+  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+
+  items: OrderItem[];
   total: number;
-  status: OrderStatus;
   notes?: string;
-  createdAt?: any;
-  updatedAt?: any;
+
+  createdAt: string;
+  updatedAt: string;
+  closedAt?: string;
+
+  history: OrderStatusChange[];
+}
+
+export interface OrderItem {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+  categoryId: string;
+
+  // opcionales
+  description?: string;
+  imageUrl?: string;
+}
+
+export interface OrderStatusChange {
+  status: string;
+  timestamp: string;
+  userId?: string; // mozo/cocina que hizo cambio
 }
