@@ -62,15 +62,6 @@ export class TableDialogComponent {
       sector: new FormControl(t.sector || '', [
         Validators.pattern(regexAlfanumericoConEspacios),
       ]),
-
-      qrSlug: new FormControl(t.qrSlug, [
-        Validators.required,
-        Validators.pattern(regexTextos),
-      ]),
-
-      qrCode: new FormControl(t.qrCode || ''),
-
-      currentOrderId: new FormControl(t.currentOrderId || ''),
     });
   }
 

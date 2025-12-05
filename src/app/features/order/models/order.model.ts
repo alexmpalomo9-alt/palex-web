@@ -1,37 +1,41 @@
+
 export interface Order {
   orderId: string;
   restaurantId: string;
   tableId: string;
   tableNumber: number;
-
-  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
-
+  status: OrderStatus;
   items: OrderItem[];
   total: number;
-  notes?: string;
-
-  createdAt: string;
-  updatedAt: string;
-  closedAt?: string;
-
-  history: OrderStatusChange[];
+  createdAt: any;
+  updatedAt: any;
+  // ❌ eliminar history de aquí
 }
 
+export type OrderStatus =
+  | 'new'
+  | 'approved'
+  | 'preparing'
+  | 'ready'
+  | 'delivered'
+  | 'closed'
+  | 'cancelled';
+
+export interface OrderStatusChange {
+  status: OrderStatus;
+  timestamp: any;
+  userId: string | null;
+}
 export interface OrderItem {
   productId: string;
-  name: string;
+  productName: string;
   price: number;
   quantity: number;
   subtotal: number;
-  categoryId: string;
+  categoryId?: string;
 
   // opcionales
   description?: string;
   imageUrl?: string;
-}
-
-export interface OrderStatusChange {
-  status: string;
-  timestamp: string;
-  userId?: string; // mozo/cocina que hizo cambio
+  createdAt?: string;
 }

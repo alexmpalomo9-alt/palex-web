@@ -1,263 +1,188 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   Firestore,
-  doc,
-  docData,
-  setDoc,
-  updateDoc,
   collection,
   collectionData,
+  doc,
+  addDoc,
+  updateDoc,
+  serverTimestamp,
+  runTransaction,
   query,
   where,
+  getDocs,
+  DocumentReference,
+  CollectionReference,
   getDoc
 } from '@angular/fire/firestore';
 
-import { nanoid } from 'nanoid';
-import { Order, OrderItem, OrderStatusChange } from '../models/order.model';
-import { Table } from '../../restaurant/restaurant-tables/model/tables.model';
+import { Observable } from 'rxjs';
+import { Order, OrderItem, OrderStatus } from '../models/order.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrdersService {
 
-  private firestore = inject(Firestore);
+  constructor(private firestore: Firestore) {}
 
-  /** ===============================
-   *   CREATE ORDER
-   *  =============================== */
+  // --------------------------------------------------------------------------
+  // Referencia tipada a orders del restaurante
+  // --------------------------------------------------------------------------
+  private ordersCollectionRef(restaurantId: string): CollectionReference<Order> {
+    return collection(this.firestore, `restaurants/${restaurantId}/orders`) as CollectionReference<Order>;
+  }
+
+  // --------------------------------------------------------------------------
+  // 1) Crear pedido (oficial): crea el pedido y guarda el primer evento de
+  // historial en la subcolección /orders/{orderId}/history
+  // --------------------------------------------------------------------------
   async createOrder(
     restaurantId: string,
-    table: Table,
-    items: OrderItem[],
-    notes?: string
+    tableId: string,
+    tableNumber: number,
+    force = false
   ): Promise<string> {
 
-    const orderId = nanoid();
-    const now = new Date().toISOString();
+    // referencia a la colección de orders del restaurante
+    const ordersCol = this.ordersCollectionRef(restaurantId);
+    const orderRef = doc(ordersCol);
+    const orderId = orderRef.id;
 
-    const total = items.reduce((acc, item) => acc + item.subtotal, 0);
+    // 1) Ejecutar transacción para crear pedido y marcar mesa ocupada
+    await runTransaction(this.firestore, async (tx) => {
 
-    const order: Order = {
-      orderId,
-      restaurantId,
-      tableId: table.tableId,
-      tableNumber: table.number,
-      items,
-      total,
-      notes,
-      status: 'pending',
-      createdAt: now,
-      updatedAt: now,
-      history: [
-        { status: 'pending', timestamp: now }
-      ]
-    };
+      const tableRef = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+      const tableSnap = await tx.get(tableRef);
 
-    const orderRef = doc(
-      this.firestore,
-      `restaurants/${restaurantId}/orders/${orderId}`
-    );
+      if (!tableSnap.exists()) throw new Error('La mesa no existe');
+      if (tableSnap.data()['status'] !== 'available' && !force) {
+        throw new Error('La mesa está ocupada');
+      }
 
-    const tableRef = doc(
-      this.firestore,
-      `restaurants/${restaurantId}/tables/${table.tableId}`
-    );
+      // crear documento del pedido SIN poner aquí historial con serverTimestamp
+      tx.set(orderRef, {
+        orderId,
+        restaurantId,
+        tableId,
+        tableNumber,
+        status: 'new',
+        items: [],
+        total: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
 
-    // escribir pedido
-    await setDoc(orderRef, order);
+      // marcar mesa ocupada y asignar currentOrderId
+      tx.update(tableRef, {
+        status: 'occupied',
+        currentOrderId: orderId,
+        updatedAt: serverTimestamp()
+      });
 
-    // actualizar mesa
-    await updateDoc(tableRef, {
-      currentOrderId: orderId,
-      status: 'occupied',
-      updatedAt: now
+      // transacción termina devolviendo (implícitamente) sin crash
+      return orderId;
     });
+
+    // 2) Agregar primer entry de historial EN UNA SUBCOLECCIÓN (fuera de la tx)
+    await this.addHistoryEntry(restaurantId, orderId, 'new', null);
 
     return orderId;
   }
 
-  /** ===============================
-   *   GET ORDER (STREAM)
-   *  =============================== */
-  getOrder(restaurantId: string, orderId: string) {
-    const ref = doc(
+  // --------------------------------------------------------------------------
+  // Helper: agregar entrada de historial como documento en la subcolección
+  // /restaurants/{restaurantId}/orders/{orderId}/history
+  // --------------------------------------------------------------------------
+  async addHistoryEntry(restaurantId: string, orderId: string, status: OrderStatus, userId: string | null = null) {
+    const historyCol = collection(this.firestore, `restaurants/${restaurantId}/orders/${orderId}/history`);
+    await addDoc(historyCol, {
+      status,
+      timestamp: serverTimestamp(),
+      userId: userId ?? null
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Obtener pedidos activos por mesa
+  // --------------------------------------------------------------------------
+  getActiveOrderByTable(restaurantId: string, tableId: string): Observable<Order[]> {
+    const ref = this.ordersCollectionRef(restaurantId);
+
+    const q = query(
+      ref,
+      where('tableId', '==', tableId),
+      where('status', 'in', ['new', 'pending', 'approved', 'preparing', 'ready'])
+    );
+
+    return collectionData(q, { idField: 'orderId' }) as Observable<Order[]>;
+  }
+
+  // --------------------------------------------------------------------------
+  // Pedidos para cocina
+  // --------------------------------------------------------------------------
+  getKitchenOrders(restaurantId: string): Observable<Order[]> {
+    const ref = this.ordersCollectionRef(restaurantId);
+
+    const q = query(
+      ref,
+      where('status', 'in', ['approved', 'preparing'])
+    );
+
+    return collectionData(q, { idField: 'orderId' }) as Observable<Order[]>;
+  }
+
+  // --------------------------------------------------------------------------
+  // Agregar ítem al pedido (añade doc en subcolección items y actualiza updatedAt)
+  // --------------------------------------------------------------------------
+  async addItem(restaurantId: string, orderId: string, item: OrderItem) {
+    const itemsRef = collection(
+      this.firestore,
+      `restaurants/${restaurantId}/orders/${orderId}/items`
+    );
+
+    await addDoc(itemsRef, {
+      ...item,
+      createdAt: serverTimestamp(),
+    });
+
+    const orderRef = doc(
       this.firestore,
       `restaurants/${restaurantId}/orders/${orderId}`
     );
-    return docData(ref, { idField: 'orderId' });
+
+    await updateDoc(orderRef, {
+      updatedAt: serverTimestamp(),
+    });
   }
 
-  /** ===============================
-   *   GET ORDER SNAPSHOT ONCE
-   *  =============================== */
-  async getOrderSnapshot(
-    restaurantId: string,
-    orderId: string
-  ): Promise<Order | null> {
-
-    const ref = doc(
-      this.firestore,
-      `restaurants/${restaurantId}/orders/${orderId}`
-    );
-
-    const snap = await getDoc(ref);
-    return snap.exists() ? (snap.data() as Order) : null;
-  }
-
-  /** ===============================
-   *   UPDATE STATUS + HISTORY
-   *  =============================== */
-  async updateStatus(
+  // --------------------------------------------------------------------------
+  // Cambiar estado del pedido: actualiza el doc order y agrega entry en history
+  // --------------------------------------------------------------------------
+  async updateOrderStatus(
     restaurantId: string,
     orderId: string,
-    status: Order['status'],
+    newStatus: OrderStatus,
     userId?: string
   ) {
-    const now = new Date().toISOString();
-
-    const order = await this.getOrderSnapshot(restaurantId, orderId);
-    if (!order) throw new Error('El pedido no existe');
-
-    const history: OrderStatusChange[] = [
-      ...order.history,
-      { status, timestamp: now, userId }
-    ];
-
     const orderRef = doc(
       this.firestore,
       `restaurants/${restaurantId}/orders/${orderId}`
     );
 
+    // actualizar estado en el documento principal
     await updateDoc(orderRef, {
-      status,
-      updatedAt: now,
-      history
+      status: newStatus,
+      updatedAt: serverTimestamp()
     });
+
+    // agregar historial en subcolección
+    await this.addHistoryEntry(restaurantId, orderId, newStatus, userId ?? null);
   }
 
-  /** ===============================
-   *   ADD ITEM TO ORDER
-   *  =============================== */
-  async addItem(
-    restaurantId: string,
-    orderId: string,
-    item: OrderItem
-  ) {
-    const now = new Date().toISOString();
-    const order = await this.getOrderSnapshot(restaurantId, orderId);
-    if (!order) throw new Error('Order not found');
-
-    const items = [...order.items, item];
-    const total = items.reduce((acc, i) => acc + i.subtotal, 0);
-
-    const orderRef = doc(
-      this.firestore,
-      `restaurants/${restaurantId}/orders/${orderId}`
-    );
-
-    await updateDoc(orderRef, {
-      items,
-      total,
-      updatedAt: now
-    });
-  }
-
-  /** ===============================
-   *   REMOVE ITEM
-   *  =============================== */
-  // async removeItem(
-  //   restaurantId: string,
-  //   orderId: string,
-  //   itemId: string
-  // ) {
-  //   const now = new Date().toISOString();
-  //   const order = await this.getOrderSnapshot(restaurantId, orderId);
-  //   if (!order) throw new Error('Order not found');
-
-  //   const items = order.items.filter(i => i.itemId !== itemId);
-  //   const total = items.reduce((acc, i) => acc + i.subtotal, 0);
-
-  //   const orderRef = doc(
-  //     this.firestore,
-  //     `restaurants/${restaurantId}/orders/${orderId}`
-  //   );
-
-  //   await updateDoc(orderRef, {
-  //     items,
-  //     total,
-  //     updatedAt: now
-  //   });
-  // }
-
-  /** ===============================
-   *   MOVE ORDER TO ANOTHER TABLE
-   *  =============================== */
-  async moveOrder(
-    restaurantId: string,
-    orderId: string,
-    fromTable: Table,
-    toTable: Table
-  ) {
-    const now = new Date().toISOString();
-
-    const orderRef = doc(
-      this.firestore,
-      `restaurants/${restaurantId}/orders/${orderId}`
-    );
-
-    const fromTableRef = doc(
-      this.firestore,
-      `restaurants/${restaurantId}/tables/${fromTable.tableId}`
-    );
-
-    const toTableRef = doc(
-      this.firestore,
-      `restaurants/${restaurantId}/tables/${toTable.tableId}`
-    );
-
-    // actualizar pedido
-    await updateDoc(orderRef, {
-      tableId: toTable.tableId,
-      tableNumber: toTable.number,
-      updatedAt: now
-    });
-
-    // liberar mesa origen
-    await updateDoc(fromTableRef, {
-      currentOrderId: null,
-      status: 'available',
-      updatedAt: now
-    });
-
-    // asignar mesa destino
-    await updateDoc(toTableRef, {
-      currentOrderId: orderId,
-      status: 'occupied',
-      updatedAt: now
-    });
-  }
-
-  /** ===============================
-   *   GET ORDERS BY STATUS
-   *  =============================== */
-  getOrdersByStatus(restaurantId: string, status: Order['status']) {
-    const ref = collection(
-      this.firestore,
-      `restaurants/${restaurantId}/orders`
-    );
-    const q = query(ref, where('status', '==', status));
-    return collectionData(q, { idField: 'orderId' });
-  }
-
-  /** ===============================
-   *   CLOSE ORDER
-   *  =============================== */
-  async closeOrder(
-    restaurantId: string,
-    orderId: string,
-    table: Table
-  ) {
-    const now = new Date().toISOString();
-
+  // --------------------------------------------------------------------------
+  // Cerrar pedido: transaction que actualiza order.status y libera la mesa,
+  // y además agrega entry en history (fuera de tx para timestamp seguro)
+  // --------------------------------------------------------------------------
+  async closeOrder(restaurantId: string, orderId: string, tableId: string) {
     const orderRef = doc(
       this.firestore,
       `restaurants/${restaurantId}/orders/${orderId}`
@@ -265,19 +190,76 @@ export class OrdersService {
 
     const tableRef = doc(
       this.firestore,
-      `restaurants/${restaurantId}/tables/${table.tableId}`
+      `restaurants/${restaurantId}/tables/${tableId}`
     );
 
-    await updateDoc(orderRef, {
-      status: 'delivered',
-      closedAt: now,
-      updatedAt: now
+    // transacción para actualizar estados atomically
+    await runTransaction(this.firestore, async (tx) => {
+
+      tx.update(orderRef, {
+        status: 'closed',
+        closedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      tx.update(tableRef, {
+        currentOrderId: null,
+        status: 'available',
+        updatedAt: serverTimestamp(),
+      });
     });
 
-    await updateDoc(tableRef, {
-      currentOrderId: null,
-      status: 'available',
-      updatedAt: now
-    });
+    // agregar historial fuera de la tx para timestamp correcto
+    await this.addHistoryEntry(restaurantId, orderId, 'closed', null);
   }
+
+  async createOrGetActiveOrder(
+  restaurantId: string,
+  tableId: string,
+  tableNumber: number
+): Promise<string> {
+
+  // 1) Buscar pedidos activos
+  const ordersCol = this.ordersCollectionRef(restaurantId);
+
+const q = query(
+  ordersCol,
+  where('tableId', '==', tableId),
+  where('status', 'in', ['pending', 'active'])
+);
+  const snap = await getDocs(q);
+
+  if (!snap.empty) {
+    // retornar el pedido activo existente
+    return snap.docs[0].id;
+  }
+
+  // 2) Si no había pedido activo → crear uno nuevo
+  return await this.createOrder(restaurantId, tableId, tableNumber);
+}
+
+async addItemWithStatusCheck(
+  restaurantId: string,
+  orderId: string,
+  item: OrderItem
+) {
+  const orderRef = doc(
+    this.firestore,
+    `restaurants/${restaurantId}/orders/${orderId}`
+  );
+
+  const snap = await getDoc(orderRef);
+  const order = snap.data() as Order;
+
+  if (!order) throw new Error('Pedido no existe');
+
+  // estados NO permitidos
+  if (['closed', 'cancelled'].includes(order.status)) {
+    throw new Error('No se pueden agregar items a un pedido cerrado o cancelado');
+  }
+
+  // si está delivered, ready, approved, etc. → permitido
+  return this.addItem(restaurantId, orderId, item);
+}
+
 }

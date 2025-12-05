@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { HomePageComponent } from './customer/components/home-page/home-page.component';
 import { InviteGuard } from './core/guards/invite.guard';
 import { AuthGuard } from './core/guards/auth.guard';
-import { TestCartComponent } from './test-cart/test-cart.component';
+import { OrderTestComponentComponent } from './features/test/order-test-component/order-test-component.component';
 
 export const routes: Routes = [
   {
@@ -42,9 +42,9 @@ export const routes: Routes = [
       import('./users/routes/user.routes').then(m => m.USER_ROUTES),
   },
 
-  { path: '', component: HomePageComponent },
+  // { path: '', component: HomePageComponent },
+   { path: '', component: OrderTestComponentComponent },
 
-  // { path: '', component: TestCartComponent },
   
   {
     path: 'invite/:token',

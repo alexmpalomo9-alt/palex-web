@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TestCartComponent } from './test-cart.component';
+import { QrClientComponent } from './qr-client.component';
 
-describe('TestCartComponent', () => {
-  let component: TestCartComponent;
-  let fixture: ComponentFixture<TestCartComponent>;
+describe('QrClientComponent', () => {
+  let component: QrClientComponent;
+  let fixture: ComponentFixture<QrClientComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TestCartComponent]
+      imports: [QrClientComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TestCartComponent);
+    fixture = TestBed.createComponent(QrClientComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

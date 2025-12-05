@@ -1,0 +1,79 @@
+<div class="waiter-container">
+
+  <h2>🧑‍🍳 Vista del Mozo</h2>
+
+  <div class="tables-grid">
+
+    <div class="table-card" *ngFor="let table of tables() ?? []">
+
+      <header>
+        <h3>Mesa {{ table.number }}</h3>
+        <span class="status" [class]="table.status">{{ table.status }}</span>
+      </header>
+
+      <!-- Sin pedido activo -->
+      <div *ngIf="!table.currentOrderId" class="no-order">
+        <p>No hay pedido</p>
+      </div>
+<button 
+  *ngIf="table.status === 'available'"
+  (click)="createOrderForTable(table)"
+>
+  Crear Pedido
+</button>
+
+      <button 
+  *ngIf="!table.currentOrderId"
+  (click)="createOrderForTable(table)"
+>
+  Crear Pedido
+</button>
+<!-- Pedido activo -->
+      <div *ngIf="table.currentOrderId">
+
+        <ng-container *ngIf="getOrdersSignal(table.tableId) as orderSignal">
+
+          <ng-container *ngIf="orderSignal() as orders; else noOrderFound">
+
+            <ng-container *ngIf="orders.length > 0">
+
+              <ng-container *ngFor="let order of orders">
+                <p style="color:red">DEBUG STATUS: {{ table.status }}</p>
+
+                <div class="order-info">
+                  <p><strong>Pedido:</strong> {{ order.orderId }}</p>
+
+                  <p>
+                    <strong>Estado:</strong>
+                    <span [class]="order.status">{{ order.status }}</span>
+                  </p>
+
+                  <button *ngIf="order.status === 'new'"
+                          (click)="approveOrder(order)">
+                    ✔ Aprobar pedido
+                  </button>
+
+                  <button *ngIf="order.status === 'ready'"
+                          (click)="closeOrder(order)" class="close">
+                    ✖ Cerrar pedido
+                  </button>
+                </div>
+              </ng-container>
+
+            </ng-container>
+
+          </ng-container>
+
+        </ng-container>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <ng-template #noOrderFound>
+    <p>Error: Pedido no encontrado</p>
+  </ng-template>
+
+</div>

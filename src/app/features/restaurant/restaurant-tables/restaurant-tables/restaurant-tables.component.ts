@@ -1,63 +1,63 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TableService } from '../services/table.service';
+import { Subscription } from 'rxjs';
+import { OrdersService } from '../../../order/services/order.service';
 import { Table } from '../model/tables.model';
-import { SharedModule } from '../../../../shared/shared.module';
-import { ActivatedRoute } from '@angular/router';
+import { TableService } from '../services/table.service';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
+import { ActivatedRoute } from '@angular/router';
+import { TableQrDialogComponent } from '../../../../shared/components/qr-preview/table-qr-dialog/table-qr-dialog.component';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { TableDialogService } from '../services/table-dialog/table-dialog.service';
-import { TableQrDialogComponent } from '../../../../shared/components/qr-preview/table-qr-dialog/table-qr-dialog.component';
+import { SharedModule } from '../../../../shared/shared.module';
 
 @Component({
   selector: 'app-restaurant-tables',
-  standalone: true,
-  imports: [SharedModule],
   templateUrl: './restaurant-tables.component.html',
   styleUrls: ['./restaurant-tables.component.scss'],
+  imports: [SharedModule],
 })
-export class RestaurantTablesComponent implements OnInit {
+export class RestaurantTablesComponent implements OnInit, OnDestroy {
+  restaurantId!: string; // viene del auth o del contexto
   @Input() restaurant: Restaurant | null = null;
 
-  private tableService = inject(TableService);
-  private dialog = inject(MatDialog);
-  private route = inject(ActivatedRoute);
-  private restaurantService = inject(RestaurantService);
-  private dialogService = inject(DialogService);
-  private tableDialogService = inject(TableDialogService);
-
-  restaurantId!: string;
   tables: Table[] = [];
-  loading = false;
+  loading = true;
 
-  ngOnInit() {
-    this.route.parent?.paramMap.subscribe((params) => {
-      const slug = params.get('restaurantId');
-      if (!slug) return;
+  private sub!: Subscription;
 
-    this.restaurantService.getRestaurantBySlug(slug).subscribe((restaurant) => {
+  constructor(
+    private route: ActivatedRoute,
+    private tableService: TableService,
+    private restaurantService: RestaurantService,
+    private dialog: MatDialog,
+    private dialogService: DialogService,
+    private tableDialogService: TableDialogService
+  ) {}
+
+ ngOnInit() {
+  const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
+  if (!slug) return;
+
+  this.sub = this.restaurantService
+    .getRestaurantBySlug(slug)
+    .subscribe((restaurant) => {
       if (!restaurant) return;
 
       this.restaurant = restaurant;
-      this.restaurantId = restaurant.restaurantId!;
-      this.loadTables();
-    });
-    });
-  }
-  openQr(table: any) {
-    const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
+      this.restaurantId = restaurant.restaurantId; // ✔️ ASIGNAR RESTAURANT ID
 
-    this.dialog.open(TableQrDialogComponent, {
-      data: {
-        table,
-        url,
-        logoUrl: 'assets/img/logo-palex.png',
-      },
+      this.loadTables(); // ✔️ recién ahora es seguro llamar
     });
+}
+
+
+  ngOnDestroy(): void {
+    if (this.sub) this.sub.unsubscribe();
   }
 
-  /** Cargar mesas del restaurante */
+    /** Cargar mesas del restaurante */
   loadTables() {
     if (!this.restaurantId) return;
 
@@ -70,6 +70,11 @@ export class RestaurantTablesComponent implements OnInit {
         this.loading = false;
       });
   }
+
+  
+  // --------------------------------------------------
+  // ACCIONES
+  // --------------------------------------------------
 
   openCreateTable() {
     if (!this.restaurant) return;
@@ -101,46 +106,50 @@ export class RestaurantTablesComponent implements OnInit {
       });
   }
 
-openEditTable(table: Table) {
-  if (!this.restaurant) return;
+  openEditTable(table: Table) {
+    if (!this.restaurant) return;
 
-  const restaurant = this.restaurant; // ← tipo Restaurant GARANTIZADO
+    const restaurant = this.restaurant; // ← tipo Restaurant GARANTIZADO
 
-  this.tableDialogService
-    .openTableDialog({ mode: 'edit', data: table })
-    .subscribe(async (result) => {
-      if (!result) {
-        this.dialogService.infoDialog(
-          'Cancelado',
-          'No se realizó la acción.'
-        );
-        return;
-      }
+    this.tableDialogService
+      .openTableDialog({ mode: 'edit', data: table })
+      .subscribe(async (result) => {
+        if (!result) {
+          this.dialogService.infoDialog(
+            'Cancelado',
+            'No se realizó la acción.'
+          );
+          return;
+        }
 
-      const { restaurantId } = restaurant;
-      const { restaurantId: _ignore, ...cleanData } = result;
+        const { restaurantId } = restaurant;
+        const { restaurantId: _ignore, ...cleanData } = result;
 
-      try {
-        // Intentar actualizar (la validación en TableService puede lanzar)
-        await this.tableService.updateTable(
-          restaurantId,
-          table.tableId!,
-          cleanData
-        );
+        try {
+          // Intentar actualizar (la validación en TableService puede lanzar)
+          await this.tableService.updateTable(
+            restaurantId,
+            table.tableId!,
+            cleanData
+          );
 
-        // Si llegamos acá, todo salió bien
-        this.dialogService.infoDialog('Éxito', 'Mesa actualizada correctamente.');
-        this.loadTables();
-      } catch (error: any) {
-        // Mostrar dialog con el mensaje del error (si existe)
-        this.dialogService.errorDialog(
-          'Error',
-          error?.message || 'Ocurrió un error inesperado al actualizar la mesa.'
-        );
-        // opcional: volver a abrir el diálogo para corregir (no obligatorio)
-      }
-    });
-}
+          // Si llegamos acá, todo salió bien
+          this.dialogService.infoDialog(
+            'Éxito',
+            'Mesa actualizada correctamente.'
+          );
+          this.loadTables();
+        } catch (error: any) {
+          // Mostrar dialog con el mensaje del error (si existe)
+          this.dialogService.errorDialog(
+            'Error',
+            error?.message ||
+              'Ocurrió un error inesperado al actualizar la mesa.'
+          );
+          // opcional: volver a abrir el diálogo para corregir (no obligatorio)
+        }
+      });
+  }
 
   deleteTable(table: Table) {
     if (!table.tableId || !this.restaurant) return;
@@ -181,13 +190,31 @@ openEditTable(table: Table) {
       });
   }
 
-  /** Cambiar estado */
-  async changeStatus(
-    table: Table,
-    newStatus: 'available' | 'occupied' | 'reserved'
-  ) {
-    await this.tableService.updateTable(this.restaurantId, table.tableId, {
-      status: newStatus,
+  changeStatus(table: Table, status: 'available' | 'occupied' | 'reserved') {
+    this.tableService.updateTable(this.restaurantId, table.tableId!, {
+      status,
     });
+  }
+
+  openQr(table: Table) {
+    const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
+
+    this.dialog.open(TableQrDialogComponent, {
+      data: {
+        table,
+        url,
+        logoUrl: 'assets/img/logo-palex.png',
+      },
+    });
+  }
+
+  // ============================================================
+  // 🔵 Ver Pedido
+  // ============================================================
+
+  viewOrder(orderId: string | null) {
+    if (!orderId) return;
+    console.log('Ver pedido', orderId);
+    // abrir diálogo o navegar al pedido
   }
 }

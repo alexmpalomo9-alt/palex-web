@@ -1,0 +1,35 @@
+<div *ngIf="loading">Cargando...</div>
+
+<div *ngIf="!loading && !table">
+  <h2>No se encontró la mesa</h2>
+</div>
+
+<div *ngIf="!loading && table">
+
+  <!-- Si no existe pedido -->
+  <div *ngIf="!order">
+    <h2>Bienvenido a {{ table.name || ('Mesa ' + table.number) }}</h2>
+
+    <h3>Menú</h3>
+    <div *ngFor="let item of menuItems">
+      <p>{{ item.name }} - ${{ item.price }}</p>
+      <button (click)="addItem(item)">Agregar</button>
+    </div>
+  </div>
+
+  <!-- Pedido existente -->
+  <div *ngIf="order">
+    <h2>Tu pedido</h2>
+
+    <div *ngFor="let it of order.items">
+      {{ it.quantity }}x {{ it.productName }} — {{ it.subtotal }}
+    </div>
+
+    <h3>Total: {{ order.total }}</h3>
+
+    <button (click)="confirmOrder()" [disabled]="order.status !== 'pending'">
+      Confirmar pedido
+    </button>
+  </div>
+
+</div>
