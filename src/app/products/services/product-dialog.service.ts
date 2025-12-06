@@ -13,6 +13,7 @@ export class ProductDialogService {
   constructor(private dialog: MatDialog) {}
   openProductDialog(options: {
     mode: DialogMode;
+    restaurantId: string; 
     data?: Product;
   }): Observable<Product> {
     const dialogRef = this.dialog.open(ProductDialogComponent, {

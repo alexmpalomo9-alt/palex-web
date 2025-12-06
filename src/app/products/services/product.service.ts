@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   docData,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -84,6 +85,20 @@ export class ProductService {
 
     return collectionData(q, { idField: 'productId' }) as Observable<Product[]>;
   }
+
+getProductsByCategory(restaurantId: string, categoryId: string) {
+  return collectionData(
+    query(
+      collection(this.firestore, 'products'),
+      where('restaurantId', '==', restaurantId),
+      where('categoryId', '==', categoryId),
+      where('available', '==', true),
+      orderBy('name', 'asc')
+    ),
+    { idField: 'productId' }
+  );
+}
+
 
   /* =====================================================
    * CREATE

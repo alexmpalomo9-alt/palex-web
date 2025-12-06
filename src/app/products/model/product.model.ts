@@ -6,18 +6,12 @@ export interface Product {
   available: boolean;
   description?: string;
   imageUrl?: string;
-  category?: string;
   isOffer?: boolean;
   offerPrice?: number;
 
   categoryId: string;
+  categoryName?: string; // opcional, para mostrar sin pedir FS
   createdAt?: string;
   updatedAt?: string;
 }
 
-export const PRODUCT_CATEGORIES = [
-  'Entradas',
-  'Platos Principales',
-  'Bebidas',
-  'Postres',
-];

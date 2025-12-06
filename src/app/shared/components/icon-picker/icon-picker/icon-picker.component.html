@@ -1,0 +1,15 @@
+<div class="icon-picker">
+  <button mat-button (click)="clear()" *ngIf="value">Quitar</button>
+
+  <div class="icons-grid">
+    <button
+      mat-button
+      *ngFor="let i of icons"
+      (click)="select(i)"
+      [class.selected]="i === value"
+      [disabled]="disabled"
+    >
+      <mat-icon>{{ i }}</mat-icon>
+    </button>
+  </div>
+</div>

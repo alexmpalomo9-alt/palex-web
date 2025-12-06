@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { MaterialModule } from './material/material.module';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BooleanToTextPipe } from './pipes/boolean-to-text.pipe';
 import { UnionNombreApellidoPipe } from './pipes/union-nombre-apellido.pipe';
 import { SizeTittleDirective } from './directives/size-tittle.directive';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   imports: [
@@ -14,6 +15,8 @@ import { SizeTittleDirective } from './directives/size-tittle.directive';
     BooleanToTextPipe,
     UnionNombreApellidoPipe,
     SizeTittleDirective,
+    FormsModule,
+    DragDropModule
   ],
   exports: [
     MaterialModule,
@@ -21,6 +24,8 @@ import { SizeTittleDirective } from './directives/size-tittle.directive';
     BooleanToTextPipe,
     UnionNombreApellidoPipe,
     SizeTittleDirective,
+    FormsModule,
+    DragDropModule,
   ],
 })
 export class SharedModule {}

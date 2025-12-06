@@ -1,39 +1,35 @@
-<h2 mat-dialog-title>
-  {{ isAddMode ? "Agregar ítem al pedido" : "Seleccionar productos" }}
-</h2>
+<h2 mat-dialog-title>Menú</h2>
 
-<mat-dialog-content>
-  <!-- Lista de productos -->
-  <div class="products">
-    <div class="product" *ngFor="let p of products" (click)="selectProduct(p)">
-      <h3>{{ p.name }}</h3>
-      <p>$ {{ p.price }}</p>
-    </div>
-  </div>
+<div class="filters">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Buscar producto...</mat-label>
+    <input matInput [formControl]="searchControl">
+  </mat-form-field>
 
-  <!-- Carrito solo para modo NUEVO PEDIDO -->
-  <div *ngIf="!isAddMode && cart.length > 0" class="cart">
-    <h3>Carrito</h3>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Categoría</mat-label>
+    <mat-select [formControl]="categoryControl">
+      <mat-option value="all">Todas</mat-option>
+      <mat-option *ngFor="let c of categories" [value]="c">
+        {{ c }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
 
-    <div class="cart-item" *ngFor="let c of cart; let i = index">
-      <span>{{ c.name }} x{{ c.quantity }}</span>
-      <strong>$ {{ c.price * c.quantity }}</strong>
-      <button mat-icon-button color="warn" (click)="removeItem(i)">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </div>
-  </div>
-</mat-dialog-content>
+<div class="product-list">
+  <mat-card *ngFor="let product of filteredProducts" class="product-card" (click)="addToOrder(product)">
+    <mat-card-title>{{ product.name }}</mat-card-title>
+    <mat-card-subtitle>${{ product.price }}</mat-card-subtitle>
 
-<!-- Footer SOLO para modo crear pedido -->
-<mat-dialog-actions *ngIf="!isAddMode" align="end">
-  <button mat-button (click)="cancel()">Cancelar</button>
-  <button
-    mat-flat-button
-    color="primary"
-    (click)="confirm()"
-    [disabled]="cart.length === 0"
-  >
-    Confirmar pedido
-  </button>
-</mat-dialog-actions>
+    <img *ngIf="product.imageUrl" [src]="product.imageUrl" alt="" class="product-image">
+
+    <mat-card-content>
+      <p>{{ product.description }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Cerrar</button>
+</div>

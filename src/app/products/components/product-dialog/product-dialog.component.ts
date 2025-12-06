@@ -1,6 +1,6 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Product, PRODUCT_CATEGORIES } from '../../model/product.model';
+import { Product } from '../../model/product.model';
 import {
   FormBuilder,
   FormGroup,
@@ -10,6 +10,8 @@ import {
 } from '@angular/forms';
 import { SharedModule } from '../../../shared/shared.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CategoryService } from '../../../features/restaurant/categories/services/category.service';
+import { Category } from '../../../features/restaurant/categories/model/category.model';
 
 export type ProductDialogMode = 'create' | 'edit';
 
@@ -20,10 +22,12 @@ export type ProductDialogMode = 'create' | 'edit';
   templateUrl: './product-dialog.component.html',
   styleUrls: ['./product-dialog.component.css'],
 })
-export class ProductDialogComponent {
+export class ProductDialogComponent implements OnInit {
+  
   mode: ProductDialogMode;
   editForm: FormGroup;
-  categories: string[] = PRODUCT_CATEGORIES;
+  categories: Category[] = [];
+
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: {
@@ -32,7 +36,8 @@ export class ProductDialogComponent {
       restaurantId: string;
     },
     private dialogRef: MatDialogRef<ProductDialogComponent>,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private categoryService: CategoryService
   ) {
     this.mode = data.mode;
 
@@ -42,7 +47,7 @@ export class ProductDialogComponent {
       available: true,
       description: '',
       imageUrl: '',
-      category: '',
+      categoryId: '',
       isOffer: false,
       offerPrice: null,
     };
@@ -50,7 +55,7 @@ export class ProductDialogComponent {
     this.editForm = this.fb.group(
       {
         name: [p.name, [Validators.required, Validators.minLength(2)]],
-        category: [p.category, Validators.required],
+        categoryId: [p.categoryId, Validators.required], 
         price: [p.price, [Validators.required, Validators.min(0)]],
         isOffer: [p.isOffer],
         offerPrice: [p.offerPrice, [Validators.min(0)]],
@@ -58,13 +63,20 @@ export class ProductDialogComponent {
         available: [p.available],
         imageUrl: [p.imageUrl],
       },
-      {
-        validators: [this.offerValidator],
-      }
+      { validators: [this.offerValidator] }
     );
   }
 
-  /** VALIDACIÓN PERSONALIZADA DEL FORMULARIO */
+  ngOnInit(): void {
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.categoryService
+      .getCategories(this.data.restaurantId)
+      .subscribe((cats) => (this.categories = cats));
+  }
+
   offerValidator(form: AbstractControl): ValidationErrors | null {
     const isOffer = form.get('isOffer')?.value;
     const price = form.get('price')?.value;
@@ -72,13 +84,9 @@ export class ProductDialogComponent {
 
     if (!isOffer) return null;
 
-    if (offerPrice == null || offerPrice === '') {
-      return { offerRequired: true };
-    }
+    if (!offerPrice) return { offerRequired: true };
 
-    if (offerPrice >= price) {
-      return { invalidOffer: true };
-    }
+    if (offerPrice >= price) return { invalidOffer: true };
 
     return null;
   }
@@ -93,12 +101,18 @@ export class ProductDialogComponent {
       formValue.name.trim().charAt(0).toUpperCase() +
       formValue.name.trim().slice(1);
 
+    const selectedCategory = this.categories.find(
+      (c) => c.categoryId === formValue.categoryId
+    );
+
     const finalProduct: Product = {
       ...(this.data.data ?? {}),
       ...formValue,
       name: cleanedName,
       offerPrice: formValue.isOffer ? formValue.offerPrice : null,
-      restaurantId: this.data.restaurantId, // 🔥 obligatorio para create
+      restaurantId: this.data.restaurantId,
+      categoryId: formValue.categoryId,
+      categoryName: selectedCategory?.name ?? null, // denormalización opcional
     };
 
     this.dialogRef.close(finalProduct);

@@ -47,7 +47,7 @@ export class ProductListComponent implements AfterViewInit {
       { id: 'price', label: 'Precio Regular' },
       { id: 'isOffer', label: 'Oferta', template: this.tplOffer },
       { id: 'offerPrice', label: 'Precio Oferta' },
-      { id: 'category', label: 'Categoría' },
+      { id: 'categoryName', label: 'Categoría' },
       { id: 'available', label: 'Disponible', template: this.tplAvailable },
     ];
 

@@ -1,0 +1,6 @@
+.icon-picker { 
+  .icons-grid { 
+    display:flex; flex-wrap:wrap; gap:8px;
+  }
+  button.selected { background: rgba(0,0,0,0.08);}
+}
