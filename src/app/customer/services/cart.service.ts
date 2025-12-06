@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map } from 'rxjs';
-import { Cart, CartItem } from '../model/cart.model';
 import { Product } from '../../products/model/product.model';
+import { Cart, CartItem } from '../components/cart/model/cart.model';
 
 const STORAGE_KEY = 'palex_cart_v1';
 

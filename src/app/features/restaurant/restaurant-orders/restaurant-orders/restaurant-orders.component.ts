@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-restaurant-orders',
   imports: [SharedModule, FormsModule],
   templateUrl: './restaurant-orders.component.html',
-  styleUrl: './restaurant-orders.component.scss'
+  styleUrl: './restaurant-orders.component.scss',
 })
 export class RestaurantOrdersComponent {
   @Input() restaurant: Restaurant | null = null;
@@ -23,7 +23,7 @@ export class RestaurantOrdersComponent {
 
   selectedItem: OrderItem = {
     productId: '',
-    productName: '',
+    name: '',
     quantity: 1,
     price: 0,
     subtotal: 0,
@@ -51,7 +51,7 @@ export class RestaurantOrdersComponent {
   // ------------------------------------------------------------
   async onCreateOrGetOrder() {
     if (!this.restaurant) {
-      alert("Restaurante no cargado");
+      alert('Restaurante no cargado');
       return;
     }
 
@@ -82,15 +82,18 @@ export class RestaurantOrdersComponent {
     }
 
     if (!this.restaurant) {
-      alert("Restaurante no cargado");
+      alert('Restaurante no cargado');
       return;
     }
 
     try {
       await this.ordersService.addItemWithStatusCheck(
-        this.restaurant.restaurantId, 
+        this.restaurant.restaurantId,
         this.currentOrderId,
-        this.selectedItem
+        {
+          ...this.selectedItem,
+          subtotal: this.selectedItem.price * this.selectedItem.quantity,
+        }
       );
 
       alert('Item agregado');

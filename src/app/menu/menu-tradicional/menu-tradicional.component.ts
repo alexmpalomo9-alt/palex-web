@@ -1,7 +1,4 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { Observable } from "rxjs";
 import { Restaurant } from "../../features/restaurant/model/restaurant.model";
@@ -11,13 +8,10 @@ import { SharedModule } from "../../shared/shared.module";
 @Component({
   selector: 'app-menu-traditional',
   standalone: true,
-  templateUrl: './menu-tradicional.component.html', // revisa que coincida con el archivo
+  templateUrl: './menu-tradicional.component.html',
   styleUrls: ['./menu-tradicional.component.scss'],
   imports: [
-    CommonModule,
     SharedModule,
-    MatButtonModule,
-    MatIconModule,
     MatExpansionModule
   ]
 })

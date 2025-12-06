@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>
+  Pedido Mesa {{ tableNumber }}
+</h2>
+
+<mat-dialog-content class="dialog-content">
+
+  <ng-container *ngIf="order$ | async as order">
+
+    <p><strong>Estado:</strong> {{ order.status }}</p>
+    <p><strong>ID:</strong> {{ order.orderId }}</p>
+
+    <h3>Items</h3>
+
+    <div class="item" *ngFor="let i of items$ | async">
+      <span>{{ i.name }} x{{ i.quantity }}</span>
+      <strong>$ {{ i.price * i.quantity }}</strong>
+    </div>
+
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+
+  <button mat-stroked-button color="primary" (click)="addItem()">
+    Agregar Ítem
+  </button>
+
+  <button mat-stroked-button color="warn" (click)="cancelOrder()">
+    Cancelar Pedido
+  </button>
+
+  <button mat-flat-button color="primary" (click)="closeOrder()">
+    Cerrar Pedido
+  </button>
+
+  <button mat-button (click)="exit()">
+    Salir
+  </button>
+
+</mat-dialog-actions>

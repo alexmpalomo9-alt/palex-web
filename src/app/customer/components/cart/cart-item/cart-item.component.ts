@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CartItem } from '../../../model/cart.model';
 import { SharedModule } from '../../../../shared/shared.module';
 import { trigger, style, animate, transition } from '@angular/animations';
+import { CartItem } from '../model/cart.model';
 
 @Component({
   selector: 'app-cart-item',

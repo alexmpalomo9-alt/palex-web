@@ -28,7 +28,7 @@ export interface OrderStatusChange {
 }
 export interface OrderItem {
   productId: string;
-  productName: string;
+  name: string;
   price: number;
   quantity: number;
   subtotal: number;

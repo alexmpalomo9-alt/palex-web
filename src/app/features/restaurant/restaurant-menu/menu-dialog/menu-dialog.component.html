@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>
+  {{ isAddMode ? "Agregar ítem al pedido" : "Seleccionar productos" }}
+</h2>
+
+<mat-dialog-content>
+  <!-- Lista de productos -->
+  <div class="products">
+    <div class="product" *ngFor="let p of products" (click)="selectProduct(p)">
+      <h3>{{ p.name }}</h3>
+      <p>$ {{ p.price }}</p>
+    </div>
+  </div>
+
+  <!-- Carrito solo para modo NUEVO PEDIDO -->
+  <div *ngIf="!isAddMode && cart.length > 0" class="cart">
+    <h3>Carrito</h3>
+
+    <div class="cart-item" *ngFor="let c of cart; let i = index">
+      <span>{{ c.name }} x{{ c.quantity }}</span>
+      <strong>$ {{ c.price * c.quantity }}</strong>
+      <button mat-icon-button color="warn" (click)="removeItem(i)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<!-- Footer SOLO para modo crear pedido -->
+<mat-dialog-actions *ngIf="!isAddMode" align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="confirm()"
+    [disabled]="cart.length === 0"
+  >
+    Confirmar pedido
+  </button>
+</mat-dialog-actions>

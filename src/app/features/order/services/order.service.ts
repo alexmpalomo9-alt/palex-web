@@ -13,7 +13,8 @@ import {
   getDocs,
   DocumentReference,
   CollectionReference,
-  getDoc
+  getDoc,
+  docData
 } from '@angular/fire/firestore';
 
 import { Observable } from 'rxjs';
@@ -238,28 +239,93 @@ const q = query(
   return await this.createOrder(restaurantId, tableId, tableNumber);
 }
 
-async addItemWithStatusCheck(
-  restaurantId: string,
-  orderId: string,
-  item: OrderItem
-) {
+async addItemWithStatusCheck(restaurantId: string, orderId: string, item: OrderItem) {
+
+  const orderItemsRef = collection(
+    this.firestore,
+    `restaurants/${restaurantId}/orders/${orderId}/items`
+  );
+
+  // 1. Buscar si ya existe un item igual
+  const q = query(orderItemsRef, where('productId', '==', item.productId));
+  const snap = await getDocs(q);
+
+  if (!snap.empty) {
+    // Ya existe → lo actualizamos
+    const docRef = snap.docs[0].ref;
+    const existing = snap.docs[0].data() as OrderItem;
+
+    const newQty = existing.quantity + item.quantity;
+    const newSubtotal = existing.price * newQty;
+
+    await updateDoc(docRef, {
+      quantity: newQty,
+      subtotal: newSubtotal,
+      updatedAt: serverTimestamp()
+    });
+
+  } else {
+    // No existe → crear uno nuevo
+    await addDoc(orderItemsRef, {
+      ...item,
+      subtotal: item.price * item.quantity,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  // 2. Recalcular total del pedido
+  await this.updateOrderTotal(restaurantId, orderId);
+}
+
+// --------------------------------------------------------------------------
+// Recalcular el total del pedido sumando los subtotales de items
+// --------------------------------------------------------------------------
+async updateOrderTotal(restaurantId: string, orderId: string) {
+
+  const itemsRef = collection(
+    this.firestore,
+    `restaurants/${restaurantId}/orders/${orderId}/items`
+  );
+
+  // 1. Traer todos los items del pedido
+  const snap = await getDocs(itemsRef);
+
+  let total = 0;
+
+  snap.forEach((d) => {
+    const it = d.data() as OrderItem;
+    total += it.subtotal ?? (it.price * it.quantity);
+  });
+
+  // 2. Actualizar el total del pedido
   const orderRef = doc(
     this.firestore,
     `restaurants/${restaurantId}/orders/${orderId}`
   );
 
-  const snap = await getDoc(orderRef);
-  const order = snap.data() as Order;
-
-  if (!order) throw new Error('Pedido no existe');
-
-  // estados NO permitidos
-  if (['closed', 'cancelled'].includes(order.status)) {
-    throw new Error('No se pueden agregar items a un pedido cerrado o cancelado');
-  }
-
-  // si está delivered, ready, approved, etc. → permitido
-  return this.addItem(restaurantId, orderId, item);
+  await updateDoc(orderRef, {
+    total,
+    updatedAt: serverTimestamp()
+  });
 }
+
+getOrder(restaurantId: string, orderId: string): Observable<Order | null> {
+  const orderRef = doc(
+    this.firestore,
+    `restaurants/${restaurantId}/orders/${orderId}`
+  );
+  return docData(orderRef, { idField: 'orderId' }) as Observable<Order | null>;
+}
+
+getOrderItems(restaurantId: string, orderId: string): Observable<OrderItem[]> {
+  const itemsRef = collection(
+    this.firestore,
+    `restaurants/${restaurantId}/orders/${orderId}/items`
+  );
+  const q = query(itemsRef);
+  return collectionData(q, { idField: 'itemId' }) as Observable<OrderItem[]>;
+}
+
 
 }

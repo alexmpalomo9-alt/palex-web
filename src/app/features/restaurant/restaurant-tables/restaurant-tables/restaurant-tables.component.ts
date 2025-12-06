@@ -11,6 +11,7 @@ import { TableQrDialogComponent } from '../../../../shared/components/qr-preview
 import { DialogService } from '../../../../core/services/dialog.service';
 import { TableDialogService } from '../services/table-dialog/table-dialog.service';
 import { SharedModule } from '../../../../shared/shared.module';
+import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order-dialog.component';
 
 @Component({
   selector: 'app-restaurant-tables',
@@ -36,28 +37,27 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
     private tableDialogService: TableDialogService
   ) {}
 
- ngOnInit() {
-  const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
-  if (!slug) return;
+  ngOnInit() {
+    const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
+    if (!slug) return;
 
-  this.sub = this.restaurantService
-    .getRestaurantBySlug(slug)
-    .subscribe((restaurant) => {
-      if (!restaurant) return;
+    this.sub = this.restaurantService
+      .getRestaurantBySlug(slug)
+      .subscribe((restaurant) => {
+        if (!restaurant) return;
 
-      this.restaurant = restaurant;
-      this.restaurantId = restaurant.restaurantId; // ✔️ ASIGNAR RESTAURANT ID
+        this.restaurant = restaurant;
+        this.restaurantId = restaurant.restaurantId; // ✔️ ASIGNAR RESTAURANT ID
 
-      this.loadTables(); // ✔️ recién ahora es seguro llamar
-    });
-}
-
+        this.loadTables(); // ✔️ recién ahora es seguro llamar
+      });
+  }
 
   ngOnDestroy(): void {
     if (this.sub) this.sub.unsubscribe();
   }
 
-    /** Cargar mesas del restaurante */
+  /** Cargar mesas del restaurante */
   loadTables() {
     if (!this.restaurantId) return;
 
@@ -71,7 +71,6 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
       });
   }
 
-  
   // --------------------------------------------------
   // ACCIONES
   // --------------------------------------------------
@@ -212,9 +211,15 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   // 🔵 Ver Pedido
   // ============================================================
 
-  viewOrder(orderId: string | null) {
+  viewOrder(orderId: string | null, table: any) {
     if (!orderId) return;
-    console.log('Ver pedido', orderId);
-    // abrir diálogo o navegar al pedido
+
+    this.dialog.open(OrderDialogComponent, {
+      width: '600px',
+      data: {
+        restaurantId: this.restaurantId,
+        orderId: orderId,
+      },
+    });
   }
 }

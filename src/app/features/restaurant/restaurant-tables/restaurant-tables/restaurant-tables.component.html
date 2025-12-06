@@ -75,9 +75,9 @@
           </button>
 
           <!-- Botón Ver Pedido -->
-          <button mat-icon-button color="primary" (click)="viewOrder(t.currentOrderId)" *ngIf="t.currentOrderId">
-            <mat-icon>receipt_long</mat-icon>
-          </button>
+        <button mat-icon-button color="primary" (click)="viewOrder(t.currentOrderId, t)">
+          <mat-icon>receipt_long</mat-icon>
+        </button>
         </td>
       </ng-container>
 

@@ -20,7 +20,7 @@ export class OrderTestComponentComponent {
 
   selectedItem: OrderItem = {
     productId: '',
-    productName: '',
+    name: '',
     quantity: 1,
     price: 0,
     subtotal: 0

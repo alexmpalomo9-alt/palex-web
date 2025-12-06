@@ -1,0 +1,31 @@
+.products {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.product {
+  width: 160px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f4f4f4;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.product:hover {
+  background: #e0e0e0;
+}
+
+.cart {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}

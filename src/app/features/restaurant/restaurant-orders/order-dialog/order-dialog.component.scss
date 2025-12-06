@@ -1,0 +1,36 @@
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 80px;
+  padding: 6px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.total {
+  margin-top: 10px;
+  text-align: right;
+  font-size: 18px;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 5px;
+  &.open { background: #e3f2fd; color: #1976d2; }
+  &.in-progress { background: #fff8e1; color: #f9a825; }
+  &.closed { background: #e8f5e9; color: #388e3c; }
+}
+.dialog-content {
+  min-width: 380px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+}
