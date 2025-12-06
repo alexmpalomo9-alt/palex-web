@@ -1,0 +1,75 @@
+<div class="tables-container">
+  <!-- HEADER -->
+  <div class="tables-header sticky-header">
+    <h2>Mesas del Restaurante</h2>
+  </div>
+
+  <!-- LOADING -->
+  <mat-progress-bar
+    *ngIf="loading"
+    mode="indeterminate"
+    class="loading-bar"
+  ></mat-progress-bar>
+
+  <!-- TARJETAS -->
+  <div class="cards-wrapper" *ngIf="tables.length > 0">
+    <div
+      class="table-card"
+      *ngFor="let t of tables"
+      [ngClass]="{ 'active-order': t.currentOrderId }"
+    >
+      <!-- Número y Nombre -->
+      <div class="card-header">
+        <h3>Mesa {{ t.number }}</h3>
+        <span>{{ t.name || "-" }}</span>
+      </div>
+
+      <!-- Detalles -->
+      <div class="card-details">
+        <p><strong>Capacidad:</strong> {{ t.capacity }}</p>
+        <p><strong>Sector:</strong> {{ t.sector }}</p>
+        <span
+          class="status-pill"
+          [ngClass]="t.currentOrderId ? 'active' : t.status"
+        >
+          {{ t.currentOrderId ? "Pedido Activo" : (t.status | titlecase) }}
+        </span>
+      </div>
+
+      <!-- Acciones -->
+      <div class="card-actions">
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>swap_horiz</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="changeStatus(t, 'available')">
+            Disponible
+          </button>
+          <button mat-menu-item (click)="changeStatus(t, 'occupied')">
+            Ocupada
+          </button>
+          <button mat-menu-item (click)="changeStatus(t, 'reserved')">
+            Reservada
+          </button>
+        </mat-menu>
+
+        <button mat-icon-button color="accent" (click)="openQr(t)">
+          <mat-icon>qr_code</mat-icon>
+        </button>
+<button
+  mat-flat-button
+  color="primary"
+  (click)="viewOrder(t.currentOrderId ?? null, t)"
+>
+  <mat-icon>receipt_long</mat-icon>
+  {{ t.currentOrderId ? 'Ver / Editar Pedido' : 'Crear Pedido' }}
+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && tables.length === 0" class="empty-state">
+    <p>No hay mesas registradas.</p>
+  </div>
+</div>

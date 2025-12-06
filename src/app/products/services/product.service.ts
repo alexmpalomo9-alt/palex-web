@@ -87,16 +87,19 @@ export class ProductService {
   }
 
 getProductsByCategory(restaurantId: string, categoryId: string) {
-  return collectionData(
-    query(
-      collection(this.firestore, 'products'),
-      where('restaurantId', '==', restaurantId),
-      where('categoryId', '==', categoryId),
-      where('available', '==', true),
-      orderBy('name', 'asc')
-    ),
-    { idField: 'productId' }
+  const ref = collection(
+    this.firestore,
+    `restaurants/${restaurantId}/products`
   );
+
+  const q = query(
+    ref,
+    where('categoryId', '==', categoryId),
+    where('available', '==', true),
+    orderBy('name', 'asc')
+  );
+
+  return collectionData(q, { idField: 'productId' });
 }
 
 

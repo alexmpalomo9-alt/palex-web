@@ -1,0 +1,137 @@
+.tables-container {
+  padding: 24px;
+  background: #f7f9fc;
+  min-height: 100vh;
+}
+
+.tables-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h2 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #1f2937;
+  }
+}
+
+.cards-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.table-card {
+  background: linear-gradient(145deg, #ffffff, #f0f4f8);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  &.active-order {
+    border: 2px solid #3b82f6; // azul moderno
+    background: #e0f2fe; // azul muy suave
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+  }
+
+  .card-details {
+    margin: 16px 0;
+
+    p {
+      margin: 6px 0;
+      font-size: 0.95rem;
+      color: #374151;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      transition: all 0.3s;
+
+      &.available {
+        background: #d1fae5;
+        color: #10b981;
+      }
+      &.occupied {
+        background: #fee2e2;
+        color: #ef4444;
+      }
+      &.reserved {
+        background: #fef3c7;
+        color: #f59e0b;
+      }
+      &.active {
+        background: #dbeafe;
+        color: #3b82f6;
+        animation: pulseStatus 1.5s infinite;
+      }
+    }
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    button {
+      font-size: 0.85rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+    }
+  }
+}
+
+@keyframes pulseStatus {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.85; }
+}
+
+.empty-state {
+  text-align: center;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 1rem;
+  margin-top: 40px;
+}
+
+mat-progress-bar.loading-bar {
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}

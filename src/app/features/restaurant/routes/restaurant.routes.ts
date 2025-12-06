@@ -7,8 +7,8 @@ import { RestaurantStatsComponent } from '../restaurant-stats/restaurant-stats/r
 import { RestaurantTablesComponent } from '../restaurant-tables/restaurant-tables/restaurant-tables.component';
 import { RestaurantShellComponent } from '../restaurant-shell/restaurant-shell/restaurant-shell.component';
 import { RestaurantProductsComponent } from '../restaurant-products/restaurant-products/restaurant-products.component';
+import { RestaurantTablesCardComponent } from '../restaurant-tables/restaurant-tables-card/restaurant-tables-card.component';
 // import { RestaurantKitchenComponent } from '../restaurant-kitchen/restaurant-kitchen/restaurant-kitchen.component';
-import { RestaurantWaiterComponent } from '../restaurant-waiter/restaurant-waiter/restaurant-waiter.component';
 
 export const RESTAURANT_ROUTES: Routes = [
   // Listado de restaurantes
@@ -32,7 +32,7 @@ export const RESTAURANT_ROUTES: Routes = [
       { path: 'orders', component: RestaurantOrdersComponent },
       { path: 'stats', component: RestaurantStatsComponent },
       // { path: 'kitchen', component: RestaurantKitchenComponent },
-      { path: 'waiter', component: RestaurantWaiterComponent },
+      { path: 'waiter', component: RestaurantTablesCardComponent },
     ],
   },
 

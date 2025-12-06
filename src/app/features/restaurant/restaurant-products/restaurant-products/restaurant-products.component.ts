@@ -32,7 +32,6 @@ export class RestaurantProductsComponent implements OnInit {
     private productService: ProductService,
     private productDialogService: ProductDialogService,
     private dialogService: DialogService,
-    private categoryService: CategoryService,
     private router: Router
   ) {}
 
@@ -98,7 +97,7 @@ editProduct(product: Product) {
     .openProductDialog({
       mode: 'edit',
       restaurantId: this.restaurant.restaurantId,
-      data: product   // 👈 ¡Faltaba esto!
+      data: product   
     })
     .subscribe(async (result) => {
       if (!result) {

@@ -1,106 +1,55 @@
 <div class="menu-flyer" *ngIf="restaurant as r">
   <!-- TÍTULO -->
   <h1 class="menu-title">
-    <span class="menu-label">{{ r.name }}</span
-    ><br />
+    <span class="menu-label">{{ r.name }}</span><br />
     <span class="menu-description">{{ r.description }}</span>
   </h1>
 
   <!-- OFERTAS -->
   <div class="category-section" *ngIf="offerProducts$ | async as offerProducts">
     <h2 class="category-title">🔥 Ofertas</h2>
-
     <ul class="product-list">
       <li *ngFor="let product of offerProducts" class="product-item">
         <div class="product-info">
           <span class="product-name">{{ product.name }}</span>
           <span class="product-description">{{ product.description }}</span>
         </div>
-
         <div class="product-actions">
-          <span class="old-price">{{ product.price | currency }}</span>
-          <span class="offer-price">{{ product.offerPrice | currency }}</span>
-
+          <span class="old-price" *ngIf="product.isOffer">{{ product.price | currency }}</span>
+          <span class="offer-price" *ngIf="product.isOffer">{{ product.offerPrice | currency }}</span>
+          <span class="product-price" *ngIf="!product.isOffer">{{ product.price | currency }}</span>
           <div class="action-buttons">
-            <button
-              mat-button
-              color="accent"
-              *ngIf="product.imageUrl"
-              (click)="onOpenImage(product.imageUrl)"
-            >
-              Ver imagen
-            </button>
-
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="onAddProduct(product)"
-            >
-              Añadir 🛒
-            </button>
+            <button mat-button color="accent" *ngIf="product.imageUrl" (click)="onOpenImage(product.imageUrl)">Ver imagen</button>
+            <button mat-raised-button color="primary" (click)="onAddProduct(product)">Añadir 🛒</button>
           </div>
         </div>
       </li>
-
-      <li *ngIf="offerProducts.length === 0" class="empty-message">
-        No hay ofertas disponibles.
-      </li>
+      <li *ngIf="offerProducts.length === 0" class="empty-message">No hay ofertas disponibles.</li>
     </ul>
   </div>
 
   <!-- CATEGORÍAS -->
   <div *ngFor="let category of categories" class="category-section">
     <h2 class="category-title">{{ category.label }}</h2>
-
     <ul class="product-list">
-      <li
-        *ngFor="let product of category.products$ | async"
-        class="product-item"
-      >
+      <li *ngFor="let product of category.products$ | async" class="product-item">
         <div class="product-info">
           <span class="product-name">{{ product.name }}</span>
           <span class="product-description">{{ product.description }}</span>
         </div>
-
         <div class="product-actions">
-          <!-- PRECIO -->
-          <span class="product-price" *ngIf="!product.isOffer">
-            {{ product.price | currency }}
-          </span>
-
+          <span class="product-price" *ngIf="!product.isOffer">{{ product.price | currency }}</span>
           <ng-container *ngIf="product.isOffer">
             <span class="old-price">{{ product.price | currency }}</span>
             <span class="offer-price">{{ product.offerPrice | currency }}</span>
           </ng-container>
-
-          <!-- ACCIONES -->
           <div class="action-buttons">
-            <button
-              mat-button
-              color="accent"
-              *ngIf="product.imageUrl"
-              (click)="onOpenImage(product.imageUrl)"
-            >
-              Ver imagen
-            </button>
-
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="onAddProduct(product)"
-            >
-              Añadir 🛒
-            </button>
+            <button mat-button color="accent" *ngIf="product.imageUrl" (click)="onOpenImage(product.imageUrl)">Ver imagen</button>
+            <button mat-raised-button color="primary" (click)="onAddProduct(product)">Añadir 🛒</button>
           </div>
         </div>
       </li>
-
-      <li
-        *ngIf="(category.products$ | async)?.length === 0"
-        class="empty-message"
-      >
-        No hay productos disponibles.
-      </li>
+      <li *ngIf="(category.products$ | async)?.length === 0" class="empty-message">No hay productos disponibles.</li>
     </ul>
   </div>
 </div>

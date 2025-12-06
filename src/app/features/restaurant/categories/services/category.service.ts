@@ -24,10 +24,6 @@ export class CategoryService {
     return collection(this.firestore, `restaurants/${restaurantId}/categories`);
   }
 
-  private productsCollectionRef(restaurantId: string) {
-    return collection(this.firestore, `restaurants/${restaurantId}/products`);
-  }
-
   // ------------------------------------------------------------
   // Listado
   // ------------------------------------------------------------

@@ -1,28 +1,78 @@
-<h2 mat-dialog-title>
-  Pedido Mesa {{ tableNumber }}
+<h2 mat-dialog-title class="dialog-title">
+  Pedido Mesa {{ number }}
+  <button mat-icon-button class="close-dialog" (click)="exit()">
+    <mat-icon>close</mat-icon>
+  </button>
 </h2>
 
 <mat-dialog-content class="dialog-content">
-
-  <ng-container *ngIf="order$ | async as order">
-
-    <p><strong>Estado:</strong> {{ order.status }}</p>
-    <p><strong>ID:</strong> {{ order.orderId }}</p>
-
-    <h3>Items</h3>
-
-    <div class="item" *ngFor="let i of items$ | async">
-      <span>{{ i.name }} x{{ i.quantity }}</span>
-      <strong>$ {{ i.price * i.quantity }}</strong>
+  <!-- Header -->
+  <div class="order-header mat-elevation-z2" *ngIf="order$ | async as order">
+    <div class="info">
+      <span class="label">Estado:</span>
+      <span class="value status" [ngClass]="order.status">
+        {{ order.status }} 
+      </span>
     </div>
 
-  </ng-container>
+    <div class="info">
+      <span class="label">ID:</span>
+      <span class="value">{{ order.orderId }}</span>
+    </div>
+  </div>
 
+  <h3 class="section-title centered">Items del Pedido</h3>
+
+  <!-- DRAG & DROP LIST -->
+  <div class="items-grid" cdkDropList (cdkDropListDropped)="drop($event)">
+    <div
+      class="item-card mat-elevation-z1"
+      *ngFor="let i of itemsArray; let idx = index"
+      cdkDrag
+    >
+      <!-- Drag Handle -->
+      <div class="drag-handle" cdkDragHandle>
+        <mat-icon>drag_indicator</mat-icon>
+      </div>
+
+      <div class="left">
+        <div class="name">{{ i.name }}</div>
+        <div class="qty">x{{ i.quantity }}</div>
+      </div>
+
+      <div class="right">
+        <div class="price">$ {{ i.subtotal }}</div>
+
+        <!-- Delete button (perfectamente alineado a la derecha) -->
+        <button
+          mat-icon-button
+          color="warn"
+          class="delete-btn"
+          (click)="removeItem(i)"
+          aria-label="Eliminar ítem"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Total -->
+    <div class="total-card mat-elevation-z2">
+      <div><strong>Total</strong></div>
+      <div>
+        <strong>$ {{ total }}</strong>
+      </div>
+    </div>
+  </div>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-
-  <button mat-stroked-button color="primary" (click)="addItem()">
+<mat-dialog-actions class="action-bar">
+  <button
+    mat-stroked-button
+    color="primary"
+    class="add-btn"
+    (click)="addItem()"
+  >
     Agregar Ítem
   </button>
 
@@ -33,9 +83,4 @@
   <button mat-flat-button color="primary" (click)="closeOrder()">
     Cerrar Pedido
   </button>
-
-  <button mat-button (click)="exit()">
-    Salir
-  </button>
-
 </mat-dialog-actions>

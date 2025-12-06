@@ -223,3 +223,98 @@ Mozo → PedidoService → Firestore
 
 Cocina → PedidoService (solo lectura de algunos)
 Caja → PedidoService
+
+
+Flujo de Pedidos por Mesa
+1️⃣ Usuario hace click en una mesa
+Mesa seleccionada
+   │
+   ├─> ¿Mesa tiene pedido activo? (currentOrderId o getActiveOrderByTable)
+   │       │
+   │       ├─ Sí → Abrir OrderDialog (isNew = false)
+   │       │       - Mostrar items existentes
+   │       │       - Estado actual del pedido
+   │       │
+   │       └─ No → Crear pedido nuevo
+   │               │
+   │               ├─ Llamar OrdersService.createOrder()
+   │               └─ Abrir OrderDialog (isNew = true)
+
+2️⃣ OrderDialogComponent (Diálogo de Pedido)
+
+Inputs: restaurantId, tableId, orderId, isNew, tableNumber
+
+Renderizado según isNew y contenido:
+
+isNew && itemsArray vacío
+    → Mostrar mensaje: "Mesa libre, agregá ítems para iniciar el pedido"
+    
+itemsArray tiene elementos
+    → Mostrar lista de ítems con subtotal y total
+
+
+Acciones disponibles:
+
+Agregar ítem → abre MenuDialogComponent → usa addItemWithStatusCheck
+
+Eliminar ítem → confirmación → removeItem + recalcular total
+
+Cerrar pedido → closeOrder → actualiza estado + libera mesa + agrega historial
+
+Cancelar pedido → updateOrderStatus('cancelled') + closeOrder → historial
+
+3️⃣ Agregar ítem al pedido
+Usuario selecciona producto
+    │
+    ├─> Producto ya existe en items del pedido?
+    │       │
+    │       ├─ Sí → actualizar cantidad y subtotal (addItemWithStatusCheck)
+    │       └─ No → crear nuevo item en subcolección
+    │
+    └─> Recalcular total del pedido (updateOrderTotal)
+
+4️⃣ Cerrar pedido
+Usuario cierra pedido
+    │
+    ├─> runTransaction:
+    │       - order.status = 'closed'
+    │       - table.status = 'available'
+    │       - table.currentOrderId = null
+    │
+    └─> Agregar entry en /history
+
+5️⃣ Cancelar pedido
+Usuario cancela pedido
+    │
+    ├─> Confirmación
+    │
+    ├─> updateOrderStatus('cancelled')
+    │
+    ├─> closeOrder (liberar mesa)
+    │
+    └─> Agregar entry en /history
+
+6️⃣ Historial de cambios
+
+Cada cambio de estado (new, approved, preparing, ready, closed, cancelled) se guarda en la subcolección /orders/{orderId}/history.
+
+Permite trazabilidad completa del pedido.
+
+💡 Resumen visual rápido (tipo mini-diagrama ASCII):
+
+[Click Mesa]
+     │
+     ├─[Pedido Activo?]─Sí─> [Abrir OrderDialog editar]
+     │
+     └─No─> [createOrder] → [Abrir OrderDialog nuevo]
+
+[OrderDialog]
+     │
+     ├─ Agregar ítem → addItemWithStatusCheck → updateOrderTotal
+     ├─ Eliminar ítem → removeItem → updateOrderTotal
+     ├─ Cerrar pedido → closeOrder (liberar mesa)
+     └─ Cancelar pedido → updateOrderStatus('cancelled') + closeOrder
+
+[Historial]
+     │
+     └─ Cada cambio de estado se registra en /history

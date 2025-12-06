@@ -38,14 +38,14 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef> Estado </th>
         <td mat-cell *matCellDef="let t">
-          <span class="status-pill" [ngClass]="t.status">
-            {{ t.status | titlecase }}
+          <span class="status-pill" [ngClass]="t.currentOrderId ? 'active' : t.status">
+            {{ t.currentOrderId ? 'Pedido Activo' : (t.status | titlecase) }}
           </span>
         </td>
       </ng-container>
         
       <!-- Sector -->
-        <ng-container matColumnDef="sector">
+      <ng-container matColumnDef="sector">
         <th mat-header-cell *matHeaderCellDef> Sector </th>
         <td mat-cell *matCellDef="let t"> {{ t.sector }} </td>
       </ng-container>
@@ -75,15 +75,18 @@
           </button>
 
           <!-- Botón Ver Pedido -->
-        <button mat-icon-button color="primary" (click)="viewOrder(t.currentOrderId, t)">
-          <mat-icon>receipt_long</mat-icon>
-        </button>
+          <button mat-icon-button color="primary" (click)="viewOrder(t.currentOrderId, t)">
+            <mat-icon>receipt_long</mat-icon>
+            <mat-icon *ngIf="t.currentOrderId" class="active-order-icon">circle</mat-icon>
+          </button>
         </td>
       </ng-container>
 
       <!-- Filas -->
-      <tr mat-header-row *matHeaderRowDef="['number','name','capacity','status', 'sector', 'actions']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['number','name','capacity','status','sector','actions']"></tr>
+      <tr mat-header-row *matHeaderRowDef="['number','name','capacity','status','sector','actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['number','name','capacity','status','sector','actions']"
+          [ngClass]="{'active-order-row': row.currentOrderId}">
+      </tr>
 
     </table>
   </div>

@@ -21,4 +21,12 @@ export class MenuSelectorComponent {
 
   @Output() addProduct = new EventEmitter<Product>();
   @Output() openImage = new EventEmitter<string>();
+
+  onAddProduct(product: Product) {
+    this.addProduct.emit(product);
+  }
+
+  onOpenImage(imageUrl?: string) {
+    if (imageUrl) this.openImage.emit(imageUrl);
+  }
 }

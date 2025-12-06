@@ -1,52 +1,50 @@
-.menu-container {
-  padding: 15px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.product-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.product-card {
-  padding: 8px;
-  text-align: center;
-}
-
-.qty-panel {
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  background: #f1f1f1;
-}
-
-.qty-controls {
+.product-item {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 14px;
-  margin: 10px 0;
+  padding: 14px 12px;
+  border-bottom: 1px solid #e3e3e3;
+  cursor: pointer;
+  border-radius: 6px;
+  background: #fafafa;
+  transition: background .15s ease, transform .1s;
 }
 
-.qty-number {
-  font-size: 22px;
-  font-weight: bold;
-  width: 40px;
-  text-align: center;
+.ver-img-btn {
+  margin: 0 10px;
+  min-width: 110px;
+  height: 36px;
 }
 
-.qty-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+.product-item:hover {
+  background: #f0f0f0;
 }
 
-.cart-actions {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
+.product-item:active {
+  background: #e8e8e8;
+  transform: scale(.99);
+}
+
+/* resto igual */
+.product-list {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.info { display: flex; flex-direction: column; flex: 1; }
+.product-name { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+.product-desc { font-size: 13px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
+
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ca2f24;
+  min-width: 70px;
+  text-align: right;
+}
+.strike {
+  text-decoration: line-through;
+  color: gray;
+  margin-left: 5px;
 }

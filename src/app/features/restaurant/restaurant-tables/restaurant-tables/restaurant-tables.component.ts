@@ -32,6 +32,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private tableService: TableService,
     private restaurantService: RestaurantService,
+    private orderService: OrdersService,
     private dialog: MatDialog,
     private dialogService: DialogService,
     private tableDialogService: TableDialogService
@@ -211,14 +212,35 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   // 🔵 Ver Pedido
   // ============================================================
 
-  viewOrder(orderId: string | null, table: any) {
-    if (!orderId) return;
+  /** 🔵 Ver o crear pedido según estado de la mesa */
+  async viewOrder(orderId: string | null, table: Table) {
+    if (!this.restaurant) return;
 
+    let currentOrderId = orderId;
+    if (!orderId) {
+      // Mesa libre → crear nuevo pedido
+      try {
+        currentOrderId = await this.orderService.createOrder(
+          this.restaurant.restaurantId,
+          table.tableId!,
+          table.number
+        );
+      } catch (e: any) {
+        this.dialogService.errorDialog('Error al crear pedido', e.message || 'No se pudo iniciar el pedido.');
+        return;
+      }
+    }
+
+    // Abrir diálogo con pedido existente o recién creado
     this.dialog.open(OrderDialogComponent, {
       width: '600px',
+      disableClose: true,
       data: {
-        restaurantId: this.restaurantId,
-        orderId: orderId,
+        restaurantId: this.restaurant.restaurantId,
+        orderId: currentOrderId,
+        tableId: table.tableId,
+        number: table.number,
+        isNew: !orderId
       },
     });
   }

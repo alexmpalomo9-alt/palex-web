@@ -1,35 +1,50 @@
-<h2 mat-dialog-title>Menú</h2>
+<h2 mat-dialog-title class="menu-title">Menú</h2>
 
-<div class="filters">
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Buscar producto...</mat-label>
-    <input matInput [formControl]="searchControl">
-  </mat-form-field>
+<div class="container-fluid">
+  <!-- FILTROS -->
+  <div class="row g-2 filters-row">
+    <div class="col-12 col-md-7">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Buscar</mat-label>
+        <input matInput [formControl]="searchControl" />
+      </mat-form-field>
+    </div>
 
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Categoría</mat-label>
-    <mat-select [formControl]="categoryControl">
-      <mat-option value="all">Todas</mat-option>
-      <mat-option *ngFor="let c of categories" [value]="c">
-        {{ c }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-</div>
+    <div class="col-12 col-md-5">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Categoría</mat-label>
+        <mat-select [formControl]="categoryControl">
+          <mat-option value="all">Todas</mat-option>
+          <mat-option *ngFor="let c of categories" [value]="c">{{
+            c
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
 
-<div class="product-list">
-  <mat-card *ngFor="let product of filteredProducts" class="product-card" (click)="addToOrder(product)">
-    <mat-card-title>{{ product.name }}</mat-card-title>
-    <mat-card-subtitle>${{ product.price }}</mat-card-subtitle>
+  <!-- LISTA DE PRODUCTOS -->
+  <div class="product-list">
+    <div
+      class="product-item"
+      *ngFor="let product of filteredProducts"
+      (click)="addToOrder(product)"
+    >
+      <div class="info">
+        <strong class="product-name">{{ product.name }}</strong>
+        <small class="product-desc">{{ product.description }}</small>
+      </div>
 
-    <img *ngIf="product.imageUrl" [src]="product.imageUrl" alt="" class="product-image">
-
-    <mat-card-content>
-      <p>{{ product.description }}</p>
-    </mat-card-content>
-  </mat-card>
+      <div class="price">
+        <span *ngIf="product.isOffer" class="offer-price"
+          >${{ product.offerPrice }}</span
+        >
+        <span [class.strike]="product.isOffer">${{ product.price }}</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button (click)="close()">Cerrar</button>
+  <button mat-raised-button color="warn" (click)="close()">Cerrar</button>
 </div>

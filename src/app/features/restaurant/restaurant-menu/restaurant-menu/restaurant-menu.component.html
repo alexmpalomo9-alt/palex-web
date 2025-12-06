@@ -8,13 +8,13 @@
     <section class="menu-flyer" *ngIf="restaurant$ | async as restaurant">
       <!-- Botón Carrito -->
       <button
-        mat-raised-button
+        mat-fab
         color="primary"
         (click)="cartSidenav.toggle()"
         class="cart-button"
+        matTooltip="Ver carrito"
       >
-        🛒 Carrito
-
+        🛒
         <span
           *ngIf="cartQuantity$ | async as qty"
           class="cart-qty"

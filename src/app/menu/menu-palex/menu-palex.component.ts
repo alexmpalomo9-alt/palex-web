@@ -1,4 +1,12 @@
-import { Component, Input, Output, EventEmitter, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  CUSTOM_ELEMENTS_SCHEMA,
+  SimpleChanges,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import { Product } from '../../products/model/product.model';
 import { Restaurant } from '../../features/restaurant/model/restaurant.model';
@@ -24,14 +32,26 @@ export class MenuPalexComponent implements OnInit {
   selectedCategoryIndex = 0;
   currentProducts$!: Observable<Product[]>;
 
-  // Creamos un array que incluye "Ofertas" como primera categoría
-  allCategories!: { label: string; products$: Observable<Product[]> }[];
+  allCategories: { label: string; products$: Observable<Product[]> }[] = [];
 
   ngOnInit() {
+    this.updateCategories();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['categories'] || changes['offerProducts$']) {
+      this.updateCategories();
+    }
+  }
+
+  private updateCategories() {
+    if (!this.categories) return;
+
     this.allCategories = [
       { label: '🔥 Ofertas', products$: this.offerProducts$ },
-      ...this.categories
+      ...this.categories,
     ];
+
     this.loadCategoryProducts();
   }
 
@@ -41,7 +61,9 @@ export class MenuPalexComponent implements OnInit {
   }
 
   loadCategoryProducts() {
-    this.currentProducts$ = this.allCategories[this.selectedCategoryIndex].products$;
+    if (this.allCategories.length === 0) return;
+    this.currentProducts$ =
+      this.allCategories[this.selectedCategoryIndex].products$;
   }
 
   onAddProduct(product: Product) {

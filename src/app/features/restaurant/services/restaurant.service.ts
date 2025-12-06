@@ -75,26 +75,33 @@ export class RestaurantService {
   /* =========================================================
      CREATE
   ========================================================= */
-  async createRestaurant(data: Partial<Restaurant>): Promise<Restaurant> {
-    return runAsyncInInjectionContext(this.injector, async () => {
-      const slug = await this.generateUniqueSlug(data.name!);
-      const ref = await addDoc(collection(this.firestore, 'restaurants'), {
-        ...data,
-        slug,
-        enabled: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+async createRestaurant(data: Partial<Restaurant>): Promise<Restaurant> {
+  return runAsyncInInjectionContext(this.injector, async () => {
+    const slug = await this.generateUniqueSlug(data.name!);
 
-      return {
-        ...data,
-        restaurantId: ref.id,
-        slug,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as unknown as Restaurant;
+    // 1️⃣ Crear el restaurante
+    const ref = await addDoc(collection(this.firestore, 'restaurants'), {
+      ...data,
+      slug,
+      enabled: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
-  }
+
+    const restaurant = {
+      ...data,
+      restaurantId: ref.id,
+      slug,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as unknown as Restaurant;
+
+    // 2️⃣ Crear categorías por defecto
+    await this.createDefaultCategories(ref.id);
+
+    return restaurant;
+  });
+}
 
   /* =========================================================
      READ
@@ -161,4 +168,30 @@ getRestaurantBySlug(slug: string): Observable<Restaurant | null> {
       });
     });
   }
+
+  /* =========================================================
+     CATEGORIAS POR DEFECTO AL CREAR UN RESTAURANTE
+  ========================================================= */
+
+  async createDefaultCategories(restaurantId: string) {
+  const defaults = [
+    { name: "ENTRADAS", order: 1 },
+    { name: "PRINCIPAL", order: 2 },
+    { name: "BEBIDAS", order: 3 },
+    { name: "POSTRES", order: 4 },
+  ];
+
+  for (const c of defaults) {
+    await addDoc(
+      collection(this.firestore, `restaurants/${restaurantId}/categories`),
+      {
+        ...c,
+        restaurantId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }
+    );
+  }
+}
+
 }
