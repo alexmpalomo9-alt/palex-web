@@ -56,14 +56,14 @@
         <button mat-icon-button color="accent" (click)="openQr(t)">
           <mat-icon>qr_code</mat-icon>
         </button>
-<button
-  mat-flat-button
-  color="primary"
-  (click)="viewOrder(t.currentOrderId ?? null, t)"
->
-  <mat-icon>receipt_long</mat-icon>
-  {{ t.currentOrderId ? 'Ver / Editar Pedido' : 'Crear Pedido' }}
-</button>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="viewOrder(t.currentOrderId ?? null, t)"
+        >
+          <mat-icon>receipt_long</mat-icon>
+          {{ t.currentOrderId ? "Ver / Editar Pedido" : "Crear Pedido" }}
+        </button>
       </div>
     </div>
   </div>

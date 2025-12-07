@@ -1,129 +1,233 @@
-.dialog-title {
-  font-size: 22px;
-  font-weight: 600;
-  padding-bottom: 5px;
-  border-bottom: 1px solid #eee;
-}
-
-.close-dialog {
-  position: absolute;
-  right: 0;
-  top: 10px;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-}
-
-.close-dialog:hover {
-  opacity: 1;
-}
-
-.dialog-content {
-  padding: 20px 5px;
-}
-
-.order-header {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 12px 15px;
-  margin-bottom: 20px;
+/* Header con flex para alinear título y botón */
+.order-dialog-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  button.mat-raised-button {
+    height: 36px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  }
 }
 
-.section-title.centered {
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.items-grid {
+/* Ajuste del contenido para que no haya scroll extra debajo del header */
+.order-dialog-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1rem;
+  max-height: calc(90vh - 140px); /* header + footer */
+  overflow-y: auto;
 }
 
-.item-card {
-  background: white;
-  padding: 12px 15px;
-  border-radius: 8px;
+/* Loader, tabla, mobile items y total siguen igual */
 
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  cursor: grab;
+/* Contenedor del diálogo */
+.mat-dialog-container {
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+  padding: 24px;
+  max-width: 90vw;
+  max-height: 95vh;
+  overflow: hidden;
 }
 
-.left {
-  flex: 1; /* ocupa todo lo que puede → empuja el delete al final */
-}
-
-.right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.delete-btn {
-  color: #d32f2f;
-  opacity: 0.7;
-  transition: 0.15s ease;
-}
-
-.delete-btn:hover {
-  opacity: 1;
-}
-
-.drag-handle {
-  cursor: grab;
-  display: flex;
-  align-items: center;
-  color: #9e9e9e;
-}
-
-.drag-handle:hover {
-  color: #616161;
-}
-
-.drag-handle:active {
-  cursor: grabbing;
-}
-
-.item-card:active {
-  cursor: grabbing;
-}
-
-.item-card .name {
-  font-weight: 600;
-}
-
-.item-card .qty {
-  opacity: 0.7;
-}
-
-.price {
+/* Header */
+h2.mat-dialog-title {
+  font-size: 1.6rem;
   font-weight: 700;
-  color: #2e7d32;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.total-card {
-  margin-top: 15px;
-  background: #f8f8f8;
-  border-radius: 10px;
-  padding: 14px 18px;
+/* Contenido del pedido */
+.order-dialog-content {
   display: flex;
-  justify-content: space-between;
-  font-size: 18px;
-  border-left: 4px solid #4caf50;
+  flex-direction: column;
+  gap: 1rem;
+
+  max-height: calc(90vh - 140px); /* restando header y footer */
+  overflow-y: auto;
+
+  mat-form-field.full-width {
+    width: 100%;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+
+    mat-progress-spinner {
+      width: 60px;
+      height: 60px;
+    }
+  }
+
+  /* Tabla desktop */
+  table.full-width {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+      text-align: left;
+      padding: 0.6rem;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      padding: 0.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    input[type='number'], input[type='text'] textarea {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 0.4rem;
+      width: 60px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      
+    }
+.mobile-item-card textarea {
+  min-height: 50px; // Más espacio para escribir
 }
 
-.action-bar {
+    input[type='number']:focus,
+    input[type='text']:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+      outline: none;
+    }
+  }
+
+  /* Botón agregar producto */
+  .add-item-container {
+    margin-top: 1rem;
+    text-align: right;
+
+    button.mat-raised-button {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: all 0.2s ease;
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+    }
+  }
+
+  /* Total del pedido */
+  .order-total {
+    text-align: right;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+  }
+}
+
+/* Mobile styling */
+@media (max-width: 768px) {
+  .desktop-table {
+    display: none;
+  }
+
+  .mobile-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .mobile-item-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+
+      input[type='number'] {
+        width: 60px;
+      }
+
+      input[type='text'] {
+        width: 100%;
+      }
+    }
+  }
+
+  .add-item-container {
+    text-align: center;
+  }
+
+  .order-total {
+    text-align: right;
+  }
+}
+
+/* Acciones del diálogo */
+mat-dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 0.5rem;
+
+  button {
+    min-width: 120px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  }
 }
 
-.add-btn {
-  margin-right: auto;
+@media (max-width: 480px) {
+  mat-dialog-actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
 }

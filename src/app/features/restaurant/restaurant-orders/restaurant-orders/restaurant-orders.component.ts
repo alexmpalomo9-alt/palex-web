@@ -9,9 +9,10 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-restaurant-orders',
+  standalone: true,
   imports: [SharedModule, FormsModule],
   templateUrl: './restaurant-orders.component.html',
-  styleUrl: './restaurant-orders.component.scss',
+  styleUrls: ['./restaurant-orders.component.scss'],
 })
 export class RestaurantOrdersComponent {
   @Input() restaurant: Restaurant | null = null;
@@ -20,11 +21,12 @@ export class RestaurantOrdersComponent {
   tableNumber = 1;
 
   currentOrderId: string | null = null;
+  items: OrderItem[] = [];
 
-  selectedItem: OrderItem = {
+  selectedItem: Partial<OrderItem> = {
     productId: '',
     name: '',
-    quantity: 1,
+    qty: 1,
     price: 0,
     subtotal: 0,
   };
@@ -41,13 +43,12 @@ export class RestaurantOrdersComponent {
 
     this.restaurantService.getRestaurantBySlug(slug).subscribe((restaurant) => {
       if (!restaurant) return;
-
       this.restaurant = restaurant;
     });
   }
 
   // ------------------------------------------------------------
-  // Crear pedido o recuperar pedido activo
+  // Crear pedido borrador simple
   // ------------------------------------------------------------
   async onCreateOrGetOrder() {
     if (!this.restaurant) {
@@ -56,16 +57,20 @@ export class RestaurantOrdersComponent {
     }
 
     try {
-      const orderId = await this.ordersService.createOrGetActiveOrder(
+      const orderId = await this.ordersService.createOrder(
         this.restaurant.restaurantId,
-        this.tableId,
-        this.tableNumber
+        {
+          tableId: this.tableId,
+          tableNumber: this.tableNumber,
+          createdBy: 'mozo-demo',
+        }
       );
 
       this.currentOrderId = orderId;
+      this.items = [];
 
-      console.log('Pedido activo:', orderId);
-      alert('Pedido activo: ' + orderId);
+      console.log('Borrador creado:', orderId);
+      alert('Borrador creado: ' + orderId);
     } catch (err) {
       console.error('Error creando pedido:', err);
       alert('Error: ' + (err as any).message);
@@ -73,7 +78,7 @@ export class RestaurantOrdersComponent {
   }
 
   // ------------------------------------------------------------
-  // Agregar ítem al pedido
+  // Agregar item al pedido
   // ------------------------------------------------------------
   async onAddItem() {
     if (!this.currentOrderId) {
@@ -87,20 +92,40 @@ export class RestaurantOrdersComponent {
     }
 
     try {
-      await this.ordersService.addItemWithStatusCheck(
+      const newItem: OrderItem = {
+        productId: this.selectedItem.productId!,
+        name: this.selectedItem.name!,
+        price: this.selectedItem.price!,
+        qty: this.selectedItem.qty!,
+        subtotal: this.selectedItem.price! * this.selectedItem.qty!,
+        position: this.items.length,
+        notes: this.selectedItem.notes ?? '',
+      };
+
+      this.items.push(newItem);
+
+      // Actualiza todo el pedido con los items
+      await this.ordersService.updateOrder(
         this.restaurant.restaurantId,
         this.currentOrderId,
-        {
-          ...this.selectedItem,
-          subtotal: this.selectedItem.price * this.selectedItem.quantity,
-        }
+        this.items,
+        '', // notas generales opcionales
+        'mozo-demo'
       );
 
       alert('Item agregado');
-      console.log('Item agregado:', this.selectedItem);
+      console.log('Item agregado:', newItem);
+
+      // Limpiar form
+      this.selectedItem = { productId: '', name: '', qty: 1, price: 0, subtotal: 0 };
     } catch (err) {
       console.error('Error agregando item:', err);
       alert('Error: ' + (err as any).message);
     }
+  }
+
+  // Total dinámico
+  getTotal() {
+    return this.items.reduce((acc, i) => acc + i.price * i.qty, 0);
   }
 }

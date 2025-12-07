@@ -2,13 +2,12 @@ import { Routes } from '@angular/router';
 import { HomePageComponent } from './customer/components/home-page/home-page.component';
 import { InviteGuard } from './core/guards/invite.guard';
 import { AuthGuard } from './core/guards/auth.guard';
-import { OrderTestComponentComponent } from './features/test/order-test-component/order-test-component.component';
 
 export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () =>
-      import('./auth/routes/auth.routes').then(m => m.AUTH_ROUTES),
+      import('./auth/routes/auth.routes').then((m) => m.AUTH_ROUTES),
   },
 
   // {
@@ -27,30 +26,29 @@ export const routes: Routes = [
       ),
   },
 
-
   {
     path: 'cart',
     loadComponent: () =>
-      import('./customer/components/cart/cart/cart.component')
-        .then(c => c.CartComponent),
+      import('./customer/components/cart/cart/cart.component').then(
+        (c) => c.CartComponent
+      ),
   },
 
   {
     path: 'users',
-    canActivate: [AuthGuard],                 // 🔐 Solo usuarios logueados
+    canActivate: [AuthGuard], // 🔐 Solo usuarios logueados
     loadChildren: () =>
-      import('./users/routes/user.routes').then(m => m.USER_ROUTES),
+      import('./users/routes/user.routes').then((m) => m.USER_ROUTES),
   },
 
-  // { path: '', component: HomePageComponent },
-   { path: '', component: OrderTestComponentComponent },
+  { path: '', component: HomePageComponent },
 
-  
   {
     path: 'invite/:token',
-    canActivate: [InviteGuard],               // 🎟 Token válido requerido
+    canActivate: [InviteGuard], // 🎟 Token válido requerido
     loadComponent: () =>
-      import('./features/invitations/pages/invite-page/invite-page.component')
-        .then(m => m.InvitePageComponent),
+      import(
+        './features/invitations/pages/invite-page/invite-page.component'
+      ).then((m) => m.InvitePageComponent),
   },
 ];

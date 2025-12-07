@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { OrdersService } from '../../../order/services/order.service';
@@ -12,6 +12,7 @@ import { DialogService } from '../../../../core/services/dialog.service';
 import { TableDialogService } from '../services/table-dialog/table-dialog.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order-dialog.component';
+import { AuthService } from '../../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-restaurant-tables',
@@ -20,7 +21,7 @@ import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order
   imports: [SharedModule],
 })
 export class RestaurantTablesComponent implements OnInit, OnDestroy {
-  restaurantId!: string; // viene del auth o del contexto
+  restaurantId!: string;
   @Input() restaurant: Restaurant | null = null;
 
   tables: Table[] = [];
@@ -35,7 +36,8 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
     private orderService: OrdersService,
     private dialog: MatDialog,
     private dialogService: DialogService,
-    private tableDialogService: TableDialogService
+    private tableDialogService: TableDialogService,
+    private auth: AuthService
   ) {}
 
   ngOnInit() {
@@ -146,7 +148,6 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
             error?.message ||
               'Ocurrió un error inesperado al actualizar la mesa.'
           );
-          // opcional: volver a abrir el diálogo para corregir (no obligatorio)
         }
       });
   }
@@ -209,38 +210,23 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   }
 
   // ============================================================
-  // 🔵 Ver Pedido
+  // 🔵 Ver Pedido (CORREGIDO: nueva firma createOrder)
   // ============================================================
-
-  /** 🔵 Ver o crear pedido según estado de la mesa */
   async viewOrder(orderId: string | null, table: Table) {
     if (!this.restaurant) return;
 
     let currentOrderId = orderId;
-    if (!orderId) {
-      // Mesa libre → crear nuevo pedido
-      try {
-        currentOrderId = await this.orderService.createOrder(
-          this.restaurant.restaurantId,
-          table.tableId!,
-          table.number
-        );
-      } catch (e: any) {
-        this.dialogService.errorDialog('Error al crear pedido', e.message || 'No se pudo iniciar el pedido.');
-        return;
-      }
-    }
 
-    // Abrir diálogo con pedido existente o recién creado
+    // Abrir diálogo con pedido existente o nuevo en memoria
     this.dialog.open(OrderDialogComponent, {
       width: '600px',
       disableClose: true,
       data: {
         restaurantId: this.restaurant.restaurantId,
-        orderId: currentOrderId,
+        orderId: currentOrderId, // null si es nuevo
         tableId: table.tableId,
         number: table.number,
-        isNew: !orderId
+        isNew: !orderId, // diálogo manejará el borrador en memoria
       },
     });
   }

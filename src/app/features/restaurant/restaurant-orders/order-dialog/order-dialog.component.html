@@ -1,86 +1,143 @@
-<h2 mat-dialog-title class="dialog-title">
-  Pedido Mesa {{ number }}
-  <button mat-icon-button class="close-dialog" (click)="exit()">
-    <mat-icon>close</mat-icon>
-  </button>
-</h2>
-
-<mat-dialog-content class="dialog-content">
-  <!-- Header -->
-  <div class="order-header mat-elevation-z2" *ngIf="order$ | async as order">
-    <div class="info">
-      <span class="label">Estado:</span>
-      <span class="value status" [ngClass]="order.status">
-        {{ order.status }} 
-      </span>
-    </div>
-
-    <div class="info">
-      <span class="label">ID:</span>
-      <span class="value">{{ order.orderId }}</span>
-    </div>
+<mat-dialog-content class="order-dialog-content">
+  <!-- Header con título y botón -->
+  <div class="order-dialog-header">
+    <h2>Pedido Mesa #{{ tableNumber }}</h2>
+    <button mat-raised-button color="primary" (click)="addItemDialog()">
+      Agregar producto
+    </button>
   </div>
 
-  <h3 class="section-title centered">Items del Pedido</h3>
+  <!-- Loader -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
 
-  <!-- DRAG & DROP LIST -->
-  <div class="items-grid" cdkDropList (cdkDropListDropped)="drop($event)">
-    <div
-      class="item-card mat-elevation-z1"
-      *ngFor="let i of itemsArray; let idx = index"
-      cdkDrag
+  <ng-container *ngIf="!loading">
+    <!-- Tabla para desktop -->
+    <table
+      mat-table
+      [dataSource]="items"
+      class="full-width desktop-table"
+      *ngIf="!isMobile"
     >
-      <!-- Drag Handle -->
-      <div class="drag-handle" cdkDragHandle>
-        <mat-icon>drag_indicator</mat-icon>
-      </div>
+      <!-- Producto -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Producto</th>
+        <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+      </ng-container>
 
-      <div class="left">
-        <div class="name">{{ i.name }}</div>
-        <div class="qty">x{{ i.quantity }}</div>
-      </div>
+      <!-- Cantidad -->
+      <ng-container matColumnDef="qty">
+        <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+        <td mat-cell *matCellDef="let item">
+          <input type="number" min="1" [(ngModel)]="item.qty" />
+        </td>
+      </ng-container>
 
-      <div class="right">
-        <div class="price">$ {{ i.subtotal }}</div>
+      <!-- Precio -->
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Precio</th>
+        <td mat-cell *matCellDef="let item">{{ item.price | currency }}</td>
+      </ng-container>
 
-        <!-- Delete button (perfectamente alineado a la derecha) -->
-        <button
-          mat-icon-button
-          color="warn"
-          class="delete-btn"
-          (click)="removeItem(i)"
-          aria-label="Eliminar ítem"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
+      <!-- Subtotal -->
+      <ng-container matColumnDef="subtotal">
+        <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+        <td mat-cell *matCellDef="let item">
+          {{ item.price * item.qty | currency }}
+        </td>
+      </ng-container>
+
+      <!-- Notas -->
+      <ng-container matColumnDef="notes">
+        <th mat-header-cell *matHeaderCellDef>Notas</th>
+        <td mat-cell *matCellDef="let item">
+          <input type="text" [(ngModel)]="item.notes" placeholder="Opcional" />
+        </td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let item; let i = index">
+          <button mat-icon-button color="warn" (click)="removeItem(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr
+        mat-header-row
+        *matHeaderRowDef="[ 'name', 'qty', 'price', 'subtotal', 'notes', 'actions' ]"
+      ></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: ['name', 'qty', 'price', 'subtotal', 'notes', 'actions']"
+      ></tr>
+    </table>
+
+    <!-- Cards para mobile -->
+    <div *ngIf="isMobile" class="mobile-items">
+      <div *ngFor="let item of items; let i = index" class="mobile-item-card">
+        <div class="card-header">
+          <strong>{{ item.name }}</strong>
+          <button mat-icon-button color="warn" (click)="removeItem(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <div>Cantidad: <input type="number" min="1" [(ngModel)]="item.qty" /></div>
+        <div>Precio: {{ item.price | currency }}</div>
+        <div>Subtotal: {{ item.price * item.qty | currency }}</div>
+        <div>
+          Notas:
+          <input type="text" [(ngModel)]="item.notes" placeholder="Opcional" />
+        </div>
       </div>
     </div>
+
+    <!-- Notas generales del pedido -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas del pedido</mat-label>
+      <textarea matInput [(ngModel)]="notes" rows="3"></textarea>
+    </mat-form-field>
 
     <!-- Total -->
-    <div class="total-card mat-elevation-z2">
-      <div><strong>Total</strong></div>
-      <div>
-        <strong>$ {{ total }}</strong>
-      </div>
+    <div class="order-total">
+      <strong>Total: </strong> {{ getTotal() | currency }}
     </div>
-  </div>
+  </ng-container>
 </mat-dialog-content>
 
-<mat-dialog-actions class="action-bar">
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+
+  <!-- Botón Crear pedido -->
   <button
-    mat-stroked-button
-    color="primary"
-    class="add-btn"
-    (click)="addItem()"
+    mat-raised-button
+    color="accent"
+    *ngIf="!isEditMode && status !== 'closed'"
+    (click)="createOrder()"
   >
-    Agregar Ítem
+    Crear pedido
   </button>
 
-  <button mat-stroked-button color="warn" (click)="cancelOrder()">
-    Cancelar Pedido
+  <!-- Botón Actualizar pedido -->
+  <button
+    mat-raised-button
+    color="accent"
+    *ngIf="isEditMode && status !== 'closed'"
+    (click)="updateOrder()"
+  >
+    Actualizar pedido
   </button>
 
-  <button mat-flat-button color="primary" (click)="closeOrder()">
-    Cerrar Pedido
+  <!-- Botón Cerrar pedido -->
+  <button
+    mat-raised-button
+    color="primary"
+    *ngIf="status !== 'closed' && (status === 'approved' || status === 'preparing')"
+    (click)="closeOrder()"
+  >
+    Cerrar pedido
   </button>
 </mat-dialog-actions>

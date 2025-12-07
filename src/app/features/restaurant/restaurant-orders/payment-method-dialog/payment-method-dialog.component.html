@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Cerrar pedido</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="fill">
+    <mat-label>Método de pago</mat-label>
+    <mat-select [(ngModel)]="payment.method">
+      <mat-option value="cash">Efectivo</mat-option>
+      <mat-option value="qr">QR / Transferencia</mat-option>
+      <mat-option value="mp_pos">Mercado Pago POS</mat-option>
+      <mat-option value="credit_card">Tarjeta Crédito</mat-option>
+      <mat-option value="debit_card">Tarjeta Débito</mat-option>
+      <mat-option value="house_account">Cuenta Corriente</mat-option>
+      <mat-option value="other">Otro</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" *ngIf="payment.method === 'other'">
+    <mat-label>Detalle</mat-label>
+    <input matInput [(ngModel)]="payment.detail">
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-button color="primary" (click)="confirm()">Confirmar</button>
+</mat-dialog-actions>

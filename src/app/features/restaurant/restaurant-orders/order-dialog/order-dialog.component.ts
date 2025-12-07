@@ -1,14 +1,18 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { SharedModule } from '../../../../shared/shared.module';
-import { Order, OrderItem } from '../../../order/models/order.model';
+import { Component, HostListener, Inject, OnInit } from '@angular/core';
+import {
+  MatDialog,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { OrdersService } from '../../../order/services/order.service';
+import { DialogService } from '../../../../core/services/dialog.service';
+import { PaymentMethodDialogComponent } from '../payment-method-dialog/payment-method-dialog.component';
+import { SharedModule } from '../../../../shared/shared.module';
+import { OrderItem, OrderStatus } from '../../../order/models/order.model';
 import { MenuDialogComponent } from '../../restaurant-menu/menu-dialog/menu-dialog.component';
 import { Product } from '../../../../products/model/product.model';
-import { DialogService } from '../../../../core/services/dialog.service';
+import { AuthService } from '../../../../auth/services/auth.service';
+import { TableService } from '../../restaurant-tables/services/table.service';
 
 @Component({
   selector: 'app-order-dialog',
@@ -18,103 +22,254 @@ import { DialogService } from '../../../../core/services/dialog.service';
   styleUrls: ['./order-dialog.component.scss'],
 })
 export class OrderDialogComponent implements OnInit {
-  restaurantId!: string;
-  orderId!: string;
-  tableId!: string;
-  number!: number;
-  isNew!: boolean;
+  // Datos del pedido
+  orderId: string | null = null; // Pedido existente en Firestore
+  createdOrderId: string | null = null; // Pedido recién confirmado
+  status: OrderStatus = 'draft';
+  isEditMode: boolean = false; // true = actualizar, false = crear
 
-  order$!: Observable<Order | null>;
-  itemsArray: OrderItem[] = [];
-  private _items$ = new BehaviorSubject<OrderItem[]>([]);
-  items$ = this._items$.asObservable();
-  total: number = 0;
+  // Items en memoria
+  items: OrderItem[] = [];
+  notes = '';
+  loading = false;
+
+  // Info de la mesa/restaurante
+  restaurantId = '';
+  tableId = '';
+  tableNumber = 0;
 
   constructor(
-    private ordersService: OrdersService,
     private dialog: MatDialog,
     private dialogRef: MatDialogRef<OrderDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private ordersService: OrdersService,
     private dialogService: DialogService,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+    private tableService: TableService,
+    private auth: AuthService,
+  ) {
+    this.restaurantId = data.restaurantId;
+    this.tableId = data.tableId;
+    this.tableNumber = data.tableNumber;
+    this.orderId = data.orderId ?? null;
+  }
 
-  ngOnInit() {
-    this.restaurantId = this.data.restaurantId;
-    this.orderId = this.data.orderId;
-    this.tableId = this.data.tableId;
-    this.number = this.data.number;
-    this.isNew = this.data.isNew;
-
+  ngOnInit(): void {
     if (this.orderId) {
-      this.order$ = this.ordersService.getOrder(this.restaurantId, this.orderId);
-      this.ordersService.getOrderItems(this.restaurantId, this.orderId)
-        .pipe(map(items => items.map(item => ({ ...item, subtotal: item.price * item.quantity }))))
-        .subscribe(arr => {
-          this.itemsArray = arr;
-          this._items$.next(arr);
-          this.updateTotal();
-        });
+      this.loadOrder();
+    } else {
+      this.isEditMode = false;
+      this.status = 'draft';
     }
   }
 
-  drop(event: CdkDragDrop<OrderItem[]>) {
-    moveItemInArray(this.itemsArray, event.previousIndex, event.currentIndex);
-    this._items$.next([...this.itemsArray]);
-    this.updateTotal();
+  // =====================================
+  // Cargar pedido existente
+  // =====================================
+  private async loadOrder() {
+    try {
+      this.loading = true;
+      const order = await this.ordersService.getOrderWithItems(
+        this.restaurantId,
+        this.orderId!
+      );
+
+      this.items = (order.items || []).map((i: any) => ({
+        itemId: i.itemId,
+        productId: i.productId,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        subtotal: i.subtotal ?? i.price * i.qty,
+        position: i.position,
+        notes: i.notes ?? '',
+        createdAt: i.createdAt,
+        updatedAt: i.updatedAt,
+      }));
+
+      this.notes = order.notes || '';
+      this.status = order.status;
+      this.isEditMode = this.status !== 'draft';
+    } catch (e: any) {
+      this.dialogService.errorDialog('Error', e.message);
+      this.dialogRef.close();
+    } finally {
+      this.loading = false;
+    }
   }
 
-  updateTotal() {
-    this.total = this.itemsArray.reduce((acc, item) => acc + item.subtotal, 0);
-  }
+  // =====================================
+  // Agregar item en memoria usando diálogo
+  // =====================================
+  addItemDialog() {
+    const dialogRef = this.dialog.open(MenuDialogComponent, {
+      width: '600px',
+      data: { restaurantId: this.restaurantId },
+    });
 
-  addItem() {
-    const dRef = this.dialog.open(MenuDialogComponent, { width: '600px', data: { restaurantId: this.restaurantId } });
-    dRef.afterClosed().subscribe(async (product: Product | null) => {
+    dialogRef.afterClosed().subscribe((product) => {
       if (!product) return;
 
-      const price = product.isOffer ? product.offerPrice ?? product.price : product.price;
-      const item: OrderItem = { productId: product.productId, name: product.name, quantity: 1, price, subtotal: price, categoryId: product.categoryId, description: product.description, imageUrl: product.imageUrl };
+      const newItem: OrderItem = {
+        productId: product.productId,
+        name: product.name,
+        price: this.getProductPrice(product),
+        qty: 1,
+        position: this.items.length,
+        subtotal: this.getProductPrice(product),
+        notes: '',
+      };
 
-      try { await this.ordersService.addItemWithStatusCheck(this.restaurantId, this.orderId, item); }
-      catch (e: any) { this.dialogService.errorDialog('Error', e.message || 'No se pudo agregar el ítem.'); }
+      this.items.push(newItem);
     });
   }
 
-  async removeItem(item: OrderItem) {
-    this.dialogService.confirmDialog({ title: 'Eliminar ítem', message: `¿Desea eliminar "${item.name}" del pedido?` })
-      .subscribe(async (confirmed) => {
-        if (!confirmed) return;
-        try { await this.ordersService.removeItem(this.restaurantId, this.orderId, item.productId); }
-        catch (e: any) { this.dialogService.errorDialog('Error', e.message || 'No se pudo eliminar el ítem.'); }
-      });
+  getProductPrice(product: Product): number {
+    return product.isOffer
+      ? product.offerPrice ?? product.price
+      : product.price;
   }
 
-  async closeOrder() {
+  // =====================================
+  // Eliminar item en memoria
+  // =====================================
+  removeItem(index: number) {
+    this.items.splice(index, 1);
+  }
+
+  // =====================================
+  // Calcular total
+  // =====================================
+  getTotal(): number {
+    return this.items.reduce((acc, i) => acc + i.price * i.qty, 0);
+  }
+
+  // =====================================
+  // Crear pedido directamente aprobado (mozo)
+  // =====================================
+  async createOrder() {
+    const waiter = this.auth.getUserID() ?? 'unknown';
+
+    const orderId = await this.ordersService.createOrderForMozo(
+      this.restaurantId,
+      {
+        tableId: this.tableId,
+        tableNumber: this.tableNumber, // ✔️ CORRECTO
+        createdBy: waiter,
+        waiter,
+        notes: this.notes,
+        items: this.items, // los items finales
+      }
+    );
+      // 🔹 NUEVO: asignar mesa
+  await this.tableService.assignOrderToTable(this.restaurantId, this.tableId, orderId);
+
+
+    // Cerrar diálogo y pasar el orderId creado
+    this.dialogRef.close(orderId);
+  }
+
+  // =====================================
+  // Actualizar pedido existente (modificación de items → updated)
+  // =====================================
+  async updateOrder() {
+    const targetOrderId = this.createdOrderId || this.orderId;
+    if (!targetOrderId) return;
+
+    if (this.items.length === 0) {
+      this.dialogService.infoDialog(
+        'Atención',
+        'Debe agregar al menos un producto.'
+      );
+      return;
+    }
+
+    this.loading = true;
+
     try {
-      await this.ordersService.closeOrder(this.restaurantId, this.orderId, this.tableId);
-      this.dialogService.infoDialog('Pedido cerrado', 'El pedido se cerró correctamente.');
+      await this.ordersService.updateOrder(
+        this.restaurantId,
+        targetOrderId,
+        this.items,
+        this.notes,
+        'mozo'
+      );
+
+      this.status = 'updated';
+      this.dialogService.infoDialog(
+        'Pedido actualizado',
+        'El pedido fue actualizado correctamente.'
+      );
       this.dialogRef.close(true);
     } catch (e: any) {
-      this.dialogService.errorDialog('Error', e.message || 'No se pudo cerrar el pedido.');
+      this.dialogService.errorDialog('Error', e.message);
+    } finally {
+      this.loading = false;
     }
   }
 
-  async cancelOrder() {
-    this.dialogService.confirmDialog({ title: 'Cancelar pedido', message: '¿Seguro que deseas cancelar este pedido?' })
-      .subscribe(async (confirmed) => {
-        if (!confirmed) return;
-        try {
-          await this.ordersService.updateOrderStatus(this.restaurantId, this.orderId, 'cancelled');
-          await this.ordersService.closeOrder(this.restaurantId, this.orderId, this.tableId);
-          this.dialogService.infoDialog('Pedido cancelado', 'El pedido ha sido cancelado correctamente.');
-          this.dialogRef.close(true);
-        } catch (e: any) {
-          this.dialogService.errorDialog('Error', e.message || 'No se pudo cancelar el pedido.');
-        }
-      });
+  // =====================================
+  // Confirmar pedido → delega a crear o actualizar
+  // =====================================
+  async confirmOrder() {
+    if (this.isEditMode) {
+      await this.updateOrder();
+    } else {
+      await this.createOrder();
+    }
   }
 
-  exit() {
-    this.dialogRef.close(null);
+  // =====================================
+  // Cerrar pedido → seleccionar método de pago
+  // =====================================
+async closeOrder() {
+  const dialogRef = this.dialog.open(PaymentMethodDialogComponent, {
+    data: { orderTotal: this.getTotal() },
+  });
+
+  const result = await dialogRef.afterClosed().toPromise();
+  if (!result) return;
+
+  this.loading = true;
+
+  try {
+    const status = this.mapPaymentToStatus(result.method);
+    
+    // 1️⃣ Actualizar el estado del pedido
+    await this.ordersService.updateOrderStatus(
+      this.restaurantId,
+      this.createdOrderId || this.orderId!,
+      status,
+      'mozo'
+    );
+
+    // 2️⃣ Liberar la mesa automáticamente
+    await this.tableService.clearTable(this.restaurantId, this.tableId);
+
+    this.dialogService.infoDialog(
+      'Pedido cerrado',
+      'Se registró el pago, se cerró el pedido y la mesa quedó disponible.'
+    );
+    
+    this.dialogRef.close(true);
+  } catch (e: any) {
+    this.dialogService.errorDialog('Error', e.message);
+  } finally {
+    this.loading = false;
+  }
+}
+
+  mapPaymentToStatus(method: string): OrderStatus {
+    return 'closed'; // aquí podrías mapear según tu modelo cerrado
+  }
+
+  cancel() {
+    this.dialogRef.close({ created: false });
+  }
+
+  isMobile = window.innerWidth <= 768;
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.isMobile = event.target.innerWidth <= 768;
   }
 }

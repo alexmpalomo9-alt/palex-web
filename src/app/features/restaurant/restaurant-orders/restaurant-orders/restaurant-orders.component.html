@@ -1,7 +1,7 @@
 <h2>Pedidos:</h2>
 
 <button (click)="onCreateOrGetOrder()">
-  Crear o recuperar pedido activo
+  Crear pedido activo
 </button>
 
 <div *ngIf="currentOrderId">
@@ -10,16 +10,25 @@
   <h3>Agregar Item</h3>
 
   <label>Producto ID:</label>
-  <input [(ngModel)]="selectedItem.productId">
+  <input [(ngModel)]="selectedItem.productId" />
 
   <label>Nombre:</label>
-  <input [(ngModel)]="selectedItem.name">
+  <input [(ngModel)]="selectedItem.name" />
 
   <label>Precio:</label>
-  <input type="number" [(ngModel)]="selectedItem.price">
+  <input type="number" [(ngModel)]="selectedItem.price" />
 
   <label>Cantidad:</label>
-  <input type="number" [(ngModel)]="selectedItem.quantity">
+  <input type="number" [(ngModel)]="selectedItem.qty" />
 
   <button (click)="onAddItem()">Agregar Item</button>
+
+  <h3>Items actuales</h3>
+  <ul>
+    <li *ngFor="let i of items; let idx = index">
+      {{ idx + 1 }} - {{ i.name }} x{{ i.qty }} → {{ i.price * i.qty | currency }}
+    </li>
+  </ul>
+
+  <p><strong>Total:</strong> {{ getTotal() | currency }}</p>
 </div>
