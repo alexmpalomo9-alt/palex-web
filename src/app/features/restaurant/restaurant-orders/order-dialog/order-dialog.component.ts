@@ -4,6 +4,7 @@ import {
   MatDialogRef,
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
 import { OrdersService } from '../../../order/services/order.service';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { PaymentMethodDialogComponent } from '../payment-method-dialog/payment-method-dialog.component';
@@ -13,6 +14,8 @@ import { MenuDialogComponent } from '../../restaurant-menu/menu-dialog/menu-dial
 import { Product } from '../../../../products/model/product.model';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { TableService } from '../../restaurant-tables/services/table.service';
+import { firstValueFrom } from 'rxjs';
+import { OrderStatusService } from '../../../../shared/services/order-status/order-status.service';
 
 @Component({
   selector: 'app-order-dialog',
@@ -22,21 +25,24 @@ import { TableService } from '../../restaurant-tables/services/table.service';
   styleUrls: ['./order-dialog.component.scss'],
 })
 export class OrderDialogComponent implements OnInit {
-  // Datos del pedido
-  orderId: string | null = null; // Pedido existente en Firestore
-  createdOrderId: string | null = null; // Pedido recién confirmado
+  orderId: string | null = null;
+  createdOrderId: string | null = null;
   status: OrderStatus = 'draft';
-  isEditMode: boolean = false; // true = actualizar, false = crear
+  isEditMode: boolean = false;
 
-  // Items en memoria
   items: OrderItem[] = [];
+  dataSource = new MatTableDataSource<OrderItem>();
   notes = '';
   loading = false;
 
-  // Info de la mesa/restaurante
   restaurantId = '';
   tableId = '';
   tableNumber = 0;
+
+  displayedColumns = ['name', 'qty', 'price', 'subtotal', 'actions'];
+  isMobile = window.innerWidth <= 768;
+  private originalItems: OrderItem[] = [];
+  private originalNotes: string = '';
 
   constructor(
     private dialog: MatDialog,
@@ -46,10 +52,11 @@ export class OrderDialogComponent implements OnInit {
     private dialogService: DialogService,
     private tableService: TableService,
     private auth: AuthService,
+    private orderStatusService: OrderStatusService
   ) {
     this.restaurantId = data.restaurantId;
     this.tableId = data.tableId;
-    this.tableNumber = data.tableNumber;
+    this.tableNumber = data.number || data.tableNumber; // Número de mesa
     this.orderId = data.orderId ?? null;
   }
 
@@ -62,9 +69,11 @@ export class OrderDialogComponent implements OnInit {
     }
   }
 
-  // =====================================
-  // Cargar pedido existente
-  // =====================================
+  // Getter para mostrar automáticamente la etiqueta del estado
+  get orderStatusLabel(): string {
+    return this.orderStatusService.getOrderStatusLabel(this.status);
+  }
+
   private async loadOrder() {
     try {
       this.loading = true;
@@ -86,6 +95,11 @@ export class OrderDialogComponent implements OnInit {
         updatedAt: i.updatedAt,
       }));
 
+      // Guardamos copia original para comparaciones
+      this.originalItems = this.items.map((i) => ({ ...i }));
+      this.originalNotes = order.notes || '';
+
+      this.dataSource.data = [...this.items];
       this.notes = order.notes || '';
       this.status = order.status;
       this.isEditMode = this.status !== 'draft';
@@ -97,16 +111,35 @@ export class OrderDialogComponent implements OnInit {
     }
   }
 
-  // =====================================
-  // Agregar item en memoria usando diálogo
-  // =====================================
+  // Método auxiliar para comparar cambios
+  private hasChanges(): boolean {
+    if (this.notes !== this.originalNotes) return true;
+
+    if (this.items.length !== this.originalItems.length) return true;
+
+    for (let i = 0; i < this.items.length; i++) {
+      const current = this.items[i];
+      const original = this.originalItems[i];
+      if (
+        current.productId !== original.productId ||
+        current.qty !== original.qty ||
+        current.price !== original.price ||
+        current.notes !== original.notes
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   addItemDialog() {
     const dialogRef = this.dialog.open(MenuDialogComponent, {
-      width: '600px',
+      disableClose: true,
       data: { restaurantId: this.restaurantId },
     });
 
-    dialogRef.afterClosed().subscribe((product) => {
+    dialogRef.afterClosed().subscribe((product: Product | null) => {
       if (!product) return;
 
       const newItem: OrderItem = {
@@ -120,6 +153,7 @@ export class OrderDialogComponent implements OnInit {
       };
 
       this.items.push(newItem);
+      this.dataSource.data = [...this.items];
     });
   }
 
@@ -129,51 +163,58 @@ export class OrderDialogComponent implements OnInit {
       : product.price;
   }
 
-  // =====================================
-  // Eliminar item en memoria
-  // =====================================
   removeItem(index: number) {
-    this.items.splice(index, 1);
+    this.dialogService
+      .confirmDialog({
+        title: 'Eliminar item?',
+        message: '¿Estás seguro de querer quitar el item del pedido?.',
+        type: 'question',
+      })
+      .subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.items.splice(index, 1);
+          this.dataSource.data = [...this.items]; // refrescar tabla
+        }
+      });
   }
 
-  // =====================================
-  // Calcular total
-  // =====================================
   getTotal(): number {
     return this.items.reduce((acc, i) => acc + i.price * i.qty, 0);
   }
 
-  // =====================================
-  // Crear pedido directamente aprobado (mozo)
-  // =====================================
   async createOrder() {
     const waiter = this.auth.getUserID() ?? 'unknown';
-
     const orderId = await this.ordersService.createOrderForMozo(
       this.restaurantId,
       {
         tableId: this.tableId,
-        tableNumber: this.tableNumber, // ✔️ CORRECTO
+        tableNumber: this.tableNumber,
         createdBy: waiter,
         waiter,
         notes: this.notes,
-        items: this.items, // los items finales
+        items: this.items,
       }
     );
-      // 🔹 NUEVO: asignar mesa
-  await this.tableService.assignOrderToTable(this.restaurantId, this.tableId, orderId);
 
-
-    // Cerrar diálogo y pasar el orderId creado
+    await this.tableService.assignOrderToTable(
+      this.restaurantId,
+      this.tableId,
+      orderId
+    );
     this.dialogRef.close(orderId);
   }
 
-  // =====================================
-  // Actualizar pedido existente (modificación de items → updated)
-  // =====================================
   async updateOrder() {
     const targetOrderId = this.createdOrderId || this.orderId;
     if (!targetOrderId) return;
+
+    if (!this.hasChanges()) {
+      this.dialogService.infoDialog(
+        'Sin cambios',
+        'No se detectaron cambios en el pedido.'
+      );
+      return;
+    }
 
     if (this.items.length === 0) {
       this.dialogService.infoDialog(
@@ -184,7 +225,6 @@ export class OrderDialogComponent implements OnInit {
     }
 
     this.loading = true;
-
     try {
       await this.ordersService.updateOrder(
         this.restaurantId,
@@ -193,7 +233,6 @@ export class OrderDialogComponent implements OnInit {
         this.notes,
         'mozo'
       );
-
       this.status = 'updated';
       this.dialogService.infoDialog(
         'Pedido actualizado',
@@ -207,9 +246,6 @@ export class OrderDialogComponent implements OnInit {
     }
   }
 
-  // =====================================
-  // Confirmar pedido → delega a crear o actualizar
-  // =====================================
   async confirmOrder() {
     if (this.isEditMode) {
       await this.updateOrder();
@@ -218,55 +254,78 @@ export class OrderDialogComponent implements OnInit {
     }
   }
 
-  // =====================================
-  // Cerrar pedido → seleccionar método de pago
-  // =====================================
-async closeOrder() {
-  const dialogRef = this.dialog.open(PaymentMethodDialogComponent, {
-    data: { orderTotal: this.getTotal() },
-  });
+  async closeOrder() {
+    const dialogRef = this.dialog.open(PaymentMethodDialogComponent, {
+      data: { orderTotal: this.getTotal() },
+    });
 
-  const result = await dialogRef.afterClosed().toPromise();
-  if (!result) return;
+    const result = await dialogRef.afterClosed().toPromise();
+    if (!result) return;
 
-  this.loading = true;
-
-  try {
-    const status = this.mapPaymentToStatus(result.method);
-    
-    // 1️⃣ Actualizar el estado del pedido
-    await this.ordersService.updateOrderStatus(
-      this.restaurantId,
-      this.createdOrderId || this.orderId!,
-      status,
-      'mozo'
-    );
-
-    // 2️⃣ Liberar la mesa automáticamente
-    await this.tableService.clearTable(this.restaurantId, this.tableId);
-
-    this.dialogService.infoDialog(
-      'Pedido cerrado',
-      'Se registró el pago, se cerró el pedido y la mesa quedó disponible.'
-    );
-    
-    this.dialogRef.close(true);
-  } catch (e: any) {
-    this.dialogService.errorDialog('Error', e.message);
-  } finally {
-    this.loading = false;
+    this.loading = true;
+    try {
+      const status = this.mapPaymentToStatus(result.method);
+      await this.ordersService.updateOrderStatus(
+        this.restaurantId,
+        this.createdOrderId || this.orderId!,
+        status,
+        'mozo'
+      );
+      await this.tableService.clearTable(this.restaurantId, this.tableId);
+      this.dialogService.infoDialog(
+        'Pedido cerrado',
+        'Se registró el pago, se cerró el pedido y la mesa quedó disponible.'
+      );
+      this.dialogRef.close(true);
+    } catch (e: any) {
+      this.dialogService.errorDialog('Error', e.message);
+    } finally {
+      this.loading = false;
+    }
   }
-}
+
+  async cancelOrder() {
+    if (!this.orderId && !this.createdOrderId) return;
+
+    const confirm = await firstValueFrom(
+      this.dialogService.confirmDialog({
+        title: 'Cancelar Pedido?',
+        message:
+          '¿Estás seguro de querer cancelar este pedido? Esta acción no se puede deshacer.',
+        type: 'question',
+      })
+    );
+    if (!confirm) return;
+
+    this.loading = true;
+    try {
+      const targetOrderId = this.createdOrderId || this.orderId!;
+      const userId = this.auth.getUserID() ?? 'unknown';
+      await this.ordersService.cancelOrder(
+        this.restaurantId,
+        targetOrderId,
+        userId
+      );
+      await this.tableService.clearTable(this.restaurantId, this.tableId);
+      this.dialogService.infoDialog(
+        'Pedido cancelado',
+        'El pedido fue cancelado y la mesa quedó disponible.'
+      );
+      this.dialogRef.close(true);
+    } catch (e: any) {
+      this.dialogService.errorDialog('Error', e.message);
+    } finally {
+      this.loading = false;
+    }
+  }
 
   mapPaymentToStatus(method: string): OrderStatus {
-    return 'closed'; // aquí podrías mapear según tu modelo cerrado
+    return 'closed';
   }
 
   cancel() {
     this.dialogRef.close({ created: false });
   }
-
-  isMobile = window.innerWidth <= 768;
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {

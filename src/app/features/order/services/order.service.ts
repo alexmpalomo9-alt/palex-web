@@ -211,17 +211,22 @@ export class OrdersService {
     };
   }
 
-  // ================================================================
-  // RULE: only approved or preparing can be updated
-  // ================================================================
+  // RULE: asegura que el pedido pueda ser actualizado
   private ensureOrderIsUpdatable(status: OrderStatus) {
-    if (status === 'ready')
+    if (status === 'ready') {
       throw new Error('El pedido ya está listo, no se puede modificar.');
+    }
 
-    if (status !== 'approved' && status !== 'preparing')
+    // Modificar esta validación para permitir 'updated'
+    if (
+      status !== 'approved' &&
+      status !== 'preparing' &&
+      status !== 'updated'
+    ) {
       throw new Error(
         `El pedido en estado '${status}' no permite modificaciones.`
       );
+    }
   }
 
   // ================================================================
@@ -333,6 +338,38 @@ export class OrdersService {
       updatedAt: serverTimestamp(),
     });
   }
+
+  // ================================================================
+// CANCEL ORDER
+// (marca pedido como cancelado y no permite más modificaciones)
+// ================================================================
+async cancelOrder(
+  restaurantId: string,
+  orderId: string,
+  userId: string
+) {
+  // 1️⃣ Obtener estado actual
+  const orderSnap = await getDoc(this.orderDoc(restaurantId, orderId));
+  if (!orderSnap.exists()) throw new Error('Pedido no existe');
+
+  const currentStatus = orderSnap.data()?.['status'] as OrderStatus;
+
+  // 2️⃣ Solo permitir cancelar si no está cerrado o ya cancelado
+  if (currentStatus === 'closed' || currentStatus === 'cancelled') {
+    throw new Error(`El pedido en estado '${currentStatus}' no puede cancelarse.`);
+  }
+
+  // 3️⃣ Actualizar estado a cancelado
+  await updateDoc(this.orderDoc(restaurantId, orderId), {
+    status: 'cancelled',
+    updatedAt: serverTimestamp(),
+    cancelledAt: serverTimestamp(),
+  });
+
+  // 4️⃣ Historial
+  await this.addStatusHistory(restaurantId, orderId, 'cancelled', userId);
+}
+
 
   // ================================================================
   // REMOVE ITEM

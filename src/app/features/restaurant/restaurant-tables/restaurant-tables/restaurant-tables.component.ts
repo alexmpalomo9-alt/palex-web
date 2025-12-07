@@ -219,7 +219,6 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
 
     // Abrir diálogo con pedido existente o nuevo en memoria
     this.dialog.open(OrderDialogComponent, {
-      width: '600px',
       disableClose: true,
       data: {
         restaurantId: this.restaurant.restaurantId,

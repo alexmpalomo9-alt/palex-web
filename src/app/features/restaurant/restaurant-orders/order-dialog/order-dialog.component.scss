@@ -1,233 +1,252 @@
 /* Header con flex para alinear título y botón */
-.order-dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+.order-dialog-content {
+  padding: 20px;
+  background-color: #fafafa;
+  font-family: "Roboto", sans-serif;
 
-  h2 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin: 0;
-  }
-
-  button.mat-raised-button {
-    height: 36px;
-    font-size: 0.95rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  .order-dialog-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    h2 {
+      font-size: 1.5rem;
     }
-  }
-}
+    .order-status {
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+    .close-button {
+      background-color: transparent;
+      color: white;
+        cursor: pointer;
 
-/* Ajuste del contenido para que no haya scroll extra debajo del header */
-.order-dialog-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-height: calc(90vh - 140px); /* header + footer */
-  overflow-y: auto;
-}
-
-/* Loader, tabla, mobile items y total siguen igual */
-
-/* Contenedor del diálogo */
-.mat-dialog-container {
-  border-radius: 12px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
-  padding: 24px;
-  max-width: 90vw;
-  max-height: 95vh;
-  overflow: hidden;
-}
-
-/* Header */
-h2.mat-dialog-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #1f2937;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-/* Contenido del pedido */
-.order-dialog-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  max-height: calc(90vh - 140px); /* restando header y footer */
-  overflow-y: auto;
-
-  mat-form-field.full-width {
-    width: 100%;
+      &:hover {
+        color: #faf5f5;
+      }
+    }
   }
 
   .loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 200px;
-
-    mat-progress-spinner {
-      width: 60px;
-      height: 60px;
+    padding: 20px 0;
+    .mat-progress-spinner {
+      color: #2c3e50;
     }
   }
 
-  /* Tabla desktop */
-  table.full-width {
-    width: 100%;
-    border-collapse: collapse;
-
-    th {
-      background: #f9fafb;
+  .table {
+    margin-top: 20px;
+    .mat-header-cell {
+      background-color: #2c3e50;
+      color: white;
       font-weight: 600;
-      color: #374151;
-      text-align: left;
-      padding: 0.6rem;
-      position: sticky;
-      top: 0;
-      z-index: 1;
     }
-
-    td {
-      padding: 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    input[type='number'], input[type='text'] textarea {
-      border: 1px solid #d1d5db;
-      border-radius: 4px;
-      padding: 0.4rem;
-      width: 60px;
+    .mat-cell {
       font-size: 0.95rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      
     }
-.mobile-item-card textarea {
-  min-height: 50px; // Más espacio para escribir
-}
-
-    input[type='number']:focus,
-    input[type='text']:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
-      outline: none;
-    }
-  }
-
-  /* Botón agregar producto */
-  .add-item-container {
-    margin-top: 1rem;
-    text-align: right;
-
-    button.mat-raised-button {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: all 0.2s ease;
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      }
-    }
-  }
-
-  /* Total del pedido */
-  .order-total {
-    text-align: right;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #111827;
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: #f3f4f6;
-    border-radius: 8px;
-  }
-}
-
-/* Mobile styling */
-@media (max-width: 768px) {
-  .desktop-table {
-    display: none;
   }
 
   .mobile-items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
     .mobile-item-card {
-      border: 1px solid #ddd;
+      background: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
-      padding: 0.75rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      transition: transform 0.2s, box-shadow 0.2s;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      }
-
+      margin: 10px 0;
+      padding: 15px;
       .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        strong {
+          font-size: 1.2rem;
+        }
       }
-
-      input[type='number'] {
-        width: 60px;
+      div {
+        margin-top: 10px;
       }
-
-      input[type='text'] {
+      input {
         width: 100%;
+        margin-top: 5px;
       }
     }
   }
 
-  .add-item-container {
-    text-align: center;
-  }
-
   .order-total {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
     text-align: right;
   }
 }
+/* Ajustar el contenedor del diálogo para que ocupe un poco más de espacio */
+.mat-dialog-container {
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  width: 90vw; /* Ajusta este valor según el tamaño que prefieras */
+  height: 90vh; /* Asegura que el diálogo ocupe el 90% de la altura de la ventana */
+  max-width: 100%;
+  overflow: hidden;
+}
 
-/* Acciones del diálogo */
+/* Loader */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  mat-progress-spinner {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Tabla de escritorio */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  th,
+  td {
+    padding: 1rem;
+    border: 1px solid #ecf0f1;
+    text-align: left;
+  }
+  th {
+    background-color: #f7f9fc;
+    font-weight: 600;
+    color: #34495e;
+  }
+  td {
+    color: #2c3e50;
+  }
+  .input-quantity {
+    width: 60px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    &:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+  }
+}
+
+/* Mobile items */
+.mobile-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  .mobile-item-card {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+  }
+}
+
+/* Total del pedido */
+.order-total {
+  background: #ecf0f1;
+  border-radius: 8px;
+  padding: 1rem;
+  font-weight: bold;
+  text-align: right;
+  font-size: 1.3rem;
+  color: #34495e;
+}
+
+/* Estilo para los botones en pantalla grande */
 mat-dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-
+  flex-wrap: nowrap;
   button {
     min-width: 120px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
-
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+  }
+}
+
+/* Ajuste de textarea */
+mat-form-field.full-width {
+  width: 100%;
+  padding-top: 10px;
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background-color: #f7f9fc;
+    border: 1px solid #ecf0f1;
+    font-size: 1rem;
+    color: #2c3e50;
+    &:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+  }
+}
+
+/* Estilos para mobile */
+@media (max-width: 768px) {
+  mat-dialog-actions {
+    display: flex;
+    justify-content: space-between; /* Permite que los botones se distribuyan */
+    gap: 0.5rem;
+    flex-wrap: wrap; /* Permite que los botones se ajusten a una nueva fila si es necesario */
+    button {
+      min-width: auto; /* Evitar que los botones se estiren completamente */
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      width: 48%; /* Botones con un ancho de aproximadamente la mitad */
+      box-sizing: border-box;
+    }
+  }
+
+  .order-dialog-content {
+    padding: 16px; /* Mantener un padding adecuado */
+  }
+
+  .order-total {
+    font-size: 1.2rem;
+    padding: 0.75rem;
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
   mat-dialog-actions {
-    flex-direction: column;
-    align-items: stretch;
-
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap; /* Asegura que los botones no se estiren y se acomoden en una fila */
     button {
-      width: 100%;
+      width: 100%; /* En pantallas muy pequeñas, los botones ocuparán todo el ancho */
+      margin-bottom: 10px;
     }
+  }
+
+  .order-total {
+    font-size: 1.2rem;
+    padding: 0.75rem;
+    text-align: center;
   }
 }

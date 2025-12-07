@@ -89,22 +89,18 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Ver o crear pedido según estado de la mesa
   async viewOrder(orderId: string | null, table: Table) {
     if (!this.restaurant) return;
 
-    let currentOrderId = orderId;
-
-    // Abrir diálogo con pedido existente o nuevo en memoria
     this.dialog.open(OrderDialogComponent, {
-      width: '600px',
       disableClose: true,
+      height: '80vh',
       data: {
         restaurantId: this.restaurant.restaurantId,
-        orderId: currentOrderId, // null si es nuevo
+        orderId: orderId, // null si es nuevo
         tableId: table.tableId,
-        number: table.number,
-        isNew: !orderId, // diálogo manejará el borrador en memoria
+        tableNumber: table.number, // <-- aquí lo importante
+        isNew: !orderId,
       },
     });
   }
