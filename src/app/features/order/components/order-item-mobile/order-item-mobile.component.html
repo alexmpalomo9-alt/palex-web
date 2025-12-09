@@ -1,0 +1,23 @@
+<div class="mobile-items">
+  <div *ngFor="let item of items; let i = index" class="mobile-item-card">
+    <div class="card-header">
+      <strong>{{ item.name }}</strong>
+      <button mat-icon-button color="warn" (click)="removeItem(i)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+
+    <div>
+      Cantidad:
+      <input
+        type="number"
+        min="1"
+        [(ngModel)]="item.qty"
+        class="input-quantity form-control"
+      />
+    </div>
+
+    <div>Precio: {{ item.price | currency }}</div>
+    <div>Subtotal: {{ item.price * item.qty | currency }}</div>
+  </div>
+</div>

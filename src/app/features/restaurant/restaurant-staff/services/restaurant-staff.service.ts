@@ -10,8 +10,8 @@ import {
   collectionData,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { User } from '../../../users/model/user.model';
 import { deleteField, arrayRemove } from '@angular/fire/firestore';
+import { User } from '../../../../users/model/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantStaffService {

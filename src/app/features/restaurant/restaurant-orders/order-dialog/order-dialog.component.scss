@@ -1,77 +1,71 @@
-/* Header con flex para alinear título y botón */
+/* ---------------------------------------------------
+   Order Dialog Component SCSS - Modo Dark/Light
+--------------------------------------------------- */
+
+/* Contenedor principal del diálogo */
 .order-dialog-content {
   padding: 20px;
-  background-color: #fafafa;
+  background-color: var(--card-bg);
+  color: var(--text-color);
   font-family: "Roboto", sans-serif;
+  border-radius: 1rem 1rem 0 0;
 
+  /* Inputs y textareas dentro del diálogo */
+  input,
+  textarea {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+  }
+
+  /* Header del diálogo */
   .order-dialog-header {
-    background-color: #2c3e50;
-    color: white;
+    background-color: var(--card-bg);
+    color: var(--text-color);
     padding: 10px 20px;
     border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
     h2 {
       font-size: 1.5rem;
     }
+
     .order-status {
       font-size: 0.9rem;
       font-weight: 400;
     }
+
     .close-button {
       background-color: transparent;
-      color: white;
-        cursor: pointer;
+      color: var(--text-color);
+      cursor: pointer;
 
       &:hover {
-        color: #faf5f5;
+        color: var(
+          --text-color-hover,
+          #ffffff
+        ); // usar una variable opcional para hover
       }
     }
   }
 
+  /* Loader */
   .loading-container {
     padding: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     .mat-progress-spinner {
-      color: #2c3e50;
+      color: var(--text-color);
+      width: 50px;
+      height: 50px;
     }
   }
 
-  .table {
-    margin-top: 20px;
-    .mat-header-cell {
-      background-color: #2c3e50;
-      color: white;
-      font-weight: 600;
-    }
-    .mat-cell {
-      font-size: 0.95rem;
-    }
-  }
-
-  .mobile-items {
-    .mobile-item-card {
-      background: #fff;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      margin: 10px 0;
-      padding: 15px;
-      .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 1.1rem;
-        strong {
-          font-size: 1.2rem;
-        }
-      }
-      div {
-        margin-top: 10px;
-      }
-      input {
-        width: 100%;
-        margin-top: 5px;
-      }
-    }
-  }
-
+  /* Total del pedido */
   .order-total {
     margin-top: 20px;
     font-size: 1.2rem;
@@ -79,107 +73,35 @@
     text-align: right;
   }
 }
-/* Ajustar el contenedor del diálogo para que ocupe un poco más de espacio */
+
+/* Contenedor general del diálogo de Angular Material */
 .mat-dialog-container {
   border-radius: 12px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
   padding: 24px;
-  width: 90vw; /* Ajusta este valor según el tamaño que prefieras */
-  height: 90vh; /* Asegura que el diálogo ocupe el 90% de la altura de la ventana */
+  width: 90vw;
+  height: 90vh;
   max-width: 100%;
   overflow: hidden;
 }
 
-/* Loader */
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  mat-progress-spinner {
-    width: 50px;
-    height: 50px;
-  }
-}
-
-/* Tabla de escritorio */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  th,
-  td {
-    padding: 1rem;
-    border: 1px solid #ecf0f1;
-    text-align: left;
-  }
-  th {
-    background-color: #f7f9fc;
-    font-weight: 600;
-    color: #34495e;
-  }
-  td {
-    color: #2c3e50;
-  }
-  .input-quantity {
-    width: 60px;
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 1px solid #bdc3c7;
-    border-radius: 4px;
-    &:focus {
-      border-color: #3498db;
-      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-    }
-  }
-}
-
-/* Mobile items */
-.mobile-items {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  .mobile-item-card {
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-    }
-  }
-}
-
-/* Total del pedido */
-.order-total {
-  background: #ecf0f1;
-  border-radius: 8px;
-  padding: 1rem;
-  font-weight: bold;
-  text-align: right;
-  font-size: 1.3rem;
-  color: #34495e;
-}
-
-/* Estilo para los botones en pantalla grande */
+/* Botones del diálogo */
 mat-dialog-actions {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-radius: 0 0 1rem 1rem;
+  padding: 1rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-around;
   gap: 0.5rem;
-  flex-wrap: nowrap;
+
   button {
     min-width: 120px;
     font-size: 0.95rem;
     padding: 0.6rem 1.2rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, box-shadow 0.2s;
+
     &:hover {
       transform: scale(1.05);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -187,66 +109,28 @@ mat-dialog-actions {
   }
 }
 
-/* Ajuste de textarea */
-mat-form-field.full-width {
-  width: 100%;
-  padding-top: 10px;
-  textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 8px;
-    background-color: #f7f9fc;
-    border: 1px solid #ecf0f1;
-    font-size: 1rem;
-    color: #2c3e50;
-    &:focus {
-      border-color: #3498db;
-      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-    }
-  }
-}
-
-/* Estilos para mobile */
+/* Ajustes para pantallas pequeñas */
 @media (max-width: 768px) {
   mat-dialog-actions {
-    display: flex;
-    justify-content: space-between; /* Permite que los botones se distribuyan */
-    gap: 0.5rem;
-    flex-wrap: wrap; /* Permite que los botones se ajusten a una nueva fila si es necesario */
+    justify-content: space-between;
+    flex-wrap: wrap;
+
     button {
-      min-width: auto; /* Evitar que los botones se estiren completamente */
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      width: 48%; /* Botones con un ancho de aproximadamente la mitad */
-      box-sizing: border-box;
+      width: 48%;
+      min-width: auto;
     }
-  }
-
-  .order-dialog-content {
-    padding: 16px; /* Mantener un padding adecuado */
-  }
-
-  .order-total {
-    font-size: 1.2rem;
-    padding: 0.75rem;
-    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  mat-dialog-actions {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap; /* Asegura que los botones no se estiren y se acomoden en una fila */
-    button {
-      width: 100%; /* En pantallas muy pequeñas, los botones ocuparán todo el ancho */
-      margin-bottom: 10px;
-    }
+  mat-dialog-actions button {
+    width: 100%;
+    margin-bottom: 10px;
   }
 
   .order-total {
-    font-size: 1.2rem;
-    padding: 0.75rem;
     text-align: center;
   }
 }
+
+

@@ -32,8 +32,8 @@
 .restaurant-card {
   border-radius: 18px !important;
   cursor: pointer;
-  background: var(--card-bg) !important;  /* NUEVO */
-  color: var(--text-color) !important;     /* NUEVO */
+  background: var(--card-bg) !important; /* NUEVO */
+  color: var(--text-color) !important; /* NUEVO */
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 
   &:hover {
@@ -55,14 +55,11 @@
 .restaurant-logo {
   width: 75px;
   height: 75px;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 50%;
-  background: var(--card-bg); /* ANTES: #f5f5f5 */
   padding: 4px;
   transform: scale(0.85);
-  flex-shrink: 0;
 }
-
 /* CHIPS */
 .chips-row {
   margin-top: 1rem;
@@ -100,7 +97,7 @@
   text-align: center;
   color: var(--text-color); /* ANTES: #757575 */
 
-  opacity: .7;
+  opacity: 0.7;
   font-size: 1.1rem;
   margin-top: 2rem;
 }

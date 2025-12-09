@@ -1,4 +1,4 @@
-<mat-sidenav-container class="sidenav-container">
+<mat-sidenav-container class="sidenav-container" [class.dark-theme]="isDarkMode">
   <!-- Carrito -->
   <mat-sidenav #cartSidenav mode="over" position="end" class="cart-sidenav">
     <app-cart></app-cart>

@@ -1,14 +1,14 @@
-/* CARD */
 .staff-card {
   padding: 24px;
   border-radius: 20px;
-  background: var(--md-sys-color-surface, #fff);
+  background: var(--card-bg);
+  color: var(--text-color);
   transition: 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .staff-card:hover {
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18), 0 3px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18), 0 3px 8px rgba(0,0,0,0.15);
   transform: translateY(-3px);
 }
 
@@ -19,7 +19,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.08));
   position: sticky;
   top: 0;
   z-index: 10;
@@ -28,7 +28,7 @@
 }
 
 .staff-header.scrolled {
-  box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 10px -3px rgba(0,0,0,0.15);
 }
 
 /* INFO DEL STAFF */
@@ -42,7 +42,7 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: var(--md-sys-color-primary-container, #e3f2fd);
+  background: var(--primary-container-bg, #e3f2fd);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -50,7 +50,7 @@
 
 .staff-icon mat-icon {
   font-size: 28px;
-  color: var(--md-sys-color-primary, #1976d2);
+  color: var(--primary-color, #1976d2);
 }
 
 .staff-texts {
@@ -68,6 +68,7 @@
   margin: 0;
   opacity: 0.7;
   font-size: 0.95rem;
+  color: var(--text-secondary-color, #ffffff);
 }
 
 /* BOTÓN INVITAR */
@@ -77,14 +78,14 @@
   gap: 6px;
   padding: 10px 22px;
   border-radius: 12px !important;
-  background: linear-gradient(135deg, #1976d2, #42a5f5);
-  color: white !important;
+  background: var(--primary-gradient, linear-gradient(135deg, #1976d2, #42a5f5));
+  color: var(--btn-text-color, #fff) !important;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .invite-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+  box-shadow: 0 4px 12px var(--primary-shadow, rgba(25, 118, 210, 0.35));
 }
 
 .pulse {
@@ -92,15 +93,9 @@
 }
 
 @keyframes pulseAnim {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.03);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
 }
 
 /* RESPONSIVE */

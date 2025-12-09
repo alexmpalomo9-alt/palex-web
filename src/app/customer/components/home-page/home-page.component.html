@@ -1,4 +1,4 @@
-<div class="index-container">
+<div class="index-container" [class.dark-theme]="isDarkMode">
   <div class="title-container">
     <h1 class="title">Explora Restaurantes</h1>
   </div>
@@ -18,13 +18,6 @@
       matRipple
       (click)="openRestaurant(restaurant.slug)"
     >
-      <!-- <img
-        [src]="restaurant.mainImage || 'assets/img/not-found.png'"
-        alt="Imagen del restaurante"
-        class="restaurant-image"
-      />
- -->
-
       <mat-card-header>
         <div mat-card-avatar class="logo-wrapper">
           <img

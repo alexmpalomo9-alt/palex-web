@@ -7,9 +7,7 @@ import { Table } from '../model/tables.model';
 import { Restaurant } from '../../model/restaurant.model';
 import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order-dialog.component';
 import { TableQrDialogComponent } from '../../../../shared/components/qr-preview/table-qr-dialog/table-qr-dialog.component';
-import { OrdersService } from '../../../order/services/order.service';
 import { TableService } from '../services/table.service';
-import { DialogService } from '../../../../core/services/dialog.service';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { RestaurantService } from '../../services/restaurant.service';
@@ -32,9 +30,7 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
 
   constructor(
     private tableService: TableService,
-    private ordersService: OrdersService,
     private dialog: MatDialog,
-    private dialogService: DialogService,
     private restaurantService: RestaurantService,
     private route: ActivatedRoute,
     private auth: AuthService

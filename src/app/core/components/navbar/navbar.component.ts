@@ -29,14 +29,19 @@ export class NavbarComponent {
     this.isDarkMode = this.themeService.getDarkMode();
   }
 
-  ngOnInit(): void {
+ ngOnInit(): void {
     this.isLoggedIn$ = this.authService.isLoggedIn$;
 
     this.authService.currentUser$.subscribe((user) => {
-      this.currentUser = user; // puede ser null
+      this.currentUser = user;
+    });
+
+    // Mantener icono sincronizado
+    this.themeService.darkModeObservable.subscribe(value => {
+      this.isDarkMode = value;
     });
   }
-
+  
   logOut() {
     this.authService
       .logout()
@@ -55,9 +60,7 @@ export class NavbarComponent {
     });
   }
 
-toggleDarkMode(isDark: boolean) {
-  this.isDarkMode = isDark;          // Actualiza estado local
-  this.themeService.toggleDarkMode(isDark); // Llama al servicio global
-}
-  
+  toggleTheme() {
+    this.themeService.toggleDarkMode();
+  }
 }

@@ -1,7 +1,6 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
-import { OrdersService } from '../../../order/services/order.service';
+import { Subject, from, filter, switchMap, takeUntil, tap } from 'rxjs';
 import { Table } from '../model/tables.model';
 import { TableService } from '../services/table.service';
 import { Restaurant } from '../../model/restaurant.model';
@@ -12,7 +11,7 @@ import { DialogService } from '../../../../core/services/dialog.service';
 import { TableDialogService } from '../services/table-dialog/table-dialog.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order-dialog.component';
-import { AuthService } from '../../../../auth/services/auth.service';
+import { ThemeService } from '../../../../core/services/theme/theme.service';
 
 @Component({
   selector: 'app-restaurant-tables',
@@ -26,207 +25,167 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
 
   tables: Table[] = [];
   loading = true;
+  isDarkMode: boolean;
+  displayedColumns: string[] = ['number', 'name', 'capacity', 'status', 'sector', 'actions'];
 
-  private sub!: Subscription;
+  private destroy$ = new Subject<void>();
+  private tableService = inject(TableService);
+  private restaurantService = inject(RestaurantService);
+  private dialogService = inject(DialogService);
+  private tableDialogService = inject(TableDialogService);
+  private dialog = inject(MatDialog);
+  private themeService = inject(ThemeService);
+  private route = inject(ActivatedRoute);
 
-  constructor(
-    private route: ActivatedRoute,
-    private tableService: TableService,
-    private restaurantService: RestaurantService,
-    private orderService: OrdersService,
-    private dialog: MatDialog,
-    private dialogService: DialogService,
-    private tableDialogService: TableDialogService,
-    private auth: AuthService
-  ) {}
+  constructor() {
+    this.isDarkMode = this.themeService.getDarkMode();
+  }
 
   ngOnInit() {
     const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
     if (!slug) return;
 
-    this.sub = this.restaurantService
-      .getRestaurantBySlug(slug)
-      .subscribe((restaurant) => {
-        if (!restaurant) return;
+    // 🔹 Cargar restaurante y luego mesas
+    this.restaurantService.getRestaurantBySlug(slug)
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(r => !!r),
+        tap(r => {
+          this.restaurant = r!;
+          this.restaurantId = r!.restaurantId;
+        }),
+        switchMap(() => this.loadTablesObservable())
+      )
+      .subscribe();
 
-        this.restaurant = restaurant;
-        this.restaurantId = restaurant.restaurantId; // ✔️ ASIGNAR RESTAURANT ID
-
-        this.loadTables(); // ✔️ recién ahora es seguro llamar
-      });
+    this.subscribeTheme();
   }
 
-  ngOnDestroy(): void {
-    if (this.sub) this.sub.unsubscribe();
+  private subscribeTheme() {
+    this.themeService.darkModeObservable
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => (this.isDarkMode = value));
   }
 
-  /** Cargar mesas del restaurante */
-  loadTables() {
-    if (!this.restaurantId) return;
+  /** Cargar mesas (observable) */
+  private loadTablesObservable() {
+    if (!this.restaurantId) return from([[]]); // Retorna array vacío si no hay restaurante
 
     this.loading = true;
-
-    this.tableService
-      .getTablesByRestaurant(this.restaurantId)
-      .subscribe((tables) => {
-        this.tables = tables;
-        this.loading = false;
-      });
+    return this.tableService.getTablesByRestaurant(this.restaurantId)
+      .pipe(
+        tap(tables => {
+          this.tables = tables;
+          this.loading = false;
+        })
+      );
   }
 
-  // --------------------------------------------------
-  // ACCIONES
-  // --------------------------------------------------
+  loadTables() {
+    this.loadTablesObservable().subscribe();
+  }
+
+  // ================================
+  // ACCIONES DE MESAS
+  // ================================
 
   openCreateTable() {
     if (!this.restaurant) return;
-    this.tableDialogService
-      .openTableDialog({ mode: 'create' })
-      .subscribe(async (result) => {
-        if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelar',
-            'No se realizaron cambios.'
-          );
-          return;
-        }
 
-        try {
-          await this.tableService.createTable({
-            ...result,
-            restaurantId: this.restaurant!.restaurantId,
-          });
-
-          this.dialogService.infoDialog('Éxito', 'Mesa creada correctamente.');
-          this.loadTables();
-        } catch (e: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            e.message || 'Ocurrió un error inesperado.'
-          );
-        }
+    this.tableDialogService.openTableDialog({ mode: 'create' })
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(result => !!result),
+        switchMap(result =>
+          from(this.tableService.createTable({
+            ...result!,
+            restaurantId: this.restaurant!.restaurantId
+          }))
+        ),
+        switchMap(() => this.loadTablesObservable())
+      )
+      .subscribe({
+        next: () => this.dialogService.infoDialog('Éxito', 'Mesa creada correctamente.'),
+        error: e => this.dialogService.errorDialog('Error', e?.message || 'Ocurrió un error inesperado.')
       });
   }
 
   openEditTable(table: Table) {
     if (!this.restaurant) return;
 
-    const restaurant = this.restaurant; // ← tipo Restaurant GARANTIZADO
-
-    this.tableDialogService
-      .openTableDialog({ mode: 'edit', data: table })
-      .subscribe(async (result) => {
-        if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelado',
-            'No se realizó la acción.'
-          );
-          return;
-        }
-
-        const { restaurantId } = restaurant;
-        const { restaurantId: _ignore, ...cleanData } = result;
-
-        try {
-          // Intentar actualizar (la validación en TableService puede lanzar)
-          await this.tableService.updateTable(
-            restaurantId,
-            table.tableId!,
-            cleanData
-          );
-
-          // Si llegamos acá, todo salió bien
-          this.dialogService.infoDialog(
-            'Éxito',
-            'Mesa actualizada correctamente.'
-          );
-          this.loadTables();
-        } catch (error: any) {
-          // Mostrar dialog con el mensaje del error (si existe)
-          this.dialogService.errorDialog(
-            'Error',
-            error?.message ||
-              'Ocurrió un error inesperado al actualizar la mesa.'
-          );
-        }
+    this.tableDialogService.openTableDialog({ mode: 'edit', data: table })
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(result => !!result),
+        switchMap(result => {
+          const { restaurantId: _ignore, ...cleanData } = result!;
+          return from(this.tableService.updateTable(this.restaurant!.restaurantId, table.tableId!, cleanData));
+        }),
+        switchMap(() => this.loadTablesObservable())
+      )
+      .subscribe({
+        next: () => this.dialogService.infoDialog('Éxito', 'Mesa actualizada correctamente.'),
+        error: e => this.dialogService.errorDialog('Error', e?.message || 'Ocurrió un error inesperado.')
       });
   }
 
   deleteTable(table: Table) {
     if (!table.tableId || !this.restaurant) return;
 
-    this.dialogService
-      .confirmDialog({
-        title: '¿Eliminar Permanente?',
-        message:
-          '¿Estás seguro de que deseas eliminar la mesa de forma permanente? Esta acción no se puede deshacer.',
-        type: 'confirm',
-      })
-      .subscribe(async (result) => {
-        if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelado',
-            'No se realizó la acción.'
-          );
-          return;
-        }
-
-        try {
-          await this.tableService.deleteTable(
-            this.restaurant!.restaurantId,
-            table.tableId
-          );
-          this.dialogService.infoDialog(
-            'Éxito',
-            'La mesa ha sido eliminado correctamente.'
-          );
-
-          this.loadTables();
-        } catch (error: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            error.message || 'Ocurrió un error inesperado.'
-          );
-        }
+    this.dialogService.confirmDialog({
+      title: '¿Eliminar Permanente?',
+      message: '¿Estás seguro de que deseas eliminar la mesa de forma permanente? Esta acción no se puede deshacer.',
+      type: 'confirm',
+    })
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(ok => ok),
+        switchMap(() => from(this.tableService.deleteTable(this.restaurant!.restaurantId, table.tableId!))),
+        switchMap(() => this.loadTablesObservable())
+      )
+      .subscribe({
+        next: () => this.dialogService.infoDialog('Éxito', 'La mesa ha sido eliminada correctamente.'),
+        error: e => this.dialogService.errorDialog('Error', e?.message || 'Ocurrió un error inesperado.')
       });
   }
 
   changeStatus(table: Table, status: 'available' | 'occupied' | 'reserved') {
-    this.tableService.updateTable(this.restaurantId, table.tableId!, {
-      status,
-    });
+    if (!table.tableId) return;
+
+    from(this.tableService.updateTable(this.restaurantId, table.tableId, { status }))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          table.status = status;
+        },
+        error: e => this.dialogService.errorDialog('Error', e?.message || 'No se pudo cambiar el estado.')
+      });
   }
 
   openQr(table: Table) {
     const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
-
     this.dialog.open(TableQrDialogComponent, {
-      data: {
-        table,
-        url,
-        logoUrl: 'assets/img/logo-palex.png',
-      },
+      data: { table, url, logoUrl: 'assets/img/logo-palex.png' }
     });
   }
 
-  // ============================================================
-  // 🔵 Ver Pedido (CORREGIDO: nueva firma createOrder)
-  // ============================================================
   async viewOrder(orderId: string | null, table: Table) {
     if (!this.restaurant) return;
 
-    let currentOrderId = orderId;
-
-    // Abrir diálogo con pedido existente o nuevo en memoria
     this.dialog.open(OrderDialogComponent, {
       disableClose: true,
       data: {
         restaurantId: this.restaurant.restaurantId,
-        orderId: currentOrderId, // null si es nuevo
+        orderId,
         tableId: table.tableId,
         number: table.number,
-        isNew: !orderId, // diálogo manejará el borrador en memoria
-      },
+        isNew: !orderId
+      }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -115,3 +115,37 @@
   flex-direction: column;
   gap: 32px;
 }
+/* ================= Dark Mode ================= */
+.sidenav-container.dark-theme {
+  background: #262627;
+
+  .cart-sidenav {
+    background: #2a2a3b;
+    border-left: 1px solid #444;
+    box-shadow: -6px 0 24px rgba(0,0,0,0.6);
+    color: #eee;
+  }
+
+  .cart-button {
+    background: #1976d2;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+
+  .cart-qty {
+    background: #ff5252;
+    color: #fff;
+  }
+
+  .menu-flyer {
+    color: #eee;
+  }
+
+  .image-modal {
+    background-color: rgba(0,0,0,0.85);
+  }
+
+  .image-modal img {
+    box-shadow: 0 12px 36px rgba(0,0,0,0.7);
+  }
+}

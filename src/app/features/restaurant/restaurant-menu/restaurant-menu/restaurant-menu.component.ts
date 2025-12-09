@@ -14,6 +14,7 @@ import { RestaurantService } from '../../services/restaurant.service';
 import { CartComponent } from '../../../../customer/components/cart/cart/cart.component';
 import { MenuSelectorComponent } from '../../../../menu/menu-selector/menu-selector.component';
 import { Category } from '../../categories/model/category.model';
+import { ThemeService } from '../../../../core/services/theme/theme.service';
 
 @Component({
   selector: 'app-restaurant-menu',
@@ -32,6 +33,7 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
 
   cartQuantity$!: Observable<number>;
   offerProducts$!: Observable<Product[]>;
+  isDarkMode = false;
 
   categories: {
     label: string;
@@ -49,12 +51,16 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
     private restaurantService: RestaurantService,
     private categoryService: CategoryService,
     private productsService: ProductService,
-    private cartService: CartService
+    private cartService: CartService,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
     this.cartQuantity$ = this.cartService.totalQuantity$;
     this.loadRestaurantAndMenu();
+    this.themeService.darkModeObservable.subscribe((value) => {
+      this.isDarkMode = value;
+    });
   }
 
   ngOnDestroy(): void {

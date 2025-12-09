@@ -3,6 +3,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { CartService } from '../../../services/cart.service';
 import { CartItemComponent } from '../cart-item/cart-item.component';
 import { CartItem } from '../model/cart.model';
+import { ThemeService } from '../../../../core/services/theme/theme.service';
 
 @Component({
   selector: 'app-cart',
@@ -14,8 +15,12 @@ import { CartItem } from '../model/cart.model';
 export class CartComponent implements OnInit {
   cartItems: CartItem[] = [];
   total = 0;
+  isDarkMode = false; // ✅ variable para dark mode
 
-  constructor(private cartService: CartService) {}
+  constructor(
+    private cartService: CartService,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit() {
     // Suscribirse al carrito directamente
@@ -29,6 +34,10 @@ export class CartComponent implements OnInit {
       this.cartItems = cart.items;
       this.total = this.cartService.getTotal(cart.restaurantId);
     });
+    // Suscribirse al dark mode
+    this.themeService.darkModeObservable.subscribe(
+      (value) => (this.isDarkMode = value)
+    );
   }
 
   increase(item: CartItem) {

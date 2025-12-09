@@ -5,22 +5,32 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { OrdersService } from '../../../order/services/order.service';
-import { DialogService } from '../../../../core/services/dialog.service';
-import { PaymentMethodDialogComponent } from '../payment-method-dialog/payment-method-dialog.component';
-import { SharedModule } from '../../../../shared/shared.module';
+import { firstValueFrom } from 'rxjs';
+
 import { OrderItem, OrderStatus } from '../../../order/models/order.model';
 import { MenuDialogComponent } from '../../restaurant-menu/menu-dialog/menu-dialog.component';
 import { Product } from '../../../../products/model/product.model';
 import { AuthService } from '../../../../auth/services/auth.service';
-import { TableService } from '../../restaurant-tables/services/table.service';
-import { firstValueFrom } from 'rxjs';
+
+import { SharedModule } from '../../../../shared/shared.module';
 import { OrderStatusService } from '../../../../shared/services/order-status/order-status.service';
+import { DialogService } from '../../../../core/services/dialog.service';
+import { PaymentMethodDialogComponent } from '../payment-method-dialog/payment-method-dialog.component';
+import { OrderDialogService } from '../../../order/services/order-dialog/order-dialog.service';
+
+import { OrderNotesComponent } from '../../../order/components/order-notes/order-notes.component';
+import { OrderItemsMobileComponent } from '../../../order/components/order-item-mobile/order-item-mobile.component';
+import { OrderItemsTableComponent } from '../../../order/components/order-item-table/order-item-table.component';
 
 @Component({
   selector: 'app-order-dialog',
   standalone: true,
-  imports: [SharedModule],
+  imports: [
+    SharedModule,
+    OrderItemsTableComponent,
+    OrderItemsMobileComponent,
+    OrderNotesComponent,
+  ],
   templateUrl: './order-dialog.component.html',
   styleUrls: ['./order-dialog.component.scss'],
 })
@@ -28,7 +38,7 @@ export class OrderDialogComponent implements OnInit {
   orderId: string | null = null;
   createdOrderId: string | null = null;
   status: OrderStatus = 'draft';
-  isEditMode: boolean = false;
+  isEditMode = false;
 
   items: OrderItem[] = [];
   dataSource = new MatTableDataSource<OrderItem>();
@@ -41,35 +51,33 @@ export class OrderDialogComponent implements OnInit {
 
   displayedColumns = ['name', 'qty', 'price', 'subtotal', 'actions'];
   isMobile = window.innerWidth <= 768;
+
   private originalItems: OrderItem[] = [];
-  private originalNotes: string = '';
+  private originalNotes = '';
 
   constructor(
     private dialog: MatDialog,
     private dialogRef: MatDialogRef<OrderDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private ordersService: OrdersService,
-    private dialogService: DialogService,
-    private tableService: TableService,
+
     private auth: AuthService,
-    private orderStatusService: OrderStatusService
+    private orderStatusService: OrderStatusService,
+
+    private orderDialogService: OrderDialogService,
+    private dialogService: DialogService
   ) {
     this.restaurantId = data.restaurantId;
     this.tableId = data.tableId;
-    this.tableNumber = data.number || data.tableNumber; // Número de mesa
+    this.tableNumber = data.number || data.tableNumber;
     this.orderId = data.orderId ?? null;
   }
 
   ngOnInit(): void {
     if (this.orderId) {
       this.loadOrder();
-    } else {
-      this.isEditMode = false;
-      this.status = 'draft';
     }
   }
 
-  // Getter para mostrar automáticamente la etiqueta del estado
   get orderStatusLabel(): string {
     return this.orderStatusService.getOrderStatusLabel(this.status);
   }
@@ -77,60 +85,26 @@ export class OrderDialogComponent implements OnInit {
   private async loadOrder() {
     try {
       this.loading = true;
-      const order = await this.ordersService.getOrderWithItems(
+      const order = await this.orderDialogService.loadOrder(
         this.restaurantId,
         this.orderId!
       );
 
-      this.items = (order.items || []).map((i: any) => ({
-        itemId: i.itemId,
-        productId: i.productId,
-        name: i.name,
-        price: i.price,
-        qty: i.qty,
-        subtotal: i.subtotal ?? i.price * i.qty,
-        position: i.position,
-        notes: i.notes ?? '',
-        createdAt: i.createdAt,
-        updatedAt: i.updatedAt,
-      }));
-
-      // Guardamos copia original para comparaciones
-      this.originalItems = this.items.map((i) => ({ ...i }));
-      this.originalNotes = order.notes || '';
-
+      this.items = order.items;
       this.dataSource.data = [...this.items];
-      this.notes = order.notes || '';
+
+      this.notes = order.notes;
       this.status = order.status;
       this.isEditMode = this.status !== 'draft';
+
+      this.originalItems = order.originalItems;
+      this.originalNotes = order.originalNotes;
     } catch (e: any) {
       this.dialogService.errorDialog('Error', e.message);
       this.dialogRef.close();
     } finally {
       this.loading = false;
     }
-  }
-
-  // Método auxiliar para comparar cambios
-  private hasChanges(): boolean {
-    if (this.notes !== this.originalNotes) return true;
-
-    if (this.items.length !== this.originalItems.length) return true;
-
-    for (let i = 0; i < this.items.length; i++) {
-      const current = this.items[i];
-      const original = this.originalItems[i];
-      if (
-        current.productId !== original.productId ||
-        current.qty !== original.qty ||
-        current.price !== original.price ||
-        current.notes !== original.notes
-      ) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   addItemDialog() {
@@ -145,10 +119,14 @@ export class OrderDialogComponent implements OnInit {
       const newItem: OrderItem = {
         productId: product.productId,
         name: product.name,
-        price: this.getProductPrice(product),
+        price: product.isOffer
+          ? product.offerPrice ?? product.price
+          : product.price,
         qty: 1,
         position: this.items.length,
-        subtotal: this.getProductPrice(product),
+        subtotal: product.isOffer
+          ? product.offerPrice ?? product.price
+          : product.price,
         notes: '',
       };
 
@@ -157,23 +135,17 @@ export class OrderDialogComponent implements OnInit {
     });
   }
 
-  getProductPrice(product: Product): number {
-    return product.isOffer
-      ? product.offerPrice ?? product.price
-      : product.price;
-  }
-
-  removeItem(index: number) {
+  removeItem(i: number) {
     this.dialogService
       .confirmDialog({
         title: 'Eliminar item?',
-        message: '¿Estás seguro de querer quitar el item del pedido?.',
+        message: '¿Estás seguro de querer quitar el item del pedido?',
         type: 'question',
       })
-      .subscribe((confirmed: boolean) => {
+      .subscribe((confirmed) => {
         if (confirmed) {
-          this.items.splice(index, 1);
-          this.dataSource.data = [...this.items]; // refrescar tabla
+          this.items.splice(i, 1);
+          this.dataSource.data = [...this.items];
         }
       });
   }
@@ -183,32 +155,37 @@ export class OrderDialogComponent implements OnInit {
   }
 
   async createOrder() {
-    const waiter = this.auth.getUserID() ?? 'unknown';
-    const orderId = await this.ordersService.createOrderForMozo(
-      this.restaurantId,
-      {
+    this.loading = true;
+    try {
+      const waiter = this.auth.getUserID() ?? 'unknown';
+      const orderId = await this.orderDialogService.createOrder({
+        restaurantId: this.restaurantId,
         tableId: this.tableId,
         tableNumber: this.tableNumber,
         createdBy: waiter,
         waiter,
         notes: this.notes,
         items: this.items,
-      }
-    );
+      });
 
-    await this.tableService.assignOrderToTable(
-      this.restaurantId,
-      this.tableId,
-      orderId
-    );
-    this.dialogRef.close(orderId);
+      this.dialogRef.close(orderId);
+    } finally {
+      this.loading = false;
+    }
   }
 
   async updateOrder() {
     const targetOrderId = this.createdOrderId || this.orderId;
     if (!targetOrderId) return;
 
-    if (!this.hasChanges()) {
+    const hasChanges = this.orderDialogService.hasChanges(
+      this.items,
+      this.originalItems,
+      this.notes,
+      this.originalNotes
+    );
+
+    if (!hasChanges) {
       this.dialogService.infoDialog(
         'Sin cambios',
         'No se detectaron cambios en el pedido.'
@@ -226,31 +203,20 @@ export class OrderDialogComponent implements OnInit {
 
     this.loading = true;
     try {
-      await this.ordersService.updateOrder(
-        this.restaurantId,
-        targetOrderId,
-        this.items,
-        this.notes,
-        'mozo'
-      );
-      this.status = 'updated';
+      await this.orderDialogService.updateOrder({
+        restaurantId: this.restaurantId,
+        orderId: targetOrderId,
+        items: this.items,
+        notes: this.notes,
+      });
+
       this.dialogService.infoDialog(
         'Pedido actualizado',
         'El pedido fue actualizado correctamente.'
       );
       this.dialogRef.close(true);
-    } catch (e: any) {
-      this.dialogService.errorDialog('Error', e.message);
     } finally {
       this.loading = false;
-    }
-  }
-
-  async confirmOrder() {
-    if (this.isEditMode) {
-      await this.updateOrder();
-    } else {
-      await this.createOrder();
     }
   }
 
@@ -264,63 +230,42 @@ export class OrderDialogComponent implements OnInit {
 
     this.loading = true;
     try {
-      const status = this.mapPaymentToStatus(result.method);
-      await this.ordersService.updateOrderStatus(
-        this.restaurantId,
-        this.createdOrderId || this.orderId!,
-        status,
-        'mozo'
-      );
-      await this.tableService.clearTable(this.restaurantId, this.tableId);
-      this.dialogService.infoDialog(
-        'Pedido cerrado',
-        'Se registró el pago, se cerró el pedido y la mesa quedó disponible.'
-      );
+      await this.orderDialogService.closeOrder({
+        orderId: this.orderId,
+        restaurantId: this.restaurantId,
+        tableId: this.tableId,
+        paymentMethod: result.method,
+      });
       this.dialogRef.close(true);
-    } catch (e: any) {
-      this.dialogService.errorDialog('Error', e.message);
     } finally {
       this.loading = false;
     }
   }
 
   async cancelOrder() {
-    if (!this.orderId && !this.createdOrderId) return;
-
     const confirm = await firstValueFrom(
       this.dialogService.confirmDialog({
         title: 'Cancelar Pedido?',
-        message:
-          '¿Estás seguro de querer cancelar este pedido? Esta acción no se puede deshacer.',
+        message: '¿Estás seguro de querer cancelar este pedido?',
         type: 'question',
       })
     );
+
     if (!confirm) return;
 
     this.loading = true;
     try {
-      const targetOrderId = this.createdOrderId || this.orderId!;
-      const userId = this.auth.getUserID() ?? 'unknown';
-      await this.ordersService.cancelOrder(
-        this.restaurantId,
-        targetOrderId,
-        userId
-      );
-      await this.tableService.clearTable(this.restaurantId, this.tableId);
-      this.dialogService.infoDialog(
-        'Pedido cancelado',
-        'El pedido fue cancelado y la mesa quedó disponible.'
-      );
+      await this.orderDialogService.cancelOrder({
+        restaurantId: this.restaurantId,
+        tableId: this.tableId,
+        orderId: this.orderId,
+        userId: this.auth.getUserID(),
+      });
+
       this.dialogRef.close(true);
-    } catch (e: any) {
-      this.dialogService.errorDialog('Error', e.message);
     } finally {
       this.loading = false;
     }
-  }
-
-  mapPaymentToStatus(method: string): OrderStatus {
-    return 'closed';
   }
 
   cancel() {
@@ -328,7 +273,7 @@ export class OrderDialogComponent implements OnInit {
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    this.isMobile = event.target.innerWidth <= 768;
+  onResize(e: any) {
+    this.isMobile = e.target.innerWidth <= 768;
   }
 }

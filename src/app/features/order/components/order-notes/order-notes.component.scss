@@ -1,0 +1,20 @@
+mat-form-field.full-width {
+  width: 100%;
+  padding-top: 10px;
+
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    font-size: 1rem;
+    color: var(--text-color);
+
+    &:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2); // opcional: se puede ajustar con color del tema
+      outline: none;
+    }
+  }
+}

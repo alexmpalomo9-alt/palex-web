@@ -1,4 +1,4 @@
-<div class="tables-container mat-elevation-z2">
+<div class="tables-container mat-elevation-z2" [class.dark-theme]="isDarkMode">
   <!-- HEADER -->
   <div class="tables-header sticky-header">
     <h2>Mesas del Restaurante</h2>
@@ -72,15 +72,9 @@
             <mat-icon>swap_horiz</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="changeStatus(t, 'available')">
-              Disponible
-            </button>
-            <button mat-menu-item (click)="changeStatus(t, 'occupied')">
-              Ocupada
-            </button>
-            <button mat-menu-item (click)="changeStatus(t, 'reserved')">
-              Reservada
-            </button>
+            <button mat-menu-item (click)="changeStatus(t, 'available')">Disponible</button>
+            <button mat-menu-item (click)="changeStatus(t, 'occupied')">Ocupada</button>
+            <button mat-menu-item (click)="changeStatus(t, 'reserved')">Reservada</button>
           </mat-menu>
 
           <button mat-icon-button color="warn" (click)="deleteTable(t)">
@@ -90,38 +84,22 @@
             <mat-icon>qr_code</mat-icon>
           </button>
 
-          <!-- Botón Ver Pedido -->
           <button
             mat-icon-button
             color="primary"
             (click)="viewOrder(t.currentOrderId, t)"
           >
             <mat-icon>receipt_long</mat-icon>
-            <mat-icon *ngIf="t.currentOrderId" class="active-order-icon"
-              >circle</mat-icon
-            >
+            <mat-icon *ngIf="t.currentOrderId" class="active-order-icon">circle</mat-icon>
           </button>
         </td>
       </ng-container>
 
       <!-- Filas -->
-      <tr
-        mat-header-row
-        *matHeaderRowDef="[
-          'number',
-          'name',
-          'capacity',
-          'status',
-          'sector',
-          'actions'
-        ]"
-      ></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr
         mat-row
-        *matRowDef="
-          let row;
-          columns: ['number', 'name', 'capacity', 'status', 'sector', 'actions']
-        "
+        *matRowDef="let row; columns: displayedColumns"
         [ngClass]="{ 'active-order-row': row.currentOrderId }"
       ></tr>
     </table>

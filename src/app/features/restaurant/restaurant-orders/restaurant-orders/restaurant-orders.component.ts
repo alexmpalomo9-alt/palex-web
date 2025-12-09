@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { OrderItem } from '../../../order/models/order.model';
-import { OrdersService } from '../../../order/services/order.service';
 import { Restaurant } from '../../model/restaurant.model';
 import { ActivatedRoute } from '@angular/router';
 import { RestaurantService } from '../../services/restaurant.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { FormsModule } from '@angular/forms';
+import { OrderService } from '../../../order/services/order-service/order.service';
 
 @Component({
   selector: 'app-restaurant-orders',
@@ -32,7 +32,7 @@ export class RestaurantOrdersComponent {
   };
 
   constructor(
-    private ordersService: OrdersService,
+    private orderService: OrderService,
     private route: ActivatedRoute,
     private restaurantService: RestaurantService
   ) {}
@@ -57,7 +57,7 @@ export class RestaurantOrdersComponent {
     }
 
     try {
-      const orderId = await this.ordersService.createOrder(
+      const orderId = await this.orderService.createOrder(
         this.restaurant.restaurantId,
         {
           tableId: this.tableId,
@@ -105,7 +105,7 @@ export class RestaurantOrdersComponent {
       this.items.push(newItem);
 
       // Actualiza todo el pedido con los items
-      await this.ordersService.updateOrder(
+      await this.orderService.updateOrder(
         this.restaurant.restaurantId,
         this.currentOrderId,
         this.items,

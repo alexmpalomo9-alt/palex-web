@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { SearchBoxComponent } from '../../../shared/components/search-box/search-box.component';
 import { Restaurant } from '../../../features/restaurant/model/restaurant.model';
 import { RestaurantService } from '../../../features/restaurant/services/restaurant.service';
+import { ThemeService } from '../../../core/services/theme/theme.service';
 
 @Component({
   selector: 'app-home-page',
@@ -16,10 +17,17 @@ import { RestaurantService } from '../../../features/restaurant/services/restaur
 export class HomePageComponent implements OnInit, OnDestroy {
   @Input() restaurants: Restaurant[] = [];
   filteredRestaurants: Restaurant[] = [];
+  isDarkMode: boolean;
+
   private sub?: Subscription;
+  private destroy$ = new Subject<void>();
 
   private restaurantService = inject(RestaurantService);
   private router = inject(Router);
+
+  constructor(private themeService: ThemeService) {
+    this.isDarkMode = this.themeService.getDarkMode();
+  }
 
   ngOnInit() {
     this.sub = this.restaurantService
@@ -28,6 +36,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         this.restaurants = data;
         this.filteredRestaurants = [...data];
       });
+    this.themeService.darkModeObservable
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => this.isDarkMode = value);
   }
 
   ngOnDestroy() {

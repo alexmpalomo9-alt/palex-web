@@ -1,0 +1,4 @@
+<mat-form-field appearance="outline" class="full-width">
+  <mat-label>Notas del pedido</mat-label>
+  <textarea matInput rows="3" [ngModel]="notes" (ngModelChange)="updateNotes($event)"></textarea>
+</mat-form-field>

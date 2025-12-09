@@ -17,15 +17,11 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import {
-  Order,
-  OrderItem,
-  OrderStatus,
-  OrderStatusChange,
-} from '../models/order.model';
+import { OrderStatus, OrderItem, Order } from '../../models/order.model';
+
 
 @Injectable({ providedIn: 'root' })
-export class OrdersService {
+export class OrderService {
   constructor(private firestore: Firestore) {}
 
   // ================================================================

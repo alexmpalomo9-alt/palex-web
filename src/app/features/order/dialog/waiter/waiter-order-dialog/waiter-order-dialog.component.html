@@ -1,0 +1,70 @@
+<mat-dialog-content class="order-dialog">
+
+  <!-- HEADER -->
+  <div class="dialog-header">
+    <h2>Pedido Mesa #{{ tableNumber }}</h2>
+    <span class="status">{{ statusLabel }}</span>
+
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="loading">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ITEMS LIST -->
+    <app-order-items-list
+      [items]="items"
+      [isMobile]="isMobile"
+      (remove)="removeItem($event)"
+      (qtyChange)="updateQty($event)">
+    </app-order-items-list>
+
+    <!-- NOTAS -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas del pedido</mat-label>
+      <textarea matInput [(ngModel)]="notes" rows="3"></textarea>
+    </mat-form-field>
+
+    <!-- TOTAL -->
+    <div class="total">
+      Total: <strong>{{ getTotal() | currency }}</strong>
+    </div>
+
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+
+  <button mat-raised-button color="primary" (click)="addItem()">
+    Agregar productos
+  </button>
+
+  <!-- NUEVO PEDIDO -->
+  <button mat-raised-button color="accent"
+          *ngIf="!isEditMode"
+          (click)="createOrder()">
+    Enviar pedido
+  </button>
+
+  <!-- EDITANDO -->
+  <button mat-raised-button color="accent"
+          *ngIf="isEditMode && status !== 'closed'"
+          (click)="updateOrder()">
+    Actualizar pedido
+  </button>
+
+  <!-- CERRAR -->
+  <button mat-raised-button color="primary"
+          *ngIf="isEditMode && status !== 'closed'"
+          (click)="closeOrder()">
+    Cerrar pedido
+  </button>
+
+</mat-dialog-actions>

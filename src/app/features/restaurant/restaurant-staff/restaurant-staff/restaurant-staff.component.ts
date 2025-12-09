@@ -7,10 +7,8 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, from, filter, switchMap, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { User } from '../../../../users/model/user.model';
-import { RestaurantStaffService } from '../../services/restaurant-staff.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import {
   BaseTableComponent,
@@ -24,6 +22,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { InvitationService } from '../../../invitations/services/invitation.service';
 import { InvitationDialogComponent } from '../../../invitations/components/invitation-dialog/invitation-dialog.component';
 import { RolePermissionsInfoComponent } from '../role-permissions-info/role-permissions-info.component';
+import { RestaurantStaffService } from '../services/restaurant-staff.service';
+import { User } from '../../../../users/model/user.model';
+import { ThemeService } from '../../../../core/services/theme/theme.service';
 
 @Component({
   selector: 'app-restaurant-staff',
@@ -41,13 +42,17 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
   restaurantId!: string;
   staff: User[] = [];
   showDisabled = false;
+  isDarkMode: boolean;
 
   private destroy$ = new Subject<void>();
+
   private userService = inject(UserService);
   private dialogService = inject(DialogService);
   private dialog = inject(MatDialog);
   private restaurantStaffService = inject(RestaurantStaffService);
   private invitationService = inject(InvitationService);
+  private route = inject(ActivatedRoute);
+  private themeService = inject(ThemeService);
 
   private internalRoles = [
     'adminGlobal',
@@ -69,18 +74,26 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
     { id: 'roles', label: 'Roles' },
   ];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor() {
+    this.isDarkMode = this.themeService.getDarkMode();
+  }
 
   ngOnInit() {
     this.columns.find((c) => c.id === 'roles')!.template = this.rolesTemplate;
 
-    // 🔥 USAMOS DIRECTAMENTE EL ID REAL DEL RESTAURANTE DESDE LA RUTA
-    this.restaurantId =
-      this.route.parent?.snapshot.paramMap.get('restaurantId') ?? '';
+    this.restaurantId = this.route.parent?.snapshot.paramMap.get('restaurantId') ?? '';
 
     if (this.restaurantId) {
       this.loadStaff();
     }
+
+    this.subscribeTheme();
+  }
+
+  private subscribeTheme() {
+    this.themeService.darkModeObservable
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => this.isDarkMode = value);
   }
 
   loadStaff() {
@@ -89,105 +102,80 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
     this.restaurantStaffService
       .getRestaurantEmployeesByRestaurantId(this.restaurantId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((users) => {
-        this.staff = users.map((u) => ({
+      .subscribe(users => {
+        this.staff = users.map(u => ({
           ...u,
           fullname: `${u.name} ${u.lastname}`,
-
           rolesList: [
-            // GLOBAL ROLES
+            // Global roles
             ...Object.keys(u.globalRoles || {}).filter(
-              (r) =>
-                (u.globalRoles as Record<string, boolean>)[r] &&
-                this.internalRoles.includes(r)
+              r => (u.globalRoles as Record<string, boolean>)[r] && this.internalRoles.includes(r)
             ),
-
-            // LOCAL ROLES DEL RESTAURANTE ACTUAL
+            // Local roles for current restaurant
             ...Object.keys(u.localRoles?.[this.restaurantId] || {}).filter(
-              (r) =>
-                (u.localRoles![this.restaurantId] as Record<string, boolean>)[
-                  r
-                ] && this.internalRoles.includes(r)
+              r => (u.localRoles![this.restaurantId] as Record<string, boolean>)[r] && this.internalRoles.includes(r)
             ),
           ],
         }));
       });
   }
 
-  async changeRole(user: User) {
+  changeRole(user: User) {
     const dialogRef = this.dialog.open(UserDialogComponent, {
       width: '400px',
       data: { user, modo: 'editar-usuario', restaurantId: this.restaurantId },
     });
 
-    const result = await dialogRef.afterClosed().toPromise();
-    if (!result || !user.uid) return;
-
-    // 🔥 NO envies globalRoles (para evitar undefined)
-    await this.userService.updateUser(user.uid, {
-      localRoles: result.localRoles,
-    });
-
-    this.dialogService.infoDialog('OK', 'Roles actualizados correctamente.');
-    this.loadStaff();
+    dialogRef.afterClosed()
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(result => !!result && !!user.uid),
+        switchMap(result => from(this.userService.updateUser(user.uid!, { localRoles: result.localRoles })))
+      )
+      .subscribe(() => {
+        this.dialogService.infoDialog('OK', 'Roles actualizados correctamente.');
+        this.loadStaff();
+      });
   }
 
-  async openInvitationDialog() {
+  openInvitationDialog() {
     const dialogRef = this.dialog.open(InvitationDialogComponent, {
       width: '450px',
       data: { restaurantId: this.restaurantId },
     });
 
-    dialogRef.afterClosed().subscribe(async (result) => {
-      if (!result) return;
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async (result) => {
+        if (!result) return;
 
-      try {
-        if (result.method === 'email') {
-          await this.invitationService.createInvitation(
-            this.restaurantId,
-            result.email,
-            result.role
-          );
+        try {
+          if (result.method === 'email') {
+            await this.invitationService.createInvitation(this.restaurantId, result.email, result.role);
+          } else if (result.method === 'link') {
+            await this.invitationService.createJoinLink(this.restaurantId, result.role);
+          }
+        } catch (err: any) {
+          this.dialogService.errorDialog('Error', err?.message || 'No se pudo generar la invitación.');
         }
-
-        if (result.method === 'link') {
-          await this.invitationService.createJoinLink(
-            this.restaurantId,
-            result.role
-          );
-        }
-      } catch (err: any) {
-        this.dialogService.errorDialog(
-          'Error',
-          err?.message || 'No se pudo generar la invitación.'
-        );
-      }
-    });
+      });
   }
 
-  async deleteStaffMember(user: User) {
-    this.dialogService
-      .confirmDialog({
-        title: 'Eliminar empleado del restaurante',
-        message:
-          '¿Deseas eliminar a este usuario del restaurante? No se eliminará su cuenta global.',
-        type: 'question',
-      })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(async (ok) => {
-        if (!ok || !user.uid) return;
-
-        await this.restaurantStaffService.removeUserFromRestaurant(
-          user.uid,
-          this.restaurantId
-        );
-
-        this.dialogService.infoDialog(
-          'OK',
-          'Empleado eliminado del restaurante.'
-        );
-        this.loadStaff();
-      });
+  deleteStaffMember(user: User) {
+    this.dialogService.confirmDialog({
+      title: 'Eliminar empleado del restaurante',
+      message: '¿Deseas eliminar a este usuario del restaurante? No se eliminará su cuenta global.',
+      type: 'question',
+    })
+    .pipe(
+      takeUntil(this.destroy$),
+      filter(ok => ok && !!user.uid),
+      switchMap(() => from(this.restaurantStaffService.removeUserFromRestaurant(user.uid!, this.restaurantId)))
+    )
+    .subscribe(() => {
+      this.dialogService.infoDialog('OK', 'Empleado eliminado del restaurante.');
+      this.loadStaff();
+    });
   }
 
   ngOnDestroy() {

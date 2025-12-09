@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Firestore, collection, collectionData, doc, docData, query, where } from '@angular/fire/firestore';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Product } from '../../../products/model/product.model';
-import { RestaurantStats } from '../restaurant-stats/model/restaurant-stats';
+import { Product } from '../../../../products/model/product.model';
+import { RestaurantStats } from '../model/restaurant-stats';
 
 @Injectable({
   providedIn: 'root'

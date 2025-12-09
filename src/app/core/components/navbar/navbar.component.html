@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <!-- LOGO -->
     <a class="navbar-brand" routerLink="/">
-      <img class="logo" src="assets/img/logo.png" alt="Logo" />
+      <img class="logo" src="assets/img/small_logo.png"  alt="Logo" /> Palex
     </a>
 
     <!-- BOTÓN HAMBURGUESA -->
@@ -42,13 +42,13 @@
       </ul>
 
       <!-- ICONO MODO OSCURO -->
-      <!-- <button
+      <button
         mat-icon-button
-        (click)="toggleDarkMode(!isDarkMode)"
+        (click)="toggleTheme()"
         [title]="isDarkMode ? 'Modo Claro' : 'Modo Oscuro'"
       >
         <mat-icon>{{ isDarkMode ? "light_mode" : "dark_mode" }}</mat-icon>
-      </button> -->
+      </button>
 
       <!-- ACCESOS -->
       <section *ngIf="(isLoggedIn$ | async) === false">

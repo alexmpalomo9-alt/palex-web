@@ -12,6 +12,7 @@ import { Product } from '../../products/model/product.model';
 import { Restaurant } from '../../features/restaurant/model/restaurant.model';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../shared/shared.module';
+import { ThemeService } from '../../core/services/theme/theme.service';
 
 @Component({
   selector: 'app-menu-palex',
@@ -31,11 +32,16 @@ export class MenuPalexComponent implements OnInit {
 
   selectedCategoryIndex = 0;
   currentProducts$!: Observable<Product[]>;
+  isDarkMode = false;
 
   allCategories: { label: string; products$: Observable<Product[]> }[] = [];
+  constructor(private themeService: ThemeService) {}
 
   ngOnInit() {
     this.updateCategories();
+    this.themeService.darkModeObservable.subscribe((value) => {
+      this.isDarkMode = value;
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {

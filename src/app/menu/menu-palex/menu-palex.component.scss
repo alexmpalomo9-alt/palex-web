@@ -9,6 +9,14 @@
       @media (max-width: 768px) {
         text-align: left;
       }
+
+      .title {
+        font-size: 2rem;
+        color: #222;
+      }
+      .subtitle {
+        color: #555;
+      }
     }
   }
 
@@ -21,9 +29,8 @@
     .swiper-wrapper {
       display: flex;
       align-items: center;
-      justify-content: flex-start; /* por defecto scroll horizontal móvil */
+      justify-content: flex-start;
     }
-
     .category-slide {
       width: auto !important;
       flex-shrink: 0;
@@ -33,6 +40,7 @@
       padding: 8px 20px;
       border-radius: 20px;
       background: #eee;
+      color: #222;
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
@@ -46,7 +54,6 @@
       }
     }
 
-    /* === Media Query para PC === */
     @media (min-width: 768px) {
       max-width: 700px;
       margin: 0 auto;
@@ -68,135 +75,111 @@
   .menu-card {
     border-radius: 12px;
     background: #fff;
+    color: #222;
     display: flex;
     flex-direction: column;
     position: relative;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
 
-  .menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  }
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
 
-  &.offer::before {
-    content: "🔥 Oferta";
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #d32f2f;
-    color: #fff;
-    font-weight: bold;
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    z-index: 10;
-  }
+    &.offer::before {
+      content: "🔥 Oferta";
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #d32f2f;
+      color: #fff;
+      font-weight: bold;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      z-index: 10;
+    }
 
-  .card-content-wrapper {
-    display: flex;
-    gap: 15px;
-    align-items: flex-start;
-    padding: 15px;
-    height: 100%;
-  }
+    .card-content-wrapper {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+      padding: 15px;
+      height: 100%;
+    }
 
-  .image-section img {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-  }
+    .image-section img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
 
-  .image-section img:hover {
-    transform: scale(1.1);
-    cursor: pointer;
-  }
+      &:hover {
+        transform: scale(1.1);
+        cursor: pointer;
+      }
+    }
 
-.text-section {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  height: 100%; /* llena la altura disponible */
-  padding-right: 10px;
-}
+    .text-section {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      height: 100%;
+      padding-right: 10px;
 
-.text-section > h2 {
-  margin: 0 0 10px 0;
-  font-size: 20px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
+      h2 {
+        margin: 0 0 10px 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
 
-.text-scroll {
-  flex-grow: 1;
-  overflow-y: auto;
-  color: #555;
-  margin-bottom: 10px;
-}
+      .text-scroll {
+        flex-grow: 1;
+        overflow-y: auto;
+        color: #555;
+        margin-bottom: 10px;
+      }
 
-.price-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  flex-shrink: 0;
-}
+      .price-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-shrink: 0;
 
-.button-wrapper {
-  flex-shrink: 0;
-  /* margen inferior para que no quede pegado al borde si quieres */
-  margin-bottom: 0;
-}
+        .price-normal {
+          font-size: 20px;
+          font-weight: bold;
+          color: #222;
+        }
+        .old-price {
+          font-size: 14px;
+          text-decoration: line-through;
+          color: #888;
+        }
+        .offer-price {
+          font-size: 20px;
+          font-weight: 700;
+          color: #d32f2f;
+        }
+      }
 
-.button-wrapper button {
-  width: 50%;
-  justify-content: center;
-  transition: transform 0.2s;
-}
+      .button-wrapper {
+        flex-shrink: 0;
+        margin-bottom: 0;
 
-.button-wrapper button:hover {
-  transform: translateY(-2px);
-}
-  .price-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-shrink: 0;
-  }
+        button {
+          width: 50%;
+          justify-content: center;
+          transition: transform 0.2s;
 
-  .price-normal {
-    font-size: 20px;
-    font-weight: bold;
-    color: #222;
-  }
-
-  .old-price {
-    font-size: 14px;
-    text-decoration: line-through;
-    color: #888;
-  }
-
-  .offer-price {
-    font-size: 20px;
-    font-weight: 700;
-    color: #d32f2f;
-  }
-
-  .button-wrapper {
-    flex-shrink: 0;
-  }
-
-  .button-wrapper button {
-    width: 50%;
-    justify-content: center;
-    transition: transform 0.2s;
-  }
-
-  .button-wrapper button:hover {
-    transform: translateY(-2px);
+          &:hover {
+            transform: translateY(-2px);
+          }
+        }
+      }
+    }
   }
 
   .empty-message {
@@ -206,8 +189,75 @@
   }
 }
 
-@media (min-width: 768px) {
-  .category-swiper {
-    padding: 10px 20px;
+/* ================= Dark Mode ================= */
+.menu-container.dark-theme {
+  background: #262627;
+
+  .header-menu .title-container {
+    .title {
+      color: #fff;
+    }
+    .subtitle {
+      color: #ccc;
+    }
+  }
+
+  .category-swiper .category-tab {
+    background: #333;
+    color: #ccc;
+
+    &.active {
+      background: #1976d2;
+      color: #fff;
+    }
+  }
+
+  .menu-card {
+    background: #2a2a3b;
+    color: #eee;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+
+    &:hover {
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+    }
+
+    &.offer::before {
+      background-color: #ff5252;
+      color: #fff;
+    }
+
+    .text-section {
+      h2 {
+        color: #fff;
+      }
+      .text-scroll {
+        color: #ddd;
+      }
+
+      .price-wrapper {
+        .price-normal {
+          color: #fff;
+        }
+        .old-price {
+          color: #aaa;
+        }
+        .offer-price {
+          color: #ff5252;
+        }
+      }
+
+      .button-wrapper button {
+        background: #1976d2;
+        color: #fff;
+
+        &:hover {
+          background: #1565c0;
+        }
+      }
+    }
+  }
+
+  .empty-message {
+    color: #aaa;
   }
 }
