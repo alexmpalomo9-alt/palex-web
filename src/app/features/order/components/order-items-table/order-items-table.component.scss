@@ -1,0 +1,79 @@
+/* ============================================
+   SECCIONES
+============================================ */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &.items-section {
+    margin-top: 1rem;
+  }
+
+  &.total-section {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.25rem;
+    margin: 1rem 0;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media (max-width: 768px) {
+  /* Tabla scrollable y inputs más pequeños */
+  .section.items-section table.mat-elevation-z1 {
+    font-size: 0.9rem;
+
+    input.input-quantity {
+      width: 2.8rem;
+    }
+    table.mat-elevation-z1 {
+      width: 100%;
+      display: block;
+      overflow-x: auto; // scroll horizontal en móviles
+
+      th,
+      td {
+        white-space: nowrap; // evitar que se rompa la tabla
+      }
+
+      input.input-quantity {
+        width: 3.5rem; // ancho fijo en pantallas grandes
+      }
+    }
+  }
+
+  /* Total section vertical en móviles */
+  .section.total-section {
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section.items-section table.mat-elevation-z1 input.input-quantity {
+    width: 2.2rem;
+  }
+
+  .section.total-section {
+    font-size: 0.95rem;
+  }
+
+  table.mat-elevation-z1 {
+    width: 100%;
+    display: block;
+    overflow-x: auto; // scroll horizontal en móviles
+
+    th,
+    td {
+      white-space: nowrap; // evitar que se rompa la tabla
+    }
+
+    input.input-quantity {
+      width: 3.5rem; // ancho fijo en pantallas grandes
+    }
+  }
+}

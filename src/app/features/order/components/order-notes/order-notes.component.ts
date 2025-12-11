@@ -10,6 +10,8 @@ import { SharedModule } from '../../../../shared/shared.module';
 })
 export class OrderNotesComponent {
   @Input() notes: string = '';
+  @Input() loading = false;
+
   @Output() notesChange = new EventEmitter<string>();
 
   updateNotes(value: string) {

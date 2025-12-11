@@ -1,0 +1,37 @@
+<mat-dialog-actions class="order-footer">
+  <button
+    mat-raised-button
+    color="accent"
+    *ngIf="!isEditMode && status !== 'closed'"
+    (click)="create.emit()"
+  >
+    Enviar orden
+  </button>
+  <button
+    mat-raised-button
+    color="accent"
+    *ngIf="isEditMode && status !== 'closed'"
+    (click)="update.emit()"
+  >
+    Actualizar estado
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    *ngIf="
+      status !== 'closed' &&
+      ['approved', 'preparing', 'updated'].includes(status)
+    "
+    (click)="closeOrder.emit()"
+  >
+    Cerrar pedido
+  </button>
+  <button
+    mat-raised-button
+    color="warn"
+    *ngIf="isEditMode && status !== 'closed' && status !== 'cancelled'"
+    (click)="cancelOrder.emit()"
+  >
+    Cancelar pedido
+  </button>
+</mat-dialog-actions>

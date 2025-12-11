@@ -1,92 +1,35 @@
-<mat-dialog-content class="order-dialog-content">
-  <!-- Header -->
-  <div class="order-dialog-header d-flex justify-content-between align-items-center">
-    <div>
-      <h2 class="m-0">Pedido Mesa #{{ tableNumber || "---" }}</h2>
-      <span *ngIf="orderStatusLabel" class="order-status">
-        ({{ orderStatusLabel }})
-      </span>
-    </div>
+<div class="order-dialog">
+  <!-- HEADER -->
+  <app-order-dialog-header
+    [tableNumber]="tableNumber"
+    [statusLabel]="orderStatusLabel"
+    (addItem)="addItemDialog()"
+    (close)="cancel()"
+  ></app-order-dialog-header>
 
-    <button mat-raised-button color="primary" (click)="addItemDialog()" class="action-button">
-      Agregar productos
-    </button>
+  <!-- ITEMS -->
+  <app-order-items-table
+    [items]="state.items"
+    (remove)="removeItem($event)"
+    (quantityChange)="dataSource.data = state.items"
+  ></app-order-items-table>
 
-    <button mat-icon-button class="close-button" (click)="cancel()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
+  <!-- TOTAL -->
+  <app-order-total [total]="facade.getTotal()"></app-order-total>
 
-  <!-- Loader -->
-  <div *ngIf="loading" class="loading-container">
-    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
-  </div>
+  <!-- NOTES -->
+  <app-order-notes
+    [(notes)]="state.notes"
+    [loading]="state.loading"
+  ></app-order-notes>
 
-  <ng-container *ngIf="!loading">
-    <!-- Items Desktop -->
-    <app-order-items-table
-      *ngIf="!isMobile"
-      [items]="items"
-      (remove)="removeItem($event)"
-    ></app-order-items-table>
-
-    <!-- Items Mobile -->
-    <app-order-items-mobile
-      *ngIf="isMobile"
-      [items]="items"
-      (remove)="removeItem($event)"
-    ></app-order-items-mobile>
-
-    <!-- Total -->
-    <div class="order-total">
-      <strong>Total: </strong> {{ getTotal() | currency }}
-    </div>
-
-    <!-- Notas -->
-    <app-order-notes
-      [notes]="notes"
-      (notesChange)="notes = $event"
-    ></app-order-notes>
-  </ng-container>
-</mat-dialog-content>
-
-<mat-dialog-actions>
-  <button
-    mat-raised-button
-    color="accent"
-    *ngIf="!isEditMode && status !== 'closed'"
-    (click)="createOrder()"
-  >
-    Enviar orden
-  </button>
-
-  <button
-    mat-raised-button
-    color="accent"
-    *ngIf="isEditMode && status !== 'closed'"
-    (click)="updateOrder()"
-  >
-    Actualizar estado
-  </button>
-
-  <button
-    mat-raised-button
-    color="primary"
-    *ngIf="
-      status !== 'closed' &&
-      (status === 'approved' || status === 'preparing' || status === 'updated')
-    "
-    (click)="closeOrder()"
-  >
-    Cerrar pedido
-  </button>
-
-  <button
-    mat-raised-button
-    color="warn"
-    *ngIf="isEditMode && status !== 'closed' && status !== 'cancelled'"
-    (click)="cancelOrder()"
-  >
-    Cancelar pedido
-  </button>
-</mat-dialog-actions>
+  <!-- FOOTER -->
+  <app-order-dialog-footer
+    [status]="state.status"
+    [isEditMode]="state.isEditMode"
+    (create)="createOrder()"
+    (update)="updateOrder()"
+    (closeOrder)="closeOrder()"
+    (cancelOrder)="cancelOrder()"
+  ></app-order-dialog-footer>
+</div>

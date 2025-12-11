@@ -1,0 +1,64 @@
+/* --------------------------------------------
+   HEADER
+--------------------------------------------- */
+.order-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1rem 1.3rem;
+  border-radius: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+
+  .dialog-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .order-status {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-transform: capitalize;
+
+      background: rgba(0, 0, 0, 0.15);
+      color: var(--text-color);
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .close-button {
+      color: var(--text-color);
+      transition: 0.2s ease;
+
+      &:hover {
+        transform: rotate(90deg);
+        color: #ff5959;
+      }
+    }
+  }
+}
