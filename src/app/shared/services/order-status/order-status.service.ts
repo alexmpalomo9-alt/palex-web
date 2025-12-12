@@ -5,8 +5,7 @@ import { OrderStatus } from '../../../features/order/models/order.model';
   providedIn: 'root',
 })
 export class OrderStatusService {
-
-  constructor() { }
+  constructor() {}
 
   getOrderStatusLabel(status: OrderStatus): string {
     switch (status) {

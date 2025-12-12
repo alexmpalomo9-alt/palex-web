@@ -26,7 +26,14 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   tables: Table[] = [];
   loading = true;
   isDarkMode: boolean;
-  displayedColumns: string[] = ['number', 'name', 'capacity', 'status', 'sector', 'actions'];
+  displayedColumns: string[] = [
+    'number',
+    'name',
+    'capacity',
+    'status',
+    'sector',
+    'actions',
+  ];
 
   private destroy$ = new Subject<void>();
   private tableService = inject(TableService);
@@ -46,11 +53,12 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
     if (!slug) return;
 
     // 🔹 Cargar restaurante y luego mesas
-    this.restaurantService.getRestaurantBySlug(slug)
+    this.restaurantService
+      .getRestaurantBySlug(slug)
       .pipe(
         takeUntil(this.destroy$),
-        filter(r => !!r),
-        tap(r => {
+        filter((r) => !!r),
+        tap((r) => {
           this.restaurant = r!;
           this.restaurantId = r!.restaurantId;
         }),
@@ -64,7 +72,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   private subscribeTheme() {
     this.themeService.darkModeObservable
       .pipe(takeUntil(this.destroy$))
-      .subscribe(value => (this.isDarkMode = value));
+      .subscribe((value) => (this.isDarkMode = value));
   }
 
   /** Cargar mesas (observable) */
@@ -72,13 +80,12 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
     if (!this.restaurantId) return from([[]]); // Retorna array vacío si no hay restaurante
 
     this.loading = true;
-    return this.tableService.getTablesByRestaurant(this.restaurantId)
-      .pipe(
-        tap(tables => {
-          this.tables = tables;
-          this.loading = false;
-        })
-      );
+    return this.tableService.getTablesByRestaurant(this.restaurantId).pipe(
+      tap((tables) => {
+        this.tables = tables;
+        this.loading = false;
+      })
+    );
   }
 
   loadTables() {
@@ -92,95 +99,154 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   openCreateTable() {
     if (!this.restaurant) return;
 
-    this.tableDialogService.openTableDialog({ mode: 'create' })
+    this.tableDialogService
+      .openTableDialog({ mode: 'create' })
       .pipe(
         takeUntil(this.destroy$),
-        filter(result => !!result),
-        switchMap(result =>
-          from(this.tableService.createTable({
-            ...result!,
-            restaurantId: this.restaurant!.restaurantId
-          }))
+        filter((result) => !!result),
+        switchMap((result) =>
+          from(
+            this.tableService.createTable({
+              ...result!,
+              restaurantId: this.restaurant!.restaurantId,
+            })
+          )
         ),
         switchMap(() => this.loadTablesObservable())
       )
       .subscribe({
-        next: () => this.dialogService.infoDialog('Éxito', 'Mesa creada correctamente.'),
-        error: e => this.dialogService.errorDialog('Error', e?.message || 'Ocurrió un error inesperado.')
+        next: () =>
+          this.dialogService.infoDialog('Éxito', 'Mesa creada correctamente.'),
+        error: (e) =>
+          this.dialogService.errorDialog(
+            'Error',
+            e?.message || 'Ocurrió un error inesperado.'
+          ),
       });
   }
 
   openEditTable(table: Table) {
     if (!this.restaurant) return;
 
-    this.tableDialogService.openTableDialog({ mode: 'edit', data: table })
+    this.tableDialogService
+      .openTableDialog({ mode: 'edit', data: table })
       .pipe(
         takeUntil(this.destroy$),
-        filter(result => !!result),
-        switchMap(result => {
+        filter((result) => !!result),
+        switchMap((result) => {
           const { restaurantId: _ignore, ...cleanData } = result!;
-          return from(this.tableService.updateTable(this.restaurant!.restaurantId, table.tableId!, cleanData));
+          return from(
+            this.tableService.updateTable(
+              this.restaurant!.restaurantId,
+              table.tableId!,
+              cleanData
+            )
+          );
         }),
         switchMap(() => this.loadTablesObservable())
       )
       .subscribe({
-        next: () => this.dialogService.infoDialog('Éxito', 'Mesa actualizada correctamente.'),
-        error: e => this.dialogService.errorDialog('Error', e?.message || 'Ocurrió un error inesperado.')
+        next: () =>
+          this.dialogService.infoDialog(
+            'Éxito',
+            'Mesa actualizada correctamente.'
+          ),
+        error: (e) =>
+          this.dialogService.errorDialog(
+            'Error',
+            e?.message || 'Ocurrió un error inesperado.'
+          ),
       });
   }
 
   deleteTable(table: Table) {
     if (!table.tableId || !this.restaurant) return;
 
-    this.dialogService.confirmDialog({
-      title: '¿Eliminar Permanente?',
-      message: '¿Estás seguro de que deseas eliminar la mesa de forma permanente? Esta acción no se puede deshacer.',
-      type: 'confirm',
-    })
+    this.dialogService
+      .confirmDialog({
+        title: '¿Eliminar Permanente?',
+        message:
+          '¿Estás seguro de que deseas eliminar la mesa de forma permanente? Esta acción no se puede deshacer.',
+        type: 'confirm',
+      })
       .pipe(
         takeUntil(this.destroy$),
-        filter(ok => ok),
-        switchMap(() => from(this.tableService.deleteTable(this.restaurant!.restaurantId, table.tableId!))),
+        filter((ok) => ok),
+        switchMap(() =>
+          from(
+            this.tableService.deleteTable(
+              this.restaurant!.restaurantId,
+              table.tableId!
+            )
+          )
+        ),
         switchMap(() => this.loadTablesObservable())
       )
       .subscribe({
-        next: () => this.dialogService.infoDialog('Éxito', 'La mesa ha sido eliminada correctamente.'),
-        error: e => this.dialogService.errorDialog('Error', e?.message || 'Ocurrió un error inesperado.')
+        next: () =>
+          this.dialogService.infoDialog(
+            'Éxito',
+            'La mesa ha sido eliminada correctamente.'
+          ),
+        error: (e) =>
+          this.dialogService.errorDialog(
+            'Error',
+            e?.message || 'Ocurrió un error inesperado.'
+          ),
       });
   }
 
   changeStatus(table: Table, status: 'available' | 'occupied' | 'reserved') {
     if (!table.tableId) return;
 
-    from(this.tableService.updateTable(this.restaurantId, table.tableId, { status }))
+    from(
+      this.tableService.updateTable(this.restaurantId, table.tableId, {
+        status,
+      })
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           table.status = status;
         },
-        error: e => this.dialogService.errorDialog('Error', e?.message || 'No se pudo cambiar el estado.')
+        error: (e) =>
+          this.dialogService.errorDialog(
+            'Error',
+            e?.message || 'No se pudo cambiar el estado.'
+          ),
       });
   }
 
   openQr(table: Table) {
     const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
     this.dialog.open(TableQrDialogComponent, {
-      data: { table, url, logoUrl: 'assets/img/logo-palex.png' }
+      data: { table, url, logoUrl: 'assets/img/logo-palex.png' },
     });
   }
 
-  async viewOrder(orderId: string | null, table: Table) {
+  viewOrder(orderId: string | null, table: Table) {
     if (!this.restaurant) return;
 
+    // Crear pedido SOLO si status es available o seated
+    const canCreateOrder =
+      table.status === 'available' || table.status === 'seated';
+
+    // Si NO hay pedido y NO está en estados permitidos → bloquear
+    if (!orderId && !canCreateOrder) {
+      alert('La mesa no está disponible para crear un pedido.');
+      return;
+    }
+
+    // Abrir diálogo
     this.dialog.open(OrderDialogComponent, {
       disableClose: true,
       data: {
         restaurantId: this.restaurant.restaurantId,
         orderId,
         tableId: table.tableId,
-        number: table.number,
-        isNew: !orderId
-      }
+        tableNumber: table.number,
+        isNew: !orderId,
+      },
     });
   }
 

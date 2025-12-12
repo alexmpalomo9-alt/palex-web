@@ -213,8 +213,8 @@
   }
 
   .menu-card {
-  background: var(--card-bg) !important; /* NUEVO */
-  color: var(--text-color) !important; /* NUEVO */
+    background: var(--card-bg) !important; /* NUEVO */
+    color: var(--text-color) !important; /* NUEVO */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 
     &:hover {

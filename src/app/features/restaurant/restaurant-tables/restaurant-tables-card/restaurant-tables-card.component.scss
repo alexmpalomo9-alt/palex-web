@@ -1,168 +1,195 @@
-.tables-container {
-  padding: 24px;
-  background: var(--bg-color);
-  min-height: 100vh;
-  color: var(--text-color);
+/* -----------------------------------------------------
+   GRID WRAPPER
+----------------------------------------------------- */
+.cards-wrapper {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr); /* 4 columnas */
+}
 
-  .tables-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-
-    h2 {
-      font-weight: 700;
-      font-size: 1.8rem;
-      color: var(--text-color);
-    }
-  }
-
-  mat-progress-bar.loading-bar {
-    height: 6px;
-    border-radius: 3px;
-    margin-bottom: 20px;
-  }
-
+@media (max-width: 1300px) {
   .cards-wrapper {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
-    margin-top: 16px;
-    position: relative;
-  }
-
-  .table-card {
-    background: var(--card-bg);
-    padding: 16px;
-    border-radius: 14px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: grab;
-
-    &:active {
-      cursor: grabbing;
-    }
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    }
-
-  &.active-order {
-    border: 2px solid #3b82f6; // azul moderno
-  }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-
-      h3 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-color);
-      }
-
-      span {
-        font-size: 0.9rem;
-        color: var(--text-secondary-color);
-      }
-    }
-
-    .card-details {
-      margin: 16px 0;
-
-      p {
-        margin: 6px 0;
-        font-size: 0.95rem;
-        color: var(--text-color);
-      }
-
-      .status-pill {
-        display: inline-block;
-        padding: 5px 14px;
-        border-radius: 999px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        transition: all 0.3s;
-
-        &.available {
-          background: var(--status-available-bg);
-          color: var(--status-available-color);
-        }
-        &.occupied {
-          background: var(--status-occupied-bg);
-          color: var(--status-occupied-color);
-        }
-        &.reserved {
-          background: var(--status-reserved-bg);
-          color: var(--status-reserved-color);
-        }
-        &.active {
-          background: var(--status-active-bg);
-          color: var(--status-active-color);
-          animation: pulseStatus 1.5s infinite;
-        }
-      }
-    }
-
-    .card-actions {
-      display: flex;
-      justify-content: space-around;
-      gap: 10px;
-      flex-wrap: wrap;
-
-      button {
-        font-size: 0.85rem;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-      }
-    }
-  }
-
-  .card-placeholder {
-    border: 2px dashed #b0bec5;
-    border-radius: 14px;
-    background: #eceff1;
-    height: 160px;
-    width: 100%;
-  }
-
-  .drag-preview {
-    padding: 10px 14px;
-    background: var(--primary-color);
-    color: white;
-    border-radius: 8px;
-    font-weight: bold;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  @keyframes pulseStatus {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.1);
-      opacity: 0.85;
-    }
-  }
-
-  .empty-state {
-    text-align: center;
-    color: var(--text-secondary-color);
-    font-weight: 500;
-    font-size: 1rem;
-    margin-top: 40px;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas */
   }
 }
 
+@media (max-width: 900px) {
+  .cards-wrapper {
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+  }
+}
+
+@media (max-width: 600px) {
+  .cards-wrapper {
+    grid-template-columns: repeat(1, 1fr); /* 1 columna */
+  }
+}
+
+/* -----------------------------------------------------
+   TABLE CARD (M3 style)
+----------------------------------------------------- */
+.table-card {
+  padding: 1rem;
+  border-radius: 16px; // M3 rounded corners
+  background: var(--card-bg);
+  color: var(--text-color);
+
+  /* M3 Elevation (very subtle) */
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.08);
+
+  border: 1px solid var(--border-color);
+
+  transition: background 0.3s ease, box-shadow 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* ------------------------------
+      HEADER
+  ------------------------------ */
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    mat-card-title {
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: var(--text-color);
+    }
+
+    .status-pill {
+      padding: 0.25rem 0.7rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+      &.active {
+        background-color: #28a7469a;
+      }
+      &.available {
+        background-color: #17a3b885;
+      }
+      &.occupied {
+        background-color: #8c8edf71;
+      }
+      &.reserved {
+        background-color: #96351756;
+      }
+      &.seated {
+        background-color: #b64ca885;
+      }
+    }
+  }
+
+  /* ------------------------------
+      INFO
+  ------------------------------ */
+  .card-info {
+    margin-top: 0.8rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+
+      mat-icon {
+        font-size: 20px;
+        opacity: 0.65;
+      }
+    }
+  }
+
+  /* ------------------------------
+      ICONS (top-right actions)
+  ------------------------------ */
+  .card-icons {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    button[mat-icon-button] {
+      color: var(--text-color);
+      opacity: 0.65;
+      transition: opacity 0.2s ease, color 0.25s ease;
+
+      &:hover {
+        opacity: 1;
+        color: var(--primary-color);
+      }
+    }
+  }
+
+  /* ------------------------------
+      BOTTOM BUTTON (M3 filled button)
+  ------------------------------ */
+  .full-width-btn {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    text-transform: none;
+    font-weight: 500;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.45rem;
+
+    mat-icon {
+      font-size: 20px;
+      margin-top: -1px;
+    }
+  }
+}
+
+
+/* Definimos la animación */
+@keyframes pulseActive {
+  0% { box-shadow: 0 0 0 0 rgba(40, 167, 70, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(40, 167, 70, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 167, 70, 0); }
+}
+
+/* Solo para mesas con pedido activo */
+.status-pill.active {
+  background-color: #28a7469a;
+  animation: pulseActive 2s infinite;
+}
+// .table-card.active-order {
+//   animation: pulseActive 2s infinite;
+//   border: 2px solid #28a746; /* opcional para resaltar más */
+// }
+
+
+/* -----------------------------------------------------
+   DARK THEME OVERRIDES
+----------------------------------------------------- */
+.dark-theme .table-card {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.6), 0px 1px 2px rgba(0, 0, 0, 0.45);
+
+  &:hover {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.75);
+  }
+
+  .card-icons button {
+    color: #eee;
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .cards-wrapper {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}

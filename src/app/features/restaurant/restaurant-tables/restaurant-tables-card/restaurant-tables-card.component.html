@@ -1,75 +1,88 @@
-<div class="tables-container">
-  <!-- HEADER -->
-  <div class="tables-header sticky-header">
-    <h2>Mesas del Restaurante</h2>
-  </div>
+<div class="cards-wrapper" [class.dark-theme]="isDarkMode">
+  <mat-card
+    class="table-card"
+    [class.dark-theme]="isDarkMode"
+    *ngFor="let t of tables"
+    [ngClass]="[t.currentOrderId ? 'active-order' : '', t.status]"
+  >
+    <!-- HEADER -->
+    <mat-card-header class="card-header">
+      <mat-card-title>Mesa {{ t.number }}</mat-card-title>
 
-  <!-- LOADING -->
-  <mat-progress-bar
-    *ngIf="loading"
-    mode="indeterminate"
-    class="loading-bar"
-  ></mat-progress-bar>
+      <span
+        class="status-pill"
+        [ngClass]="[t.currentOrderId ? 'active' : t.status]"
+      >
+        {{
+          t.currentOrderId
+            ? "Pedido activo"
+            : tableStatusService.getTableStatusLabel(t.status)
+        }}
+      </span>
+    </mat-card-header>
 
-  <!-- TARJETAS -->
-  <div class="cards-wrapper" *ngIf="tables.length > 0">
-    <div
-      class="table-card"
-      *ngFor="let t of tables"
-      [ngClass]="{ 'active-order': t.currentOrderId }"
-    >
-      <!-- Número y Nombre -->
-      <div class="card-header">
-        <h3>Mesa {{ t.number }}</h3>
-        <span>{{ t.name || "-" }}</span>
-      </div>
+    <!-- INFO -->
+    <mat-card-content class="card-info">
+      <span
+        ><mat-icon>people</mat-icon>  Capacidad:
+        {{ t.capacity }}</span
+      >
+      <span
+        ><mat-icon>place</mat-icon> Sector:
+        {{ t.sector || "-" }}</span
+      >
+    </mat-card-content>
 
-      <!-- Detalles -->
-      <div class="card-details">
-        <p><strong>Capacidad:</strong> {{ t.capacity }}</p>
-        <p><strong>Sector:</strong> {{ t.sector }}</p>
-        <span
-          class="status-pill"
-          [ngClass]="t.currentOrderId ? 'active' : t.status"
-        >
-          {{ t.currentOrderId ? "Pedido Activo" : (t.status | titlecase) }}
-        </span>
-      </div>
+    <!-- MENÚ DE ACCIONES -->
+    <mat-card-actions class="card-icons">
+      <button
+        mat-icon-button
+        matTooltip="Cambiar estado"
+        [matMenuTriggerFor]="menu"
+      >
+        <mat-icon>swap_horiz</mat-icon>
+      </button>
 
-      <!-- Acciones -->
-      <div class="card-actions">
-        <button mat-icon-button [matMenuTriggerFor]="menu">
-          <mat-icon>swap_horiz</mat-icon>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="changeStatus(t, 'available')">
+          Disponible
         </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="changeStatus(t, 'available')">
-            Disponible
-          </button>
-          <button mat-menu-item (click)="changeStatus(t, 'occupied')">
-            Ocupada
-          </button>
-          <button mat-menu-item (click)="changeStatus(t, 'reserved')">
-            Reservada
-          </button>
-        </mat-menu>
-
-        <button mat-icon-button color="accent" (click)="openQr(t)">
-          <mat-icon>qr_code</mat-icon>
+        <button mat-menu-item (click)="changeStatus(t, 'seated')">
+          Cliente sentado
         </button>
-        <button
-          mat-flat-button
-          color="primary"
-          (click)="viewOrder(t.currentOrderId ?? null, t)"
-        >
-          <mat-icon>receipt_long</mat-icon>
-          {{ t.currentOrderId ? "Ver / Editar Pedido" : "Crear Pedido" }}
+        <button mat-menu-item (click)="changeStatus(t, 'occupied')">
+          Ocupada
         </button>
-      </div>
-    </div>
-  </div>
+        <button mat-menu-item (click)="changeStatus(t, 'reserved')">
+          Reservada
+        </button>
+      </mat-menu>
 
-  <!-- EMPTY STATE -->
-  <div *ngIf="!loading && tables.length === 0" class="empty-state">
-    <p>No hay mesas registradas.</p>
-  </div>
+      <button
+        mat-icon-button
+        color="accent"
+        matTooltip="Ver QR"
+        (click)="openQr(t)"
+      >
+        <mat-icon>qr_code</mat-icon>
+      </button>
+    </mat-card-actions>
+
+    <!-- BOTÓN PRINCIPAL -->
+    <mat-card-actions>
+      <button
+        mat-flat-button
+        color="primary"
+        class="full-width-btn"
+        (click)="viewOrder(t.currentOrderId ?? null, t)"
+        [disabled]="
+          !t.currentOrderId &&
+          !(t.status === 'available' || t.status === 'seated')
+        "
+      >
+        <mat-icon>receipt_long</mat-icon>
+        {{ t.currentOrderId ? "Ver / Editar Pedido" : "Crear Pedido" }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
 </div>
