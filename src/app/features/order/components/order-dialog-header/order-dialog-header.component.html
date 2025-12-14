@@ -1,16 +1,23 @@
-<div class="order-dialog-header">
+<div class="order-dialog-header" [class.dark-theme]="isDarkMode">
+  <!-- TITULO + ESTADO -->
   <div class="dialog-title-group">
-<h2>
-  Pedido Mesas
-  {{ tableNumbers.length ? tableNumbers.join(', ') : '---' }}
-</h2>
+    <h2>
+      Pedido Mesas
+      <span class="table-list">
+        {{ tableNumbers.length ? tableNumbers.join(', ') : '---' }}
+      </span>
+    </h2>
     <span *ngIf="statusLabel" class="order-status">{{ statusLabel }}</span>
   </div>
+
+  <!-- ACCIONES -->
   <div class="dialog-actions">
-    <button mat-raised-button color="primary" (click)="addItem.emit()">
+    <button mat-flat-button color="primary" (click)="addItem.emit()" class="action-button">
       <mat-icon>add</mat-icon> Agregar
     </button>
 
-    <button mat-icon-button (click)="close.emit()"><mat-icon>close</mat-icon></button>
+    <button mat-icon-button (click)="close.emit()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 </div>

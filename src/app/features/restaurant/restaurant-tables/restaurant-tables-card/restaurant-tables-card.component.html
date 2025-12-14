@@ -1,9 +1,12 @@
-<!-- crear pedido seleccionando varias mesas -->
-<button mat-menu-item (click)="createOrderFromMenu()">
-  <mat-icon>add_shopping_cart</mat-icon>
-  Realizar pedido
-</button>
+<!-- Barra de acciones superior -->
+<div class="actions-bar" [class.dark-theme]="isDarkMode">
+  <button mat-flat-button color="primary" class="create-order-btn" (click)="createOrderFromMenu()">
+    <mat-icon>add_shopping_cart</mat-icon>
+    Realizar pedido
+  </button>
+</div>
 
+<!-- Grid de mesas -->
 <div class="cards-wrapper" [class.dark-theme]="isDarkMode">
   <mat-card
     class="table-card"
@@ -14,11 +17,7 @@
     <!-- HEADER -->
     <mat-card-header class="card-header">
       <mat-card-title>Mesa {{ t.number }}</mat-card-title>
-
-      <span
-        class="status-pill"
-        [ngClass]="[t.currentOrderId ? 'active' : t.status]"
-      >
+      <span class="status-pill" [ngClass]="[t.currentOrderId ? 'active' : t.status]">
         {{
           t.currentOrderId
             ? "Pedido activo"
@@ -33,39 +32,21 @@
       <span><mat-icon>place</mat-icon> Sector: {{ t.sector || "-" }}</span>
     </mat-card-content>
 
-    <!-- MENÚ DE ACCIONES -->
+    <!-- ICONOS DE ACCIONES -->
     <mat-card-actions class="card-icons">
-      <button
-        mat-icon-button
-        matTooltip="Cambiar estado"
-        [matMenuTriggerFor]="menu"
-      >
+      <button mat-icon-button matTooltip="Cambiar estado" [matMenuTriggerFor]="menu">
         <mat-icon>swap_horiz</mat-icon>
       </button>
 
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="changeStatus(t, 'available')">
-          Disponible
-        </button>
-        <button mat-menu-item (click)="changeStatus(t, 'seated')">
-          Cliente sentado
-        </button>
-        <button mat-menu-item (click)="changeStatus(t, 'occupied')">
-          Ocupada
-        </button>
-        <button mat-menu-item (click)="changeStatus(t, 'reserved')">
-          Reservada
-        </button>
-
+        <button mat-menu-item (click)="changeStatus(t, 'available')">Disponible</button>
+        <button mat-menu-item (click)="changeStatus(t, 'seated')">Cliente sentado</button>
+        <button mat-menu-item (click)="changeStatus(t, 'occupied')">Ocupada</button>
+        <button mat-menu-item (click)="changeStatus(t, 'reserved')">Reservada</button>
         <mat-divider></mat-divider>
       </mat-menu>
 
-      <button
-        mat-icon-button
-        color="accent"
-        matTooltip="Ver QR"
-        (click)="openQr(t)"
-      >
+      <button mat-icon-button color="accent" matTooltip="Ver QR" (click)="openQr(t)">
         <mat-icon>qr_code</mat-icon>
       </button>
     </mat-card-actions>
@@ -77,10 +58,7 @@
         color="primary"
         class="full-width-btn"
         (click)="viewOrder(t.currentOrderId ?? null, t)"
-        [disabled]="
-          !t.currentOrderId &&
-          !(t.status === 'available' || t.status === 'seated')
-        "
+        [disabled]="!t.currentOrderId && !(t.status === 'available' || t.status === 'seated')"
       >
         <mat-icon>receipt_long</mat-icon>
         {{ t.currentOrderId ? "Ver / Editar Pedido" : "Crear Pedido" }}

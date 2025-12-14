@@ -14,6 +14,7 @@ import {
   runTransaction,
   serverTimestamp,
   writeBatch,
+  orderBy,
 } from '@angular/fire/firestore';
 
 import { Observable } from 'rxjs';
@@ -26,17 +27,16 @@ export class TableService {
   // ===========================================================================
   // 🟢 1. Obtener todas las mesas del restaurante
   // ===========================================================================
-  getTablesByRestaurant(restaurantId: string): Observable<Table[]> {
-    const ref = collection(
-      this.firestore,
-      `restaurants/${restaurantId}/tables`
-    );
-    return collectionData(ref, { idField: 'tableId' }) as Observable<Table[]>;
-  }
+getTablesByRestaurant(restaurantId: string): Observable<Table[]> {
+  const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+  const q = query(ref, orderBy('number', 'asc')); // ✅ Orden ascendente por número de mesa
+  return collectionData(q, { idField: 'tableId' }) as Observable<Table[]>;
+}
 
   // ===========================================================================
   // 🟢 2. Obtener mesa por ID
   // ===========================================================================
+
   async getTableById(
     restaurantId: string,
     tableId: string
@@ -45,14 +45,9 @@ export class TableService {
       this.firestore,
       `restaurants/${restaurantId}/tables/${tableId}`
     );
-
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
-
-    return {
-      tableId: snap.id,
-      ...(snap.data() as Omit<Table, 'tableId'>),
-    };
+    return { tableId: snap.id, ...(snap.data() as Omit<Table, 'tableId'>) };
   }
 
   // ===========================================================================
@@ -68,14 +63,9 @@ export class TableService {
     );
     const q = query(ref, where('qrSlug', '==', qrSlug));
     const snap = await getDocs(q);
-
     if (snap.empty) return null;
-
     const d = snap.docs[0];
-    return {
-      tableId: d.id,
-      ...(d.data() as Omit<Table, 'tableId'>),
-    };
+    return { tableId: d.id, ...(d.data() as Omit<Table, 'tableId'>) };
   }
 
   // ===========================================================================
@@ -99,22 +89,18 @@ export class TableService {
   // ===========================================================================
   async createTable(data: Partial<Table> & { restaurantId: string }) {
     const { restaurantId } = data;
-
     if (data.number !== undefined) {
       const exists = await this.existsTableNumber(
         restaurantId,
         Number(data.number)
       );
-      if (exists) {
+      if (exists)
         throw new Error(`Ya existe una mesa con el número ${data.number}`);
-      }
     }
-
     const ref = collection(
       this.firestore,
       `restaurants/${restaurantId}/tables`
     );
-
     const docRef = await addDoc(ref, {
       ...data,
       status: 'available',
@@ -122,7 +108,6 @@ export class TableService {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-
     return { tableId: docRef.id };
   }
 
@@ -138,13 +123,32 @@ export class TableService {
       this.firestore,
       `restaurants/${restaurantId}/tables/${tableId}`
     );
+    const snap = await getDoc(ref);
+    if (!snap.exists()) throw new Error('La mesa no existe');
+
+    const currentData = snap.data() as Table;
+
+    // ❌ Evitar escritura si no hay cambios
+    const hasChanges = Object.keys(data).some(
+      (key) => (data as any)[key] !== (currentData as any)[key]
+    );
+    if (!hasChanges) return;
+
+    // ⚠️ Validar número duplicado si cambió
+    if (data.number !== undefined && data.number !== currentData.number) {
+      const exists = await this.existsTableNumber(
+        restaurantId,
+        Number(data.number)
+      );
+      if (exists)
+        throw new Error(`Ya existe una mesa con el número ${data.number}`);
+    }
 
     await updateDoc(ref, {
       ...data,
       updatedAt: serverTimestamp(),
     });
   }
-
   // ===========================================================================
   // 🟢 7. Cambiar estado manual de mesa
   // ===========================================================================
@@ -157,11 +161,7 @@ export class TableService {
       this.firestore,
       `restaurants/${restaurantId}/tables/${tableId}`
     );
-
-    await updateDoc(ref, {
-      status,
-      updatedAt: serverTimestamp(),
-    });
+    await updateDoc(ref, { status, updatedAt: serverTimestamp() });
   }
 
   // ===========================================================================
@@ -188,30 +188,32 @@ export class TableService {
   // ===========================================================================
   // 🟢 9. Asignar pedido a UNA o MUCHAS mesas (ATÓMICO)
   // ===========================================================================
-async assignOrderToTables(
-  restaurantId: string,
-  tableIds: string[],
-  orderId: string
-) {
-  return runTransaction(this.firestore, async (tx) => {
-    for (const tableId of tableIds) {
-      const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
-      const snap = await tx.get(ref);
+  async assignOrderToTables(
+    restaurantId: string,
+    tableIds: string[],
+    orderId: string
+  ) {
+    return runTransaction(this.firestore, async (tx) => {
+      for (const tableId of tableIds) {
+        const ref = doc(
+          this.firestore,
+          `restaurants/${restaurantId}/tables/${tableId}`
+        );
+        const snap = await tx.get(ref);
 
-      if (!snap.exists()) throw new Error('Mesa no existe');
-      if (snap.data()['status'] !== 'available') {
-        throw new Error(`Mesa ${snap.data()['number']} no disponible`);
+        if (!snap.exists()) throw new Error('Mesa no existe');
+        if (snap.data()['status'] !== 'available') {
+          throw new Error(`Mesa ${snap.data()['number']} no disponible`);
+        }
+
+        tx.update(ref, {
+          currentOrderId: orderId,
+          status: 'occupied',
+          updatedAt: serverTimestamp(),
+        });
       }
-
-      tx.update(ref, {
-        currentOrderId: orderId,
-        status: 'occupied',
-        updatedAt: serverTimestamp(),
-      });
-    }
-  });
-}
-
+    });
+  }
 
   // ===========================================================================
   // 🟢 10. Liberar UNA o MUCHAS mesas (cerrar / cancelar pedido)
@@ -222,7 +224,10 @@ async assignOrderToTables(
     const batch = writeBatch(this.firestore);
 
     tableIds.forEach((tableId) => {
-      const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+      const ref = doc(
+        this.firestore,
+        `restaurants/${restaurantId}/tables/${tableId}`
+      );
       batch.update(ref, {
         status: 'available',
         currentOrderId: null,
@@ -232,7 +237,6 @@ async assignOrderToTables(
 
     await batch.commit();
   }
-
 
   // ===========================================================================
   // 🟢 11. Agregar una mesa a un pedido existente
@@ -287,14 +291,10 @@ async assignOrderToTables(
       this.firestore,
       `restaurants/${restaurantId}/tables/${tableId}`
     );
-
     const snap = await getDoc(ref);
     if (!snap.exists()) return;
-
-    if (snap.data()['currentOrderId']) {
+    if (snap.data()['currentOrderId'])
       throw new Error('No se puede eliminar una mesa con pedido activo');
-    }
-
     await deleteDoc(ref);
   }
 }

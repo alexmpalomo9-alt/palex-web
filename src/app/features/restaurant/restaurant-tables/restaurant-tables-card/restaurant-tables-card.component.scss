@@ -1,44 +1,58 @@
-/* -----------------------------------------------------
+/* ------------------------------
+   ACCIONES SUPERIOR
+------------------------------ */
+.actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+
+  &.dark-theme {
+    button.create-order-btn {
+      background-color: #1976d2;
+      color: #fff;
+    }
+  }
+
+  .create-order-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+
+    mat-icon {
+      font-size: 20px;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+  }
+}
+
+/* ------------------------------
    GRID WRAPPER
------------------------------------------------------ */
+------------------------------ */
 .cards-wrapper {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(4, 1fr); /* 4 columnas */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
-@media (max-width: 1300px) {
-  .cards-wrapper {
-    grid-template-columns: repeat(3, 1fr); /* 3 columnas */
-  }
-}
-
-@media (max-width: 900px) {
-  .cards-wrapper {
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-  }
-}
-
-@media (max-width: 600px) {
-  .cards-wrapper {
-    grid-template-columns: repeat(1, 1fr); /* 1 columna */
-  }
-}
-
-/* -----------------------------------------------------
-   TABLE CARD (M3 style)
------------------------------------------------------ */
+/* ------------------------------
+   TABLE CARD
+------------------------------ */
 .table-card {
   padding: 1rem;
-  border-radius: 16px; // M3 rounded corners
+  border-radius: 16px;
   background: var(--card-bg);
   color: var(--text-color);
-
-  /* M3 Elevation (very subtle) */
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.08);
-
   border: 1px solid var(--border-color);
-
   transition: background 0.3s ease, box-shadow 0.2s ease, transform 0.15s ease;
 
   &:hover {
@@ -46,9 +60,6 @@
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
   }
 
-  /* ------------------------------
-      HEADER
-  ------------------------------ */
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -65,29 +76,15 @@
       border-radius: 12px;
       font-size: 0.8rem;
       font-weight: 500;
-      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 
-      &.active {
-        background-color: #28a7469a;
-      }
-      &.available {
-        background-color: #17a3b885;
-      }
-      &.occupied {
-        background-color: #8c8edf71;
-      }
-      &.reserved {
-        background-color: #96351756;
-      }
-      &.seated {
-        background-color: #b64ca885;
-      }
+      &.active { background-color: #28a7469a; animation: pulseActive 2s infinite; }
+      &.available { background-color: #17a3b885; }
+      &.occupied { background-color: #8c8edf71; }
+      &.reserved { background-color: #96351756; }
+      &.seated { background-color: #b64ca885; }
     }
   }
 
-  /* ------------------------------
-      INFO
-  ------------------------------ */
   .card-info {
     margin-top: 0.8rem;
     margin-bottom: 1rem;
@@ -108,9 +105,6 @@
     }
   }
 
-  /* ------------------------------
-      ICONS (top-right actions)
-  ------------------------------ */
   .card-icons {
     display: flex;
     gap: 0.75rem;
@@ -128,68 +122,35 @@
     }
   }
 
-  /* ------------------------------
-      BOTTOM BUTTON (M3 filled button)
-  ------------------------------ */
   .full-width-btn {
     width: 100%;
     height: 40px;
     border-radius: 10px;
     text-transform: none;
     font-weight: 500;
-
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0.45rem;
 
-    mat-icon {
-      font-size: 20px;
-      margin-top: -1px;
-    }
+    mat-icon { font-size: 20px; margin-top: -1px; }
   }
 }
 
-
-/* Definimos la animación */
+/* ANIMACIÓN MESAS ACTIVAS */
 @keyframes pulseActive {
   0% { box-shadow: 0 0 0 0 rgba(40, 167, 70, 0.4); }
   70% { box-shadow: 0 0 0 10px rgba(40, 167, 70, 0); }
   100% { box-shadow: 0 0 0 0 rgba(40, 167, 70, 0); }
 }
 
-/* Solo para mesas con pedido activo */
-.status-pill.active {
-  background-color: #28a7469a;
-  animation: pulseActive 2s infinite;
-}
-// .table-card.active-order {
-//   animation: pulseActive 2s infinite;
-//   border: 2px solid #28a746; /* opcional para resaltar más */
-// }
-
-
-/* -----------------------------------------------------
-   DARK THEME OVERRIDES
------------------------------------------------------ */
+/* DARK THEME */
 .dark-theme .table-card {
   background: var(--card-bg);
   border-color: var(--border-color);
+  box-shadow: 0px 1px 3px rgba(0,0,0,0.6), 0px 1px 2px rgba(0,0,0,0.45);
 
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.6), 0px 1px 2px rgba(0, 0, 0, 0.45);
+  &:hover { box-shadow: 0px 4px 10px rgba(0,0,0,0.75); }
 
-  &:hover {
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.75);
-  }
-
-  .card-icons button {
-    color: #eee;
-  }
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .cards-wrapper {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
+  .card-icons button { color: #eee; }
 }

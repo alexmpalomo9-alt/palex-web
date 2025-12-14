@@ -98,12 +98,11 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
 
   openCreateTable() {
     if (!this.restaurant) return;
-
     this.tableDialogService
       .openTableDialog({ mode: 'create' })
       .pipe(
         takeUntil(this.destroy$),
-        filter((result) => !!result),
+        filter(Boolean),
         switchMap((result) =>
           from(
             this.tableService.createTable({
@@ -111,8 +110,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
               restaurantId: this.restaurant!.restaurantId,
             })
           )
-        ),
-        switchMap(() => this.loadTablesObservable())
+        )
       )
       .subscribe({
         next: () =>
@@ -127,23 +125,21 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
 
   openEditTable(table: Table) {
     if (!this.restaurant) return;
-
     this.tableDialogService
       .openTableDialog({ mode: 'edit', data: table })
       .pipe(
         takeUntil(this.destroy$),
-        filter((result) => !!result),
+        filter(Boolean),
         switchMap((result) => {
-          const { restaurantId: _ignore, ...cleanData } = result!;
+          const { restaurantId: _ignore, ...clean } = result!;
           return from(
             this.tableService.updateTable(
               this.restaurant!.restaurantId,
               table.tableId!,
-              cleanData
+              clean
             )
           );
-        }),
-        switchMap(() => this.loadTablesObservable())
+        })
       )
       .subscribe({
         next: () =>
@@ -161,17 +157,15 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
 
   deleteTable(table: Table) {
     if (!table.tableId || !this.restaurant) return;
-
     this.dialogService
       .confirmDialog({
         title: '¿Eliminar Permanente?',
-        message:
-          '¿Estás seguro de que deseas eliminar la mesa de forma permanente? Esta acción no se puede deshacer.',
+        message: 'Esta acción no se puede deshacer.',
         type: 'confirm',
       })
       .pipe(
         takeUntil(this.destroy$),
-        filter((ok) => ok),
+        filter(Boolean),
         switchMap(() =>
           from(
             this.tableService.deleteTable(
@@ -179,8 +173,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
               table.tableId!
             )
           )
-        ),
-        switchMap(() => this.loadTablesObservable())
+        )
       )
       .subscribe({
         next: () =>
