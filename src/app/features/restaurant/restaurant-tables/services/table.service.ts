@@ -12,7 +12,8 @@ import {
   query,
   where,
   runTransaction,
-  serverTimestamp
+  serverTimestamp,
+  writeBatch,
 } from '@angular/fire/firestore';
 
 import { Observable } from 'rxjs';
@@ -20,188 +21,280 @@ import { Table } from '../model/tables.model';
 
 @Injectable({ providedIn: 'root' })
 export class TableService {
-
   constructor(private firestore: Firestore) {}
 
-  // --------------------------------------------------------------------------
+  // ===========================================================================
   // 🟢 1. Obtener todas las mesas del restaurante
-  // --------------------------------------------------------------------------
+  // ===========================================================================
   getTablesByRestaurant(restaurantId: string): Observable<Table[]> {
-    const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+    const ref = collection(
+      this.firestore,
+      `restaurants/${restaurantId}/tables`
+    );
     return collectionData(ref, { idField: 'tableId' }) as Observable<Table[]>;
   }
 
-  // --------------------------------------------------------------------------
-  // 🟢 2. Obtener una mesa por ID
-  // --------------------------------------------------------------------------
-  async getTableById(restaurantId: string, tableId: string): Promise<Table | null> {
-    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
-    const snap = await getDoc(ref);
+  // ===========================================================================
+  // 🟢 2. Obtener mesa por ID
+  // ===========================================================================
+  async getTableById(
+    restaurantId: string,
+    tableId: string
+  ): Promise<Table | null> {
+    const ref = doc(
+      this.firestore,
+      `restaurants/${restaurantId}/tables/${tableId}`
+    );
 
+    const snap = await getDoc(ref);
     if (!snap.exists()) return null;
 
     return {
       tableId: snap.id,
-      ...(snap.data() as Omit<Table, 'tableId'>)
+      ...(snap.data() as Omit<Table, 'tableId'>),
     };
   }
 
-  /** ============================
-  // 🟢 3. Obtener una mesa por qrSlug
-   *  ============================ */
-  async getTableBySlug(restaurantId: string, qrSlug: string): Promise<Table | null> {
-    const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+  // ===========================================================================
+  // 🟢 3. Obtener mesa por qrSlug (cliente)
+  // ===========================================================================
+  async getTableBySlug(
+    restaurantId: string,
+    qrSlug: string
+  ): Promise<Table | null> {
+    const ref = collection(
+      this.firestore,
+      `restaurants/${restaurantId}/tables`
+    );
     const q = query(ref, where('qrSlug', '==', qrSlug));
     const snap = await getDocs(q);
 
     if (snap.empty) return null;
 
-    const docSnap = snap.docs[0];
-
+    const d = snap.docs[0];
     return {
-      tableId: docSnap.id,
-      ...(docSnap.data() as Omit<Table, 'tableId'>)
+      tableId: d.id,
+      ...(d.data() as Omit<Table, 'tableId'>),
     };
   }
 
-
-  // --------------------------------------------------------------------------
-  // 🟢 4. Validar si un número de mesa ya existe
-  // --------------------------------------------------------------------------
-  async existsTableNumber(restaurantId: string, number: number): Promise<boolean> {
-    const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+  // ===========================================================================
+  // 🟢 4. Validar número de mesa duplicado
+  // ===========================================================================
+  async existsTableNumber(
+    restaurantId: string,
+    number: number
+  ): Promise<boolean> {
+    const ref = collection(
+      this.firestore,
+      `restaurants/${restaurantId}/tables`
+    );
     const q = query(ref, where('number', '==', number));
     const snap = await getDocs(q);
     return !snap.empty;
   }
 
-  // --------------------------------------------------------------------------
+  // ===========================================================================
   // 🟢 5. Crear mesa (ADMIN)
-  // --------------------------------------------------------------------------
+  // ===========================================================================
   async createTable(data: Partial<Table> & { restaurantId: string }) {
     const { restaurantId } = data;
 
-    // Verificar número duplicado
     if (data.number !== undefined) {
-      const exists = await this.existsTableNumber(restaurantId, Number(data.number));
-      if (exists) throw new Error(`Ya existe una mesa con el número ${data.number}`);
+      const exists = await this.existsTableNumber(
+        restaurantId,
+        Number(data.number)
+      );
+      if (exists) {
+        throw new Error(`Ya existe una mesa con el número ${data.number}`);
+      }
     }
 
-    const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
+    const ref = collection(
+      this.firestore,
+      `restaurants/${restaurantId}/tables`
+    );
+
     const docRef = await addDoc(ref, {
       ...data,
       status: 'available',
       currentOrderId: null,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
 
     return { tableId: docRef.id };
   }
 
-  // --------------------------------------------------------------------------
-  // 🟢 6. Actualizar mesa (datos generales)
-  // --------------------------------------------------------------------------
-  async updateTable(restaurantId: string, tableId: string, data: Partial<Table>) {
-
-    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+  // ===========================================================================
+  // 🟢 6. Actualizar datos generales de mesa
+  // ===========================================================================
+  async updateTable(
+    restaurantId: string,
+    tableId: string,
+    data: Partial<Table>
+  ) {
+    const ref = doc(
+      this.firestore,
+      `restaurants/${restaurantId}/tables/${tableId}`
+    );
 
     await updateDoc(ref, {
       ...data,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
   }
 
-  // --------------------------------------------------------------------------
-  // 🟢 7. Cambiar estado de una mesa (safe)
-  // --------------------------------------------------------------------------
+  // ===========================================================================
+  // 🟢 7. Cambiar estado manual de mesa
+  // ===========================================================================
   async updateTableStatus(
     restaurantId: string,
     tableId: string,
     status: Table['status']
   ) {
-    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    const ref = doc(
+      this.firestore,
+      `restaurants/${restaurantId}/tables/${tableId}`
+    );
+
     await updateDoc(ref, {
       status,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
   }
 
-  // --------------------------------------------------------------------------
-  // 🟢 8. Asignar un pedido a una mesa (usado por OrderService)
-  // --------------------------------------------------------------------------
-  async assignOrderToTable(
+  // ===========================================================================
+  // 🟢 8. Validar que todas las mesas estén disponibles
+  // ===========================================================================
+  async validateTablesAvailable(restaurantId: string, tableIds: string[]) {
+    for (const tableId of tableIds) {
+      const ref = doc(
+        this.firestore,
+        `restaurants/${restaurantId}/tables/${tableId}`
+      );
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        throw new Error(`La mesa ${tableId} no existe`);
+      }
+
+      if (snap.data()['status'] !== 'available') {
+        throw new Error(`La mesa ${snap.data()['number']} no está disponible`);
+      }
+    }
+  }
+
+  // ===========================================================================
+  // 🟢 9. Asignar pedido a UNA o MUCHAS mesas (ATÓMICO)
+  // ===========================================================================
+async assignOrderToTables(
+  restaurantId: string,
+  tableIds: string[],
+  orderId: string
+) {
+  return runTransaction(this.firestore, async (tx) => {
+    for (const tableId of tableIds) {
+      const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+      const snap = await tx.get(ref);
+
+      if (!snap.exists()) throw new Error('Mesa no existe');
+      if (snap.data()['status'] !== 'available') {
+        throw new Error(`Mesa ${snap.data()['number']} no disponible`);
+      }
+
+      tx.update(ref, {
+        currentOrderId: orderId,
+        status: 'occupied',
+        updatedAt: serverTimestamp(),
+      });
+    }
+  });
+}
+
+
+  // ===========================================================================
+  // 🟢 10. Liberar UNA o MUCHAS mesas (cerrar / cancelar pedido)
+  // ===========================================================================
+  async clearTables(restaurantId: string, tableIds: string[]) {
+    if (!tableIds || !tableIds.length) return;
+
+    const batch = writeBatch(this.firestore);
+
+    tableIds.forEach((tableId) => {
+      const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+      batch.update(ref, {
+        status: 'available',
+        currentOrderId: null,
+        updatedAt: serverTimestamp(),
+      });
+    });
+
+    await batch.commit();
+  }
+
+
+  // ===========================================================================
+  // 🟢 11. Agregar una mesa a un pedido existente
+  // ===========================================================================
+  async addTableToOrder(
     restaurantId: string,
     tableId: string,
     orderId: string
   ) {
-    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    const ref = doc(
+      this.firestore,
+      `restaurants/${restaurantId}/tables/${tableId}`
+    );
+
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      throw new Error('La mesa no existe');
+    }
+
+    if (snap.data()['status'] !== 'available') {
+      throw new Error('La mesa no está disponible');
+    }
+
     await updateDoc(ref, {
       currentOrderId: orderId,
       status: 'occupied',
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
   }
 
-  // --------------------------------------------------------------------------
-  // 🟢 9. Limpiar mesa (cerrar pedido)
-  // --------------------------------------------------------------------------
-  async clearTable(restaurantId: string, tableId: string) {
-    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+  // ===========================================================================
+  // 🟢 12. Quitar una mesa de un pedido
+  // ===========================================================================
+  async removeTableFromOrder(restaurantId: string, tableId: string) {
+    const ref = doc(
+      this.firestore,
+      `restaurants/${restaurantId}/tables/${tableId}`
+    );
+
     await updateDoc(ref, {
       currentOrderId: null,
       status: 'available',
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
   }
 
-  // --------------------------------------------------------------------------
-  // 🟢 10. Mover un pedido a otra mesa (mozo)
-  // --------------------------------------------------------------------------
-  async moveOrderToAnotherTable(
-    restaurantId: string,
-    fromTableId: string,
-    toTableId: string
-  ) {
-    return runTransaction(this.firestore, async (transaction) => {
-      
-      const fromRef = doc(this.firestore, `restaurants/${restaurantId}/tables/${fromTableId}`);
-      const toRef   = doc(this.firestore, `restaurants/${restaurantId}/tables/${toTableId}`);
-
-      const fromSnap = await transaction.get(fromRef);
-      const toSnap   = await transaction.get(toRef);
-
-      if (!fromSnap.exists()) throw new Error('Mesa origen no existe');
-      if (!toSnap.exists()) throw new Error('Mesa destino no existe');
-
-      const currentOrderId = fromSnap.data()['currentOrderId'];
-      if (!currentOrderId) throw new Error('La mesa origen no tiene un pedido activo');
-
-      if (toSnap.data()['status'] !== 'available') {
-        throw new Error('La mesa destino está ocupada');
-      }
-
-      // Liberar mesa origen
-      transaction.update(fromRef, {
-        currentOrderId: null,
-        status: 'available',
-        updatedAt: serverTimestamp()
-      });
-
-      // Asignar a mesa destino
-      transaction.update(toRef, {
-        currentOrderId,
-        status: 'occupied',
-        updatedAt: serverTimestamp()
-      });
-    });
-  }
-
-  // --------------------------------------------------------------------------
-  // 🟢 11. Eliminar mesa
-  // --------------------------------------------------------------------------
+  // ===========================================================================
+  // 🟢 13. Eliminar mesa (solo si no tiene pedido activo)
+  // ===========================================================================
   async deleteTable(restaurantId: string, tableId: string) {
-    const ref = doc(this.firestore, `restaurants/${restaurantId}/tables/${tableId}`);
+    const ref = doc(
+      this.firestore,
+      `restaurants/${restaurantId}/tables/${tableId}`
+    );
+
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    if (snap.data()['currentOrderId']) {
+      throw new Error('No se puede eliminar una mesa con pedido activo');
+    }
+
     await deleteDoc(ref);
   }
 }

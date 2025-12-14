@@ -1,0 +1,58 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon color="primary">table_restaurant</mat-icon>
+  Seleccionar mesas
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="table-list">
+
+    <mat-selection-list
+      [(ngModel)]="selectedTables"
+      class="w-100"
+      color="primary"
+    >
+      <mat-list-option
+        *ngFor="let t of tables"
+        [value]="t"
+        class="table-option"
+      >
+        <div class="d-flex justify-content-between align-items-center w-100">
+          <div>
+            <strong>Mesa {{ t.number }}</strong>
+            <div class="text-muted small">
+              {{ t.sector || 'Sin sector' }}
+            </div>
+          </div>
+
+          <mat-chip
+            color="primary"
+            selected
+            *ngIf="t.sector"
+          >
+            {{ t.sector }}
+          </mat-chip>
+        </div>
+      </mat-list-option>
+    </mat-selection-list>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button
+    mat-stroked-button
+    color="warn"
+    (click)="close()"
+  >
+    Cancelar
+  </button>
+
+<button
+  mat-raised-button
+  color="primary"
+  (click)="confirm()"
+  [disabled]="!selectedTables.length"
+>
+  Confirmar ({{ selectedTables.length }})
+</button>
+</mat-dialog-actions>

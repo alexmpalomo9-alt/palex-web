@@ -1,3 +1,9 @@
+<!-- crear pedido seleccionando varias mesas -->
+<button mat-menu-item (click)="createOrderFromMenu()">
+  <mat-icon>add_shopping_cart</mat-icon>
+  Realizar pedido
+</button>
+
 <div class="cards-wrapper" [class.dark-theme]="isDarkMode">
   <mat-card
     class="table-card"
@@ -23,14 +29,8 @@
 
     <!-- INFO -->
     <mat-card-content class="card-info">
-      <span
-        ><mat-icon>people</mat-icon>  Capacidad:
-        {{ t.capacity }}</span
-      >
-      <span
-        ><mat-icon>place</mat-icon> Sector:
-        {{ t.sector || "-" }}</span
-      >
+      <span><mat-icon>people</mat-icon> Capacidad: {{ t.capacity }}</span>
+      <span><mat-icon>place</mat-icon> Sector: {{ t.sector || "-" }}</span>
     </mat-card-content>
 
     <!-- MENÚ DE ACCIONES -->
@@ -56,6 +56,8 @@
         <button mat-menu-item (click)="changeStatus(t, 'reserved')">
           Reservada
         </button>
+
+        <mat-divider></mat-divider>
       </mat-menu>
 
       <button

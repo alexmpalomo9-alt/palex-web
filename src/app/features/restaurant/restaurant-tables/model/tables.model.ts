@@ -9,7 +9,7 @@ export interface Table {
   qrSlug: string; // cadena corta que usamos en URL para identificar mesa
   sector?: string; // opcional
   capacity: number; // capacidad nominal
-  tableIds: string[]; 
+
   createdAt: string;
   updatedAt?: string;
 }

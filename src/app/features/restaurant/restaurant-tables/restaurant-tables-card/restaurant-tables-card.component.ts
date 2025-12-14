@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { firstValueFrom, Subject, Subscription, takeUntil } from 'rxjs';
 
 import { Table } from '../model/tables.model';
 import { Restaurant } from '../../model/restaurant.model';
@@ -14,6 +14,8 @@ import { RestaurantService } from '../../services/restaurant.service';
 import { TableStatusService } from '../../../../shared/services/table-status/table-status.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { ThemeService } from '../../../../core/services/theme/theme.service';
+import { SelectTablesDialogComponent } from '../../../order/components/select-tables-dialog/select-tables-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-restaurant-tables-card',
@@ -39,7 +41,8 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     public tableStatusService: TableStatusService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -98,29 +101,93 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
   }
 
   // Ver / crear pedido
-  viewOrder(orderId: string | null, table: Table) {
-    if (!this.restaurant) return;
-
-    // Crear pedido SOLO si status es available o seated
-    const canCreateOrder =
-      table.status === 'available' || table.status === 'seated';
-
-    // Si NO hay pedido y NO está en estados permitidos → bloquear
-    if (!orderId && !canCreateOrder) {
-      alert('La mesa no está disponible para crear un pedido.');
-      return;
+  async viewOrder(orderId: string | null, table: Table) {
+    // Si ya tiene pedido → abrir
+    if (table.currentOrderId) {
+      orderId = table.currentOrderId;
     }
 
-    // Abrir diálogo
-    this.dialog.open(OrderDialogComponent, {
+    // Crear nuevo
+    if (!orderId) {
+      const canCreate =
+        table.status === 'available' || table.status === 'seated';
+
+      if (!canCreate) {
+        return alert(`Mesa ${table.number} no disponible`);
+      }
+    }
+
+    let selectedTables: Table[] = [];
+
+    if (orderId) {
+      selectedTables = [table];
+    } else {
+      selectedTables = await this.selectTablesForNewOrder(table);
+      if (!selectedTables.length) return;
+    }
+
+    const dialogRef = this.dialog.open(OrderDialogComponent, {
       disableClose: true,
       data: {
-        restaurantId: this.restaurant.restaurantId,
+        restaurantId: this.restaurant!.restaurantId,
         orderId,
-        tableId: table.tableId,
-        tableNumber: table.number,
+        tableIds: selectedTables.map((t) => t.tableId),
+        tableNumbers: selectedTables.map((t) => t.number),
         isNew: !orderId,
       },
     });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.success) {
+        this.snackBar.open('Pedido creado correctamente', 'OK', {
+          duration: 3000,
+        });
+      }
+    });
+  }
+
+  async createOrderFromMenu() {
+    if (!this.restaurant) return;
+
+    // 1️⃣ Seleccionar mesas
+    const selectRef = this.dialog.open(SelectTablesDialogComponent, {
+      data: { tables: this.tables, baseTable: null },
+    });
+
+    const selectedTables: Table[] = await firstValueFrom(
+      selectRef.afterClosed()
+    );
+    if (!selectedTables || !selectedTables.length) return;
+
+    // 2️⃣ Abrir OrderDialog
+    const orderRef = this.dialog.open(OrderDialogComponent, {
+      disableClose: true,
+      data: {
+        restaurantId: this.restaurant.restaurantId,
+        orderId: null,
+        tableIds: selectedTables.map((t) => t.tableId),
+        tableNumbers: selectedTables.map((t) => t.number),
+        isNew: true,
+      },
+    });
+
+    // 3️⃣ Escuchar resultado del OrderDialog (✅ AQUÍ)
+    orderRef.afterClosed().subscribe((result) => {
+      if (result?.success) {
+        this.snackBar.open('Pedido creado correctamente', 'OK', {
+          duration: 3000,
+        });
+      }
+    });
+  }
+
+  async selectTablesForNewOrder(baseTable: Table): Promise<Table[]> {
+    const dialogRef = this.dialog.open(SelectTablesDialogComponent, {
+      width: '400px',
+      data: { tables: this.tables, baseTable },
+    });
+
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    return result ?? [];
   }
 }

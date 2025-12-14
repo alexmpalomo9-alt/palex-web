@@ -1,6 +1,9 @@
 <div class="order-dialog-header">
   <div class="dialog-title-group">
-    <h2>Pedido Mesa #{{ tableNumber || "---" }}</h2>
+<h2>
+  Pedido Mesas
+  {{ tableNumbers.length ? tableNumbers.join(', ') : '---' }}
+</h2>
     <span *ngIf="statusLabel" class="order-status">{{ statusLabel }}</span>
   </div>
   <div class="dialog-actions">

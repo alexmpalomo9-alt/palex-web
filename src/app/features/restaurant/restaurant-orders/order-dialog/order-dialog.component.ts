@@ -34,8 +34,8 @@ export class OrderDialogComponent implements OnInit {
     return this.facade.state();
   }
 
-  get tableNumber() {
-    return this.facade.state().tableNumber;
+  get tableNumbers(): number[] {
+    return this.facade.state().tableNumbers;
   }
 
   get orderStatusLabel() {
@@ -75,21 +75,31 @@ export class OrderDialogComponent implements OnInit {
 
   async createOrder() {
     const ok = await this.facade.createOrder();
-    if (ok) this.close();
+    if (ok) {
+      this.dialogRef.close({ success: true });
+    }
   }
 
   async updateOrder() {
-    const ok = await this.facade.updateOrder();
-    if (ok) this.close();
-  }
-
-  async closeOrder() {
-    const ok = await this.facade.closeOrder();
-    if (ok) this.close();
+    try {
+      await this.facade.updateOrder();
+      this.close();
+    } catch (error) {}
   }
 
   async cancelOrder() {
-    const ok = await this.facade.cancelOrder();
-    if (ok) this.close();
+    try {
+      await this.facade.cancelOrder();
+      this.close();
+    } catch (error) {}
+  }
+
+  async closeOrder() {
+    try {
+      const ok = await this.facade.closeOrder();
+      if (ok) this.close(); // cierra el diálogo después de mostrar el mensaje
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

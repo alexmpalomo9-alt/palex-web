@@ -2,11 +2,12 @@ import { Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { DialogService } from '../../../../core/services/dialog.service';
 import { AuthService } from '../../../../auth/services/auth.service';
-import { OrderDialogService } from '../../services/order-dialog/order-dialog.service';
 import { OrderItemService } from '../../../order/services/order-item/order-item.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MenuDialogComponent } from '../../../restaurant/restaurant-menu/menu-dialog/menu-dialog.component';
 import { PaymentMethodDialogComponent } from '../../../restaurant/restaurant-orders/payment-method-dialog/payment-method-dialog.component';
+import { OrderService } from '../../services/order-service/order.service';
+import { TableService } from '../../../restaurant/restaurant-tables/services/table.service';
 
 export interface OrderDialogState {
   items: any[];
@@ -20,8 +21,9 @@ export interface OrderDialogState {
   loading: boolean;
 
   restaurantId: string;
-  tableId: string;
-  tableNumber: number;
+
+  tableIds: string[]; // IDs reales
+  tableNumbers: number[]; // SOLO UI
   orderId?: string;
 }
 
@@ -40,8 +42,8 @@ export class OrderDialogFacade {
       originalNotes: '',
       loading: false,
       restaurantId: '',
-      tableId: '',
-      tableNumber: 0,
+      tableIds: [], // ✅ array
+      tableNumbers: [],
       orderId: undefined,
     };
   }
@@ -52,13 +54,13 @@ export class OrderDialogFacade {
   // Constructor
   // ---------------------------
   constructor(
-    private orderService: OrderDialogService,
+    private orderService: OrderService,
+    private tableService: TableService,
     private dialog: DialogService,
     private auth: AuthService,
     private orderItemService: OrderItemService,
     private matDialog: MatDialog
   ) {}
-
   // ---------------------------
   // 🟦 Reset / helpers de estado
   // ---------------------------
@@ -73,31 +75,31 @@ export class OrderDialogFacade {
    * data esperado:
    * {
    *   restaurantId,
-   *   tableId,
+   *   tableIds,
    *   tableNumber,
    *   orderId? ,
    *   forceNew?: boolean
    * }
    */
-  initialize(data: any) {
-    // Si la mesa cambió o nos piden forzar nueva sesión, reseteamos
-    if (
-      data?.forceNew ||
-      (data?.tableId && this.state().tableId !== data.tableId)
-    ) {
-      this.resetState();
-    }
+
+  initialize(data: {
+    restaurantId: string;
+    tableIds: string[];
+    tableNumbers: number[];
+    orderId?: string;
+    forceNew?: boolean;
+  }) {
+    this.resetState();
 
     this.state.update((s) => ({
       ...s,
       restaurantId: data.restaurantId,
-      tableId: data.tableId,
-      tableNumber: data.tableNumber,
-      orderId: data.orderId ?? undefined,
+      tableIds: data.tableIds,
+      tableNumbers: data.tableNumbers,
+      orderId: data.orderId,
     }));
 
-    if (data?.orderId) {
-      // cargamos la orden existente
+    if (data.orderId) {
       void this.loadOrder();
     }
   }
@@ -109,26 +111,35 @@ export class OrderDialogFacade {
     const { restaurantId, orderId } = this.state();
     if (!restaurantId || !orderId) return;
 
-    const order = await this.orderService.loadOrder(restaurantId, orderId!);
-    if (!order) return;
+    try {
+      const order = await this.orderService.getOrderWithItems(
+        restaurantId,
+        orderId
+      );
 
-    const normalizeItem = (i: any) => ({
-      ...i,
-      qty: Number(i.qty ?? 1),
-      price: Number(i.price ?? 0),
-    });
+      const normalizedItems = (order.items ?? []).map((i: any) => ({
+        itemId: i.itemId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price ?? 0),
+        qty: Number(i.qty ?? 1),
+        subtotal: i.subtotal ?? i.price * i.qty,
+        position: i.position,
+        notes: i.notes ?? '',
+      }));
 
-    const normalizedItems = (order.items ?? []).map(normalizeItem);
-
-    this.state.update((s) => ({
-      ...s,
-      items: normalizedItems,
-      notes: order.notes ?? '',
-      status: order.status ?? 'draft',
-      isEditMode: (order.status ?? 'draft') !== 'draft',
-      originalItems: structuredClone(normalizedItems),
-      originalNotes: order.notes ?? '',
-    }));
+      this.state.update((s) => ({
+        ...s,
+        items: normalizedItems,
+        notes: order.notes ?? '',
+        status: order.status ?? 'draft',
+        isEditMode: order.status !== 'draft',
+        originalItems: structuredClone(normalizedItems),
+        originalNotes: order.notes ?? '',
+      }));
+    } catch (error: any) {
+      this.dialog.errorDialog('Error al cargar pedido', error.message);
+    }
   }
 
   // ---------------------------
@@ -202,13 +213,12 @@ export class OrderDialogFacade {
   }
 
   // ---------------------------
-  // 🟩 Crear Orden (validaciones + protección)
+  // 🟩 Crear Orden
   // ---------------------------
   async createOrder(): Promise<boolean> {
-    const { items, notes, restaurantId, tableId, tableNumber } = this.state();
+    const { items, notes, restaurantId, tableIds, tableNumbers } = this.state();
 
-    // Validar que haya items
-    if (!Array.isArray(items) || items.length === 0) {
+    if (!items.length) {
       await firstValueFrom(
         this.dialog.confirmDialog({
           title: 'Pedido vacío',
@@ -219,25 +229,12 @@ export class OrderDialogFacade {
       return false;
     }
 
-    // Validar cantidades
-    const invalidQty = items.some(
-      (it) => !Number.isFinite(Number(it.qty)) || Number(it.qty) < 1
-    );
-    if (invalidQty) {
-      await firstValueFrom(
-        this.dialog.confirmDialog({
-          title: 'Cantidad inválida',
-          message: 'Todos los items deben tener cantidad mayor o igual a 1.',
-          type: 'error',
-        })
-      );
-      return false;
-    }
-
     const confirmed = await firstValueFrom(
       this.dialog.confirmDialog({
         title: 'Crear pedido',
-        message: '¿Deseas crear este pedido?',
+        message: `¿Deseas crear este pedido para las mesas ${tableNumbers.join(
+          ', '
+        )}?`,
         type: 'question',
       })
     );
@@ -247,19 +244,22 @@ export class OrderDialogFacade {
     this.setLoading(true);
 
     try {
-      const waiter = this.auth.getUserID() ?? 'unknown';
+      const waiter = this.requireUserId();
 
-      await this.orderService.createOrder({
-        items,
-        notes,
-        restaurantId,
-        tableId,
-        tableNumber,
-        waiter,
+      await this.orderService.createOrderForMozo(restaurantId, {
+        tableIds,
         createdBy: waiter,
+        waiter,
+        notes,
+        items,
       });
 
+      // 🚫 NO volver a tocar mesas aquí
+
       return true;
+    } catch (error: any) {
+      this.dialog.errorDialog('Error', error.message);
+      return false;
     } finally {
       this.setLoading(false);
     }
@@ -302,14 +302,17 @@ export class OrderDialogFacade {
 
     if (!confirmed) return false;
 
+    if (!confirmed) return false;
+
     this.setLoading(true);
     try {
-      await this.orderService.updateOrder({
-        restaurantId,
-        orderId,
+      await this.orderService.updateOrder(
+        restaurantId!,
+        orderId!,
         items,
         notes,
-      });
+        this.requireUserId()
+      );
 
       // Actualizamos originalItems/notes para reflejar el nuevo estado
       this.state.update((s) => ({
@@ -329,44 +332,61 @@ export class OrderDialogFacade {
   // ---------------------------
   async closeOrder(): Promise<boolean> {
     const state = this.state();
+    const userId = this.requireUserId();
 
-    const confirmed = await firstValueFrom(
-      this.dialog.confirmDialog({
-        title: 'Cerrar pedido',
-        message: '¿Deseas cerrar este pedido y continuar con el pago?',
-        type: 'question',
-      })
-    );
-
-    if (!confirmed) return false;
-
-    const dialogRef = this.matDialog.open(PaymentMethodDialogComponent, {
-      data: { orderTotal: this.getTotal() },
-    });
-
-    const result = await firstValueFrom(dialogRef.afterClosed());
-    if (!result) return false;
-
-    this.setLoading(true);
     try {
-      await this.orderService.closeOrder({
-        orderId: state.orderId,
-        restaurantId: state.restaurantId,
-        tableId: state.tableId,
-        paymentMethod: result.method,
-      });
+      await this.orderService.closeOrder(
+        state.restaurantId,
+        state.orderId!,
+        userId
+      );
+
+      // Actualizar estado local para UI
+      this.state.update((s) => ({
+        ...s,
+        status: 'closed',
+        tableIds: [],
+      }));
+
+      // Mostrar mensaje de éxito (solo información)
+      await firstValueFrom(
+        this.dialog.infoDialog(
+          'Pedido cerrado',
+          'Pedido cerrado y mesas liberadas correctamente'
+        )
+      );
 
       return true;
-    } finally {
-      this.setLoading(false);
+    } catch (error: any) {
+      await firstValueFrom(
+        this.dialog.errorDialog('Error al cerrar pedido', error.message)
+      );
+      return false;
     }
+  }
+
+  private requireUserId(): string {
+    const userId = this.auth.getUserID();
+    if (!userId) {
+      throw new Error('Usuario no autenticado');
+    }
+    return userId;
   }
 
   // ---------------------------
   // 🟩 Cancelar Orden
   // ---------------------------
   async cancelOrder(): Promise<boolean> {
-    const state = this.state();
+    const { restaurantId, orderId, tableIds } = this.state();
+
+    const userId = this.auth.getUserID();
+    if (!userId) {
+      this.dialog.errorDialog(
+        'Sesión inválida',
+        'No se pudo identificar el usuario actual.'
+      );
+      return false;
+    }
 
     const confirmed = await firstValueFrom(
       this.dialog.confirmDialog({
@@ -379,15 +399,17 @@ export class OrderDialogFacade {
     if (!confirmed) return false;
 
     this.setLoading(true);
+
     try {
-      await this.orderService.cancelOrder({
-        orderId: state.orderId,
-        restaurantId: state.restaurantId,
-        tableId: state.tableId,
-        userId: this.auth.getUserID(),
-      });
+      await this.orderService.cancelOrder(restaurantId, orderId!, userId);
+
+      // ✅ limpiar todas las mesas
+      await this.tableService.clearTables(restaurantId, tableIds);
 
       return true;
+    } catch (error: any) {
+      this.dialog.errorDialog('Error', error.message);
+      return false;
     } finally {
       this.setLoading(false);
     }

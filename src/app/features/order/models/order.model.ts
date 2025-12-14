@@ -3,7 +3,8 @@ export interface Order {
   restaurantId: string;
 
   // Mesa
-  tableId: string;
+  tableIds: string[];  //Lista de mesas
+  
   tableNumber?: number;
   sector?: string;
   capacity?: number;
