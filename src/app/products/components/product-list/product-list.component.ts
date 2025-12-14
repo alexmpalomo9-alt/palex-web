@@ -19,7 +19,6 @@ import { BaseTableComponent } from '../../../shared/components/base-table/base-t
   styleUrls: ['./product-list.component.css'],
 })
 export class ProductListComponent implements AfterViewInit {
-  
   /** Inputs */
   @Input() products: Product[] = [];
   @Input() restaurantId!: string;
@@ -35,6 +34,7 @@ export class ProductListComponent implements AfterViewInit {
   @ViewChild('tplAvailable', { static: true }) tplAvailable: any;
   @ViewChild('tplOffer', { static: true }) tplOffer: any;
   @ViewChild('actions', { static: true }) actions: any;
+  @ViewChild(BaseTableComponent) table!: BaseTableComponent;
 
   /** Columns dinámicas */
   columns: any[] = [];
@@ -52,6 +52,9 @@ export class ProductListComponent implements AfterViewInit {
     ];
 
     this.cdr.detectChanges();
+  }
+  applyFilter(value: string) {
+    this.table.applyFilter(value);
   }
 
   /** Eventos */

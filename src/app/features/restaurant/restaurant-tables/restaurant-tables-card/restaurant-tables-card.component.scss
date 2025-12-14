@@ -1,3 +1,9 @@
+.tables-card-container {
+  padding: 5px;
+  border-radius: 20px;
+  background: var(--card-bg);
+  color: var(--text-color);
+}
 /* ------------------------------
    ACCIONES SUPERIOR
 ------------------------------ */
@@ -20,7 +26,7 @@
     padding: 0.5rem 1rem;
     font-weight: 600;
     border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: transform 0.15s ease, box-shadow 0.2s ease;
 
     mat-icon {
@@ -29,7 +35,7 @@
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
   }
 }
@@ -77,11 +83,22 @@
       font-size: 0.8rem;
       font-weight: 500;
 
-      &.active { background-color: #28a7469a; animation: pulseActive 2s infinite; }
-      &.available { background-color: #17a3b885; }
-      &.occupied { background-color: #8c8edf71; }
-      &.reserved { background-color: #96351756; }
-      &.seated { background-color: #b64ca885; }
+      &.active {
+        background-color: #28a7469a;
+        animation: pulseActive 2s infinite;
+      }
+      &.available {
+        background-color: #17a3b885;
+      }
+      &.occupied {
+        background-color: #8c8edf71;
+      }
+      &.reserved {
+        background-color: #96351756;
+      }
+      &.seated {
+        background-color: #b64ca885;
+      }
     }
   }
 
@@ -133,24 +150,37 @@
     align-items: center;
     gap: 0.45rem;
 
-    mat-icon { font-size: 20px; margin-top: -1px; }
+    mat-icon {
+      font-size: 20px;
+      margin-top: -1px;
+    }
   }
 }
 
 /* ANIMACIÓN MESAS ACTIVAS */
 @keyframes pulseActive {
-  0% { box-shadow: 0 0 0 0 rgba(40, 167, 70, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(40, 167, 70, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(40, 167, 70, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 70, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 70, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 70, 0);
+  }
 }
 
 /* DARK THEME */
 .dark-theme .table-card {
   background: var(--card-bg);
   border-color: var(--border-color);
-  box-shadow: 0px 1px 3px rgba(0,0,0,0.6), 0px 1px 2px rgba(0,0,0,0.45);
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.6), 0px 1px 2px rgba(0, 0, 0, 0.45);
 
-  &:hover { box-shadow: 0px 4px 10px rgba(0,0,0,0.75); }
+  &:hover {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.75);
+  }
 
-  .card-icons button { color: #eee; }
+  .card-icons button {
+    color: #eee;
+  }
 }

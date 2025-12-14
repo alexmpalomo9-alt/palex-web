@@ -7,25 +7,29 @@ import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
 import { ActivatedRoute } from '@angular/router';
 import { TableQrDialogComponent } from '../../../../shared/components/qr-preview/table-qr-dialog/table-qr-dialog.component';
-import { DialogService } from '../../../../core/services/dialog.service';
 import { TableDialogService } from '../services/table-dialog/table-dialog.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order-dialog.component';
 import { ThemeService } from '../../../../core/services/theme/theme.service';
+import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
+import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 
 @Component({
   selector: 'app-restaurant-tables',
   templateUrl: './restaurant-tables.component.html',
   styleUrls: ['./restaurant-tables.component.scss'],
-  imports: [SharedModule],
+  standalone: true,
+  imports: [SharedModule, SectionHeaderComponent],
 })
 export class RestaurantTablesComponent implements OnInit, OnDestroy {
-  restaurantId!: string;
   @Input() restaurant: Restaurant | null = null;
+  restaurantId!: string;
 
   tables: Table[] = [];
+  filteredTables: Table[] = [];
   loading = true;
   isDarkMode: boolean;
+
   displayedColumns: string[] = [
     'number',
     'name',
@@ -36,6 +40,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   ];
 
   private destroy$ = new Subject<void>();
+
   private tableService = inject(TableService);
   private restaurantService = inject(RestaurantService);
   private dialogService = inject(DialogService);
@@ -83,6 +88,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
     return this.tableService.getTablesByRestaurant(this.restaurantId).pipe(
       tap((tables) => {
         this.tables = tables;
+        this.filteredTables = tables;
         this.loading = false;
       })
     );
@@ -90,6 +96,23 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
 
   loadTables() {
     this.loadTablesObservable().subscribe();
+  }
+
+  /** Filtrado de mesas desde SectionHeader */
+  onSearch(value: string) {
+    if (!value) {
+      this.filteredTables = [...this.tables];
+      return;
+    }
+
+    const searchLower = value.toLowerCase();
+    this.filteredTables = this.tables.filter(
+      (t) =>
+        t.number.toString().includes(searchLower) ||
+        (t.name && t.name.toLowerCase().includes(searchLower)) ||
+        (t.sector && t.sector.toLowerCase().includes(searchLower)) ||
+        (t.status && t.status.toLowerCase().includes(searchLower))
+    );
   }
 
   // ================================
@@ -113,8 +136,10 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
         )
       )
       .subscribe({
-        next: () =>
-          this.dialogService.infoDialog('Éxito', 'Mesa creada correctamente.'),
+        next: () => {
+          this.dialogService.infoDialog('Éxito', 'Mesa creada correctamente.');
+          this.loadTables();
+        },
         error: (e) =>
           this.dialogService.errorDialog(
             'Error',
@@ -142,11 +167,13 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: () =>
+        next: () => {
           this.dialogService.infoDialog(
             'Éxito',
             'Mesa actualizada correctamente.'
-          ),
+          );
+          this.loadTables();
+        },
         error: (e) =>
           this.dialogService.errorDialog(
             'Error',
@@ -176,11 +203,13 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
         )
       )
       .subscribe({
-        next: () =>
+        next: () => {
           this.dialogService.infoDialog(
             'Éxito',
             'La mesa ha sido eliminada correctamente.'
-          ),
+          );
+          this.loadTables();
+        },
         error: (e) =>
           this.dialogService.errorDialog(
             'Error',
@@ -189,7 +218,10 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
       });
   }
 
-  changeStatus(table: Table, status: 'available' | 'occupied' | 'reserved') {
+  changeStatus(
+    table: Table,
+    status: 'available' | 'occupied' | 'reserved' | 'seated'
+  ) {
     if (!table.tableId) return;
 
     from(
@@ -201,6 +233,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           table.status = status;
+          this.filteredTables = [...this.filteredTables]; // Forzar update
         },
         error: (e) =>
           this.dialogService.errorDialog(
@@ -220,17 +253,14 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   viewOrder(orderId: string | null, table: Table) {
     if (!this.restaurant) return;
 
-    // Crear pedido SOLO si status es available o seated
     const canCreateOrder =
       table.status === 'available' || table.status === 'seated';
 
-    // Si NO hay pedido y NO está en estados permitidos → bloquear
     if (!orderId && !canCreateOrder) {
       alert('La mesa no está disponible para crear un pedido.');
       return;
     }
 
-    // Abrir diálogo
     this.dialog.open(OrderDialogComponent, {
       disableClose: true,
       data: {

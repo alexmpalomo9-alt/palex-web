@@ -1,36 +1,39 @@
-<div class="cat-management">
-  <div class="header">
-    <h2>Gestionar Categorías</h2>
-    <div class="actions">
-      <button mat-flat-button color="primary" (click)="addCategory()">
-        <mat-icon>add</mat-icon> Crear categoría
-      </button>
-    </div>
-  </div>
+<section class="category-management mat-typography">
+  <!-- Header -->
+  <app-section-header
+    icon="category"
+    title="Categorías"
+    subtitle="Administra las categorías del restaurante"
+    filterPlaceholder="Buscar Categorías..."
+    (search)="applyFilter($event)"
+  >
+    <app-add-button
+      label="Crear categoría"
+      (onClick)="addCategory()"
+      icon="category"
+    />
+  </app-section-header>
 
-  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+  <!-- Templates para columnas especiales -->
+  <ng-template #tplIcon let-c>
+    <mat-icon *ngIf="c.icon" class="category-icon">{{ c.icon }}</mat-icon>
+  </ng-template>
 
-  <div class="cards" cdkDropList (cdkDropListDropped)="drop($event)">
-    <div class="card" *ngFor="let c of categories; let i = index" cdkDrag>
-      <div class="drag-handle" cdkDragHandle>
-        <mat-icon>drag_indicator</mat-icon>
-      </div>
+  <!-- Template para acciones -->
+  <ng-template #actions let-c>
+    <button mat-icon-button color="primary" (click)="editCategory(c)">
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button mat-icon-button color="warn" (click)="deleteCategory(c)">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </ng-template>
 
-      <div class="card-body">
-        <div class="icon" *ngIf="c.icon">
-          <mat-icon>{{ c.icon }}</mat-icon>
-        </div>
-
-        <div class="info">
-          <div class="name">{{ c.name }}</div>
-          <div class="meta">Orden: {{ i }}</div>
-        </div>
-
-        <div class="card-actions">
-          <button mat-icon-button color="primary" (click)="editCategory(c)"><mat-icon>edit</mat-icon></button>
-          <button mat-icon-button color="warn" (click)="deleteCategory(c)"><mat-icon>delete</mat-icon></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+  <!-- Tabla base -->
+  <app-base-table
+    [columns]="columns"
+    [data]="categories"
+    [actionsTemplate]="actions"
+    filterPlaceholder="Buscar categorías..."
+  ></app-base-table>
+</section>

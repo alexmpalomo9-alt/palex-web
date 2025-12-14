@@ -1,89 +1,91 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, TemplateRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { Category } from '../../model/category.model';
 import { CategoryService } from '../../services/category.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CategoryDialogComponent } from '../category-dialog/category-dialog.component';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { CommonModule } from '@angular/common';
+import { BaseColumn, BaseTableComponent } from '../../../../../shared/components/base-table/base-table.component';
 import { SharedModule } from '../../../../../shared/shared.module';
+import { SectionHeaderComponent } from '../../../shared/section-header/section-header/section-header.component';
 
 @Component({
   selector: 'app-category-management',
   templateUrl: './category-management.component.html',
   styleUrls: ['./category-management.component.scss'],
   standalone: true,
-  imports: [CommonModule, SharedModule]
+  imports: [BaseTableComponent, SharedModule, SectionHeaderComponent],
 })
-export class CategoryManagementComponent implements OnInit {
+export class CategoryManagementComponent implements OnInit, AfterViewInit {
   @Input() restaurantId!: string;
 
   categories: Category[] = [];
-  loading = true;
 
-  constructor(private categoryService: CategoryService, private dialog: MatDialog) {}
+  @ViewChild('tplIcon', { static: true }) tplIcon!: TemplateRef<any>;
+  @ViewChild('actions', { static: true }) actions!: TemplateRef<any>;
+  @ViewChild(BaseTableComponent) table!: BaseTableComponent;
+
+  columns: BaseColumn[] = [];
+
+  constructor(
+    private categoryService: CategoryService,
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    if (!this.restaurantId) throw new Error('restaurantId is required');
+    this.loadCategories();
+  }
+
+  ngAfterViewInit() {
+    this.columns = [
+      { id: 'order', label: '#', template: undefined }, // índice de fila
+      { id: 'icon', label: 'Icono', template: this.tplIcon },
+      { id: 'name', label: 'Nombre' },
+    ];
+    this.cdr.detectChanges();
+  }
+
+  loadCategories() {
     this.categoryService.getCategories(this.restaurantId).subscribe((cats) => {
-      this.categories = cats;
-      this.loading = false;
+      // agregar índice dinámico para la columna "order"
+      this.categories = cats.map((c, i) => ({ ...c, order: i + 1 }));
     });
   }
 
-addCategory() {
-  const ref = this.dialog.open(CategoryDialogComponent, {
-    width: '520px',
-    data: {
-      mode: 'create',
-      restaurantId: this.restaurantId,
-      categoryService: this.categoryService
-    }
-  });
-
-  ref.afterClosed().subscribe(async payload => {
-    if (!payload) return;
-    await this.categoryService.createCategory({
-      ...payload,
-      restaurantId: this.restaurantId
+  addCategory() {
+    const ref = this.dialog.open(CategoryDialogComponent, {
+      width: '520px',
+      disableClose: true,
+      data: { mode: 'create', restaurantId: this.restaurantId, categoryService: this.categoryService },
     });
-  });
-}
 
-editCategory(c: Category) {
-  const ref = this.dialog.open(CategoryDialogComponent, {
-    width: '520px',
-    data: {
-      mode: 'edit',
-      category: c,
-      restaurantId: this.restaurantId,
-      categoryService: this.categoryService
-    }
-  });
-
-  ref.afterClosed().subscribe(async payload => {
-    if (!payload) return;
-    await this.categoryService.updateCategory(
-      this.restaurantId,
-      c.categoryId!,
-      payload
-    );
-  });
-}
-
-  async deleteCategory(c: Category) {
-    const ok = confirm(`Eliminar categoría "${c.name}"?`);
-    if (!ok) return;
-    try {
-      await this.categoryService.deleteCategory(this.restaurantId, c.categoryId!);
-    } catch (e) {
-      console.error(e);
-    }
+    ref.afterClosed().subscribe(async (payload) => {
+      if (!payload) return;
+      await this.categoryService.createCategory({ ...payload, restaurantId: this.restaurantId });
+      this.loadCategories();
+    });
   }
 
-  drop(event: CdkDragDrop<Category[]>) {
-    moveItemInArray(this.categories, event.previousIndex, event.currentIndex);
-    // actualizar orden en backend
-    const orderedIds = this.categories.map((c) => c.categoryId!) as string[];
-    this.categoryService.reorderCategories(this.restaurantId, orderedIds).catch(console.error);
+  editCategory(c: Category) {
+    const ref = this.dialog.open(CategoryDialogComponent, {
+      width: '520px',
+      disableClose: true,
+      data: { mode: 'edit', category: c, restaurantId: this.restaurantId, categoryService: this.categoryService },
+    });
+
+    ref.afterClosed().subscribe(async (payload) => {
+      if (!payload) return;
+      await this.categoryService.updateCategory(this.restaurantId, c.categoryId!, payload);
+      this.loadCategories();
+    });
+  }
+
+  deleteCategory(c: Category) {
+    if (!confirm(`Eliminar categoría "${c.name}"?`)) return;
+    this.categoryService.deleteCategory(this.restaurantId, c.categoryId!).then(() => this.loadCategories());
+  }
+
+  // Método llamado desde el SectionHeader para filtrar la tabla
+  applyFilter(text: string) {
+    this.table.applyFilter(text);
   }
 }

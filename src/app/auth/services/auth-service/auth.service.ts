@@ -23,8 +23,8 @@ import {
 } from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
 import { FirebaseError } from 'firebase/app';
-import { ErrorHandlerService } from '../../core/services/error-handler.service';
-import { User, UserCredentials } from '../../users/model/user.model';
+import { User, UserCredentials } from '../../../users/model/user.model';
+import { ErrorHandlerService } from '../../../shared/services/error-firebase/error-handler.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

@@ -1,0 +1,9 @@
+<button
+  mat-flat-button
+  class="add-btn pulse"
+  [class.dark-theme]="isDarkMode"
+  (click)="onClick.emit()"
+>
+  <mat-icon>{{ icon }}</mat-icon>
+  {{ label }}
+</button>

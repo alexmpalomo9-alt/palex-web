@@ -1,0 +1,46 @@
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: 12px !important;
+
+  /* Colores por defecto (light mode) */
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  color: #fff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+    background: linear-gradient(135deg, #1565c0, #1e88e5);
+  }
+}
+
+/* ================= Dark Mode ================= */
+.add-btn.dark-theme {
+  background: linear-gradient(135deg, #0f375a, #4a677e);
+  color: #fff;
+
+  &:hover {
+    background: linear-gradient(135deg, #1565c0, #1976d2);
+    box-shadow: 0 4px 12px rgba(0, 150, 255, 0.4);
+  }
+}
+
+/* Animación pulse */
+.pulse {
+  animation: pulseAnim 1.6s infinite;
+}
+
+@keyframes pulseAnim {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

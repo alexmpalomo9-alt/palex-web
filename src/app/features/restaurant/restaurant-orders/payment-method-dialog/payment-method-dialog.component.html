@@ -1,26 +1,43 @@
-<h2 mat-dialog-title>Cerrar pedido</h2>
+<h2 mat-dialog-title class="dialog-title">
+  Cerrar pedido
+  <span class="total">Total: {{ total | currency:'ARS':'symbol':'1.2-2' }}</span>
+</h2>
 
-<mat-dialog-content>
-  <mat-form-field appearance="fill">
+<mat-dialog-content class="dialog-content">
+  <mat-form-field appearance="fill" class="full-width">
     <mat-label>Método de pago</mat-label>
     <mat-select [(ngModel)]="payment.method">
-      <mat-option value="cash">Efectivo</mat-option>
-      <mat-option value="qr">QR / Transferencia</mat-option>
-      <mat-option value="mp_pos">Mercado Pago POS</mat-option>
-      <mat-option value="credit_card">Tarjeta Crédito</mat-option>
-      <mat-option value="debit_card">Tarjeta Débito</mat-option>
-      <mat-option value="house_account">Cuenta Corriente</mat-option>
-      <mat-option value="other">Otro</mat-option>
+      <mat-option value="cash">
+        <mat-icon class="payment-icon">attach_money</mat-icon> Efectivo
+      </mat-option>
+      <mat-option value="qr">
+        <mat-icon class="payment-icon">qr_code</mat-icon> QR / Transferencia
+      </mat-option>
+      <mat-option value="mp_pos">
+        <mat-icon class="payment-icon">payment</mat-icon> Mercado Pago POS
+      </mat-option>
+      <mat-option value="credit_card">
+        <mat-icon class="payment-icon">credit_card</mat-icon> Tarjeta Crédito
+      </mat-option>
+      <mat-option value="debit_card">
+        <mat-icon class="payment-icon">credit_card</mat-icon> Tarjeta Débito
+      </mat-option>
+      <mat-option value="house_account">
+        <mat-icon class="payment-icon">account_balance</mat-icon> Cuenta Corriente
+      </mat-option>
+      <mat-option value="other">
+        <mat-icon class="payment-icon">more_horiz</mat-icon> Otro
+      </mat-option>
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="fill" *ngIf="payment.method === 'other'">
+  <mat-form-field appearance="fill" class="full-width" *ngIf="payment.method === 'other'">
     <mat-label>Detalle</mat-label>
-    <input matInput [(ngModel)]="payment.detail">
+    <input matInput [(ngModel)]="payment.detail" placeholder="Especificar método">
   </mat-form-field>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancelar</button>
-  <button mat-button color="primary" (click)="confirm()">Confirmar</button>
+<mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="confirm()" class="confirm-btn">Confirmar</button>
 </mat-dialog-actions>

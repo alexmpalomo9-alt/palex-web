@@ -1,48 +1,24 @@
 <div *ngIf="restaurant" class="restaurant-menu-container">
+  <app-section-header
+    icon="restaurant_menu"
+    title="Productos del Restaurante"
+    subtitle="Administra el catálogo de productos, edita precios y gestiona la oferta."
+    filterPlaceholder="Buscar Productos: "
+    (search)="onSearch($event)"
+  >
+    <app-add-button
+      label="Agregar Producto"
+      (onClick)="createProduct()"
+      icon="local_dining"
+    />
+  </app-section-header>
 
-  <mat-card class="menu-card">
-
-    <!-- HEADER STICKY SIMPLE -->
-    <div class="section-header sticky-header">
-
-      <div class="section-info">
-
-        <!-- Ícono -->
-        <div class="section-icon">
-          <mat-icon>restaurant_menu</mat-icon>
-        </div>
-
-        <!-- Títulos alineados a la derecha del ícono -->
-        <div class="section-texts">
-          <h2 class="section-title">Productos del Restaurante</h2>
-          <p class="section-subtitle">
-            Administra el catálogo de productos, edita precios y gestiona la oferta.
-          </p>
-        </div>
-
-      </div>
-
-      <button
-        mat-flat-button
-        color="primary"
-        class="add-btn pulse"
-        (click)="createProduct()"
-      >
-        <mat-icon>add</mat-icon>
-        Agregar Producto
-      </button>
-
-    </div>
-
-    <!-- Lista -->
-    <app-product-list
-      [products]="dataSource.data"
-      [restaurantId]="restaurant.restaurantId"
-      (edit)="editProduct($event)"
-      (remove)="deleteProduct($event)"
-    ></app-product-list>
-
-  </mat-card>
-<app-category-management [restaurantId]="restaurant.restaurantId"></app-category-management>
-
+  <app-product-list
+    #productList
+    [products]="dataSource.data"
+    [restaurantId]="restaurant.restaurantId"
+    (edit)="editProduct($event)"
+    (remove)="deleteProduct($event)"
+  />
+  <app-category-management [restaurantId]="restaurant.restaurantId" />
 </div>

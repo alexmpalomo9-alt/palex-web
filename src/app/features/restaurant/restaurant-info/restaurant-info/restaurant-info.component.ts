@@ -5,10 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantDialogService } from '../../services/restaurant-dialog.service';
-import { DialogService } from '../../../../core/services/dialog.service';
 import { RestaurantService } from '../../services/restaurant.service';
 import { ActivatedRoute } from '@angular/router';
 import { Timestamp } from 'firebase/firestore';
+import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 
 @Component({
   selector: 'app-restaurant-info',

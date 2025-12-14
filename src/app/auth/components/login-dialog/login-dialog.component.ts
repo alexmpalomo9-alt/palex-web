@@ -9,9 +9,9 @@ import { Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { RegisterDialogComponent } from '../register-dialog/register-dialog.component';
 import { ResetPasswordDialogComponent } from '../reset-password-dialog/reset-password-dialog.component';
-import { AuthService } from '../../services/auth.service';
-import { DialogService } from '../../../core/services/dialog.service';
+import { AuthService } from '../../services/auth-service/auth.service';
 import { UserCredentials } from '../../../users/model/user.model';
+import { DialogService } from '../../../core/services/dialog-service/dialog.service';
 
 @Component({
   selector: 'app-login-dialog',

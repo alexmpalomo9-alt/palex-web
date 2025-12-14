@@ -1,37 +1,21 @@
 <mat-card class="staff-card shadow-sm" [class.dark-theme]="isDarkMode">
 
-  <!-- HEADER STICKY -->
-  <div class="staff-header sticky-header">
-
-    <div class="staff-info">
-
-      <!-- Ícono -->
-      <div class="staff-icon">
-        <mat-icon color="primary">groups</mat-icon>
-      </div>
-
-      <!-- Títulos -->
-      <div class="staff-texts">
-        <h2 class="staff-title">Personal del Restaurante</h2>
-        <p class="staff-subtitle">
-          Administra los empleados, roles y permisos del restaurante.
-        </p>
-      </div>
-
-    </div>
-
-    <!-- Botón invitar -->
-    <button
-      mat-flat-button
-      color="primary"
-      class="invite-btn pulse"
-      (click)="openInvitationDialog()"
-    >
-      <mat-icon>person_add_alt</mat-icon>
-      Invitar empleado
-    </button>
-
-  </div>
+  <!-- HEADER CON SECTION-HEADER -->
+  <app-section-header
+    icon="restaurant_menu"
+    title="Personal del Restaurante"
+    subtitle="Administra los empleados, roles y permisos del restaurante."
+    filterPlaceholder="Buscar empleado..."
+    [class.dark-theme]="isDarkMode"
+    (search)="onSearch($event)"
+  >
+    <!-- Botón de acción dentro del header -->
+    <app-add-button
+      label="Invitar empleado"
+      (onClick)="openInvitationDialog()"
+      icon="person_add_alt"
+    />
+  </app-section-header>
 
   <mat-divider></mat-divider>
 

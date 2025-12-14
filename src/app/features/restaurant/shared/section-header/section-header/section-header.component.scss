@@ -1,0 +1,82 @@
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px; /* separación entre bloques */
+  margin-bottom: 20px;
+  padding: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: inherit;
+  z-index: 10;
+
+  /* Para que el header se adapte */
+  flex-wrap: wrap; 
+}
+
+/* Contenedor izquierdo: icono + textos */
+.section-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 auto; /* que ocupe espacio disponible */
+  min-width: 200px; /* un ancho mínimo para que no se achique mucho */
+}
+
+/* Buscador: centro, ocupa espacio fijo o flexible */
+app-search-box {
+  flex: 0 0 300px; /* ancho fijo, para que no se achique */
+  max-width: 100%;
+}
+
+/* Zona de acciones: derecha */
+.actions-container {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Ícono, textos, título y subtítulo: mantienen estilos previos */
+
+.section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(25, 118, 210, 0.12);
+
+  mat-icon {
+    color: #1976d2;
+  }
+}
+
+.section-texts {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  margin: 0;
+  opacity: 0.75;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  ::ng-deep app-add-button {
+    width: 100%;
+  }
+}

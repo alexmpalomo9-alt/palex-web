@@ -1,4 +1,6 @@
 .tables-container {
+  padding: 5px;
+  border-radius: 20px;
   background: var(--card-bg);
   color: var(--text-color);
 
@@ -102,7 +104,7 @@
 
   &.dark-theme {
     .active-order-row {
-      background: var(--card-bg);
+      background:  #444647; // color claro por defecto
       color: var(--text-color);
     }
   }

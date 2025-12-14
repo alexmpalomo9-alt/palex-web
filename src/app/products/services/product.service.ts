@@ -16,7 +16,7 @@ import {
 import { Observable } from 'rxjs';
 import { Product } from '../model/product.model';
 import { FirebaseError } from 'firebase/app';
-import { ErrorHandlerService } from '../../core/services/error-handler.service';
+import { ErrorHandlerService } from '../../shared/services/error-firebase/error-handler.service';
 
 @Injectable({
   providedIn: 'root',

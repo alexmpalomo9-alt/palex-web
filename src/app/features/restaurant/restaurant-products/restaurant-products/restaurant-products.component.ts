@@ -1,16 +1,16 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { RestaurantService } from '../../services/restaurant.service';
 import { Restaurant } from '../../model/restaurant.model';
 import { ProductListComponent } from '../../../../products/components/product-list/product-list.component';
-import { DialogService } from '../../../../core/services/dialog.service';
 import { Product } from '../../../../products/model/product.model';
 import { ProductDialogService } from '../../../../products/services/product-dialog.service';
 import { ProductService } from '../../../../products/services/product.service';
 import { CategoryManagementComponent } from '../../categories/components/category-management/category-management.component';
 import { SharedModule } from '../../../../shared/shared.module';
-import { CategoryService } from '../../categories/services/category.service';
+import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
+import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 
 @Component({
   selector: 'app-restaurant-products',
@@ -18,6 +18,7 @@ import { CategoryService } from '../../categories/services/category.service';
     ProductListComponent,
     CategoryManagementComponent,
     SharedModule,
+    SectionHeaderComponent,
   ],
   templateUrl: './restaurant-products.component.html',
   styleUrls: ['./restaurant-products.component.scss'],
@@ -25,6 +26,7 @@ import { CategoryService } from '../../categories/services/category.service';
 export class RestaurantProductsComponent implements OnInit {
   restaurant: Restaurant | null = null;
   dataSource = new MatTableDataSource<Product>();
+  @ViewChild('productList') productList!: ProductListComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -34,6 +36,10 @@ export class RestaurantProductsComponent implements OnInit {
     private dialogService: DialogService,
     private router: Router
   ) {}
+
+  onSearch(value: string) {
+    this.productList.applyFilter(value);
+  }
 
   ngOnInit() {
     this.route.parent?.paramMap.subscribe((params) => {
@@ -59,69 +65,89 @@ export class RestaurantProductsComponent implements OnInit {
       });
   }
 
-async createProduct() {
-  if (!this.restaurant) return;
+  async createProduct() {
+    if (!this.restaurant) return;
 
-  this.productDialogService
-    .openProductDialog({ mode: 'create', restaurantId: this.restaurant.restaurantId })
-    .subscribe(async (result) => {
-      if (!result) {
-        this.dialogService.infoDialog('Cancelar', 'No se realizaron cambios.');
-        return;
-      }
-
-      try {
-        // 🔥 categoryId ya viene del diálogo
-        if (!result.categoryId) {
-          throw new Error('El producto debe tener una categoría.');
+    this.productDialogService
+      .openProductDialog({
+        mode: 'create',
+        restaurantId: this.restaurant.restaurantId,
+      })
+      .subscribe(async (result) => {
+        if (!result) {
+          this.dialogService.infoDialog(
+            'Cancelar',
+            'No se realizaron cambios.'
+          );
+          return;
         }
 
-        await this.productService.createProduct({
-          ...result,
-          restaurantId: this.restaurant!.restaurantId,
-        });
+        try {
+          // 🔥 categoryId ya viene del diálogo
+          if (!result.categoryId) {
+            throw new Error('El producto debe tener una categoría.');
+          }
 
-        this.dialogService.infoDialog('Éxito', 'Producto creado correctamente.');
-        this.loadProducts(this.restaurant!.restaurantId);
+          await this.productService.createProduct({
+            ...result,
+            restaurantId: this.restaurant!.restaurantId,
+          });
 
-      } catch (e: any) {
-        this.dialogService.errorDialog('Error', e.message || 'Ocurrió un error inesperado.');
-      }
-    });
-}
+          this.dialogService.infoDialog(
+            'Éxito',
+            'Producto creado correctamente.'
+          );
+          this.loadProducts(this.restaurant!.restaurantId);
+        } catch (e: any) {
+          this.dialogService.errorDialog(
+            'Error',
+            e.message || 'Ocurrió un error inesperado.'
+          );
+        }
+      });
+  }
 
-editProduct(product: Product) {
-  if (!this.restaurant) return;
+  editProduct(product: Product) {
+    if (!this.restaurant) return;
 
-  this.productDialogService
-    .openProductDialog({
-      mode: 'edit',
-      restaurantId: this.restaurant.restaurantId,
-      data: product   
-    })
-    .subscribe(async (result) => {
-      if (!result) {
-        this.dialogService.infoDialog('Cancelar', 'No se realizaron cambios.');
-        return;
-      }
+    this.productDialogService
+      .openProductDialog({
+        mode: 'edit',
+        restaurantId: this.restaurant.restaurantId,
+        data: product,
+      })
+      .subscribe(async (result) => {
+        if (!result) {
+          this.dialogService.infoDialog(
+            'Cancelar',
+            'No se realizaron cambios.'
+          );
+          return;
+        }
 
-      try {
-        const restaurantId = this.restaurant!.restaurantId;
-        const { restaurantId: _, ...cleanData } = result;
+        try {
+          const restaurantId = this.restaurant!.restaurantId;
+          const { restaurantId: _, ...cleanData } = result;
 
-        await this.productService.updateProduct(
-          restaurantId,
-          product.productId!,
-          cleanData
-        );
+          await this.productService.updateProduct(
+            restaurantId,
+            product.productId!,
+            cleanData
+          );
 
-        this.dialogService.infoDialog('Éxito', 'Producto editado correctamente.');
-        this.loadProducts(restaurantId);
-      } catch (e: any) {
-        this.dialogService.errorDialog('Error', e.message || 'Ocurrió un error inesperado.');
-      }
-    });
-}
+          this.dialogService.infoDialog(
+            'Éxito',
+            'Producto editado correctamente.'
+          );
+          this.loadProducts(restaurantId);
+        } catch (e: any) {
+          this.dialogService.errorDialog(
+            'Error',
+            e.message || 'Ocurrió un error inesperado.'
+          );
+        }
+      });
+  }
 
   deleteProduct(product: Product) {
     if (!product.productId || !this.restaurant) return;

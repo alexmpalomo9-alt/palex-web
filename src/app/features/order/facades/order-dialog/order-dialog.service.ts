@@ -1,13 +1,13 @@
 import { Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { DialogService } from '../../../../core/services/dialog.service';
-import { AuthService } from '../../../../auth/services/auth.service';
+import { AuthService } from '../../../../auth/services/auth-service/auth.service';
 import { OrderItemService } from '../../../order/services/order-item/order-item.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MenuDialogComponent } from '../../../restaurant/restaurant-menu/menu-dialog/menu-dialog.component';
 import { PaymentMethodDialogComponent } from '../../../restaurant/restaurant-orders/payment-method-dialog/payment-method-dialog.component';
 import { OrderService } from '../../services/order-service/order.service';
 import { TableService } from '../../../restaurant/restaurant-tables/services/table.service';
+import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 
 export interface OrderDialogState {
   items: any[];
@@ -330,15 +330,23 @@ export class OrderDialogFacade {
   // ---------------------------
   // 🟩 Cerrar Orden (pago)
   // ---------------------------
-  async closeOrder(): Promise<boolean> {
+  // ---------------------------
+  // 🟩 Cerrar Orden (pago)
+  // ---------------------------
+  async closeOrder(payment: {
+    method: string;
+    detail?: string;
+  }): Promise<boolean> {
     const state = this.state();
     const userId = this.requireUserId();
 
     try {
+      // Pasamos el payment al service
       await this.orderService.closeOrder(
         state.restaurantId,
         state.orderId!,
-        userId
+        userId,
+        payment
       );
 
       // Actualizar estado local para UI

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatDialog } from '@angular/material/dialog';
 import { LoginDialogComponent } from '../../../auth/components/login-dialog/login-dialog.component';
-import { AuthService } from '../../../auth/services/auth.service';
+import { AuthService } from '../../../auth/services/auth-service/auth.service';
 import { User } from '../../../users/model/user.model';
 import { ThemeService } from '../../services/theme/theme.service';
 

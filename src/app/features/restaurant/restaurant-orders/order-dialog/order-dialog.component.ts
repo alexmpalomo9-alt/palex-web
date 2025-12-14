@@ -1,5 +1,9 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialog,
+} from '@angular/material/dialog';
 import { OrderDialogFacade } from '../../../order/facades/order-dialog/order-dialog.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { OrderDialogFooterComponent } from '../../../order/components/order-dialog-footer/order-dialog-footer.component';
@@ -8,6 +12,8 @@ import { OrderNotesComponent } from '../../../order/components/order-notes/order
 import { OrderDialogHeaderComponent } from '../../../order/components/order-dialog-header/order-dialog-header.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { OrderItemsTableComponent } from '../../../order/components/order-items-table/order-items-table.component';
+import { PaymentMethodDialogComponent } from '../payment-method-dialog/payment-method-dialog.component';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-order-dialog',
@@ -45,7 +51,8 @@ export class OrderDialogComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<OrderDialogComponent>,
-    public facade: OrderDialogFacade
+    public facade: OrderDialogFacade,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -96,8 +103,22 @@ export class OrderDialogComponent implements OnInit {
 
   async closeOrder() {
     try {
-      const ok = await this.facade.closeOrder();
-      if (ok) this.close(); // cierra el diálogo después de mostrar el mensaje
+      // Abrir diálogo de método de pago
+      const payment = await firstValueFrom(
+        this.dialog
+          .open(PaymentMethodDialogComponent, {
+            disableClose: true,
+            width: '700px',
+            data: { orderTotal: this.facade.getTotal() },
+          })
+          .afterClosed()
+      );
+
+      if (!payment) return; // usuario canceló
+
+      // Pasar el método de pago al facade para registrar
+      const ok = await this.facade.closeOrder(payment);
+      if (ok) this.close();
     } catch (error) {
       console.error(error);
     }

@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth-service/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SessionTimeoutDialogComponent } from '../components/session-timeout-dialog/session-timeout-dialog.component';
 
@@ -30,7 +30,7 @@ export class IdleService {
 
   resetTimer() {
     // Verificar que hay sesión activa
-    if (!this.auth.isLoggedIn) {
+    if (!this.auth.isLoggedIn$) {
       this.clearTimers();
       return;
     }
@@ -74,7 +74,7 @@ export class IdleService {
   }
 
   private showWarning() {
-    if (!this.auth.isLoggedIn) return;
+    if (!this.auth.isLoggedIn$) return;
 
     const dialogRef = this.dialog.open(SessionTimeoutDialogComponent, {
       width: '350px',

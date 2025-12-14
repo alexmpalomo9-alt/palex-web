@@ -1,4 +1,3 @@
-// restaurant-staff.component.ts
 import {
   Component,
   OnInit,
@@ -17,7 +16,6 @@ import {
 import { MatChipsModule } from '@angular/material/chips';
 import { UserService } from '../../../../users/services/user.service';
 import { UserDialogComponent } from '../../../../users/components/user-dialog/user-dialog.component';
-import { DialogService } from '../../../../core/services/dialog.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InvitationService } from '../../../invitations/services/invitation.service';
 import { InvitationDialogComponent } from '../../../invitations/components/invitation-dialog/invitation-dialog.component';
@@ -25,6 +23,8 @@ import { RolePermissionsInfoComponent } from '../role-permissions-info/role-perm
 import { RestaurantStaffService } from '../services/restaurant-staff.service';
 import { User } from '../../../../users/model/user.model';
 import { ThemeService } from '../../../../core/services/theme/theme.service';
+import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
+import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 
 @Component({
   selector: 'app-restaurant-staff',
@@ -34,6 +34,7 @@ import { ThemeService } from '../../../../core/services/theme/theme.service';
     BaseTableComponent,
     MatChipsModule,
     RolePermissionsInfoComponent,
+    SectionHeaderComponent,
   ],
   templateUrl: './restaurant-staff.component.html',
   styleUrls: ['./restaurant-staff.component.scss'],
@@ -41,7 +42,7 @@ import { ThemeService } from '../../../../core/services/theme/theme.service';
 export class RestaurantStaffComponent implements OnInit, OnDestroy {
   restaurantId!: string;
   staff: User[] = [];
-  showDisabled = false;
+  filteredStaff: User[] = []; // ← Para filtrar la tabla sin perder los datos originales
   isDarkMode: boolean;
 
   private destroy$ = new Subject<void>();
@@ -117,7 +118,23 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
             ),
           ],
         }));
+
+        // Inicializamos la tabla filtrada
+        this.filteredStaff = [...this.staff];
       });
+  }
+
+  // 🔹 Método de búsqueda integrado con el header
+  onSearch(searchValue: string) {
+    if (!searchValue) {
+      this.filteredStaff = [...this.staff];
+    } else {
+      const searchLower = searchValue.toLowerCase();
+      this.filteredStaff = this.staff.filter(user =>
+        `${user.name} ${user.lastname}`.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower)
+      );
+    }
   }
 
   changeRole(user: User) {
@@ -155,6 +172,7 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
           } else if (result.method === 'link') {
             await this.invitationService.createJoinLink(this.restaurantId, result.role);
           }
+          this.loadStaff();
         } catch (err: any) {
           this.dialogService.errorDialog('Error', err?.message || 'No se pudo generar la invitación.');
         }

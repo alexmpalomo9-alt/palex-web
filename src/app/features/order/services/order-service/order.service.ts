@@ -426,11 +426,12 @@ export class OrderService {
     });
   }
 
-  // Cerrar pedido
+  // Cerrar pedido con método de pago
   async closeOrder(
     restaurantId: string,
     orderId: string,
-    userId: string | null
+    userId: string | null,
+    payment: { method: string; detail?: string } // <-- nuevo parámetro
   ) {
     const db = this.firestore;
 
@@ -442,11 +443,13 @@ export class OrderService {
 
       const orderData = orderSnap.data() as Order;
 
-      // 2️⃣ Actualizar estado de la orden
+      // 2️⃣ Actualizar estado de la orden y registrar método de pago
       tx.update(orderRef, {
         status: 'closed',
         closedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        paymentMethod: payment.method,
+        paymentDetail: payment.detail || null,
       });
 
       // 3️⃣ Registrar historial
@@ -456,6 +459,8 @@ export class OrderService {
       tx.set(historyRef, {
         status: 'closed',
         userId,
+        paymentMethod: payment.method,
+        paymentDetail: payment.detail || null,
         timestamp: serverTimestamp(),
       });
 

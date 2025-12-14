@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../services/user.service';
 import { User } from '../../model/user.model';
-import { AuthService } from '../../../auth/services/auth.service';
+import { AuthService } from '../../../auth/services/auth-service/auth.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatCardModule } from '@angular/material/card';
 import { matFormFieldAnimations, MatFormFieldModule } from '@angular/material/form-field';

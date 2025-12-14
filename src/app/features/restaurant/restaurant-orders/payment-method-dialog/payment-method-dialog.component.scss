@@ -1,0 +1,102 @@
+/* Contenedor del diálogo */
+:host ::ng-deep .mat-dialog-container {
+  width: 100%;
+  max-width: 600px;
+  min-width: 320px;
+  padding: 1.8rem;
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+  background-color: var(--bg-color);
+  transition: all 0.3s ease;
+  font-family: "Roboto", sans-serif;
+}
+
+/* Título */
+.dialog-title {
+  font-weight: 700;
+  font-size: 1.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+
+  .total {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+}
+
+/* Contenido */
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .mat-form-field {
+    background-color: var(--bg-color);
+    border-radius: 8px;
+  }
+
+  .payment-icon {
+    margin-right: 8px;
+    vertical-align: middle;
+    color: var(--text-color);
+  }
+}
+
+/* Acciones */
+.dialog-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+
+  button {
+    font-weight: 500;
+    border-radius: 8px;
+    min-width: 100px;
+    transition: all 0.3s ease;
+  }
+
+  button[mat-stroked-button] {
+    border-color: #ccc;
+    color: var(--text-color);
+    &:hover {
+      background-color: var(--bg-color);
+    }
+  }
+
+  .confirm-btn {
+    background: var(--card-bg);
+
+    color: var(--text-color);
+    box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+    &:hover {
+      background-color: var(--card-bg);
+      box-shadow: 0 6px 16px rgba(63, 81, 181, 0.35);
+    }
+  }
+}
+
+/* Responsividad móvil */
+@media (max-width: 600px) {
+  :host ::ng-deep .mat-dialog-container {
+    width: 95vw;
+    padding: 1rem;
+  }
+
+  .dialog-title {
+    font-size: 1.3rem;
+  }
+
+  .dialog-actions button {
+    min-width: 80px;
+    font-size: 0.9rem;
+  }
+}

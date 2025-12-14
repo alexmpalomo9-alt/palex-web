@@ -5,6 +5,7 @@ import { BooleanToTextPipe } from './pipes/boolean-to-text.pipe';
 import { UnionNombreApellidoPipe } from './pipes/union-nombre-apellido.pipe';
 import { SizeTittleDirective } from './directives/size-tittle.directive';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { AddButtonComponent } from './components/button/add-button/add-button.component';
 
 @NgModule({
   imports: [
@@ -16,7 +17,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     UnionNombreApellidoPipe,
     SizeTittleDirective,
     FormsModule,
-    DragDropModule
+    DragDropModule,
+    AddButtonComponent
   ],
   exports: [
     MaterialModule,
@@ -26,6 +28,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     SizeTittleDirective,
     FormsModule,
     DragDropModule,
+    AddButtonComponent
   ],
 })
 export class SharedModule {}

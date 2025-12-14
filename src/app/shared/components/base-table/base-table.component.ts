@@ -24,7 +24,7 @@ export interface BaseColumn {
 @Component({
   selector: 'app-base-table',
   standalone: true,
-  imports: [SharedModule, SearchBoxComponent],
+  imports: [SharedModule],
   templateUrl: './base-table.component.html',
   styleUrls: ['./base-table.component.css'],
 })

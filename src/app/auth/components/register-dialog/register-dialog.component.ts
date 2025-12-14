@@ -5,9 +5,9 @@ import { SharedModule } from '../../../shared/shared.module';
 import { regexMail } from '../../../shared/pattern/patterns';
 import { validatePassword } from '../../helper/passwordValidator';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AuthService } from '../../services/auth.service';
-import { DialogService } from '../../../core/services/dialog.service';
+import { AuthService } from '../../services/auth-service/auth.service';
 import { LoginDialogComponent } from '../login-dialog/login-dialog.component';
+import { DialogService } from '../../../core/services/dialog-service/dialog.service';
 
 @Component({
   selector: 'app-register-dialog',
