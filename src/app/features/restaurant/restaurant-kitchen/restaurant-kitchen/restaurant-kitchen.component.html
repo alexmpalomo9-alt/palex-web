@@ -1,0 +1,80 @@
+<div class="kitchen-container container-fluid kitchen-mode">
+  <div class="row g-3">
+    <div
+      class="col-12 col-md-6 col-lg-4"
+      *ngFor="let order of activeOrders$ | async"
+    >
+      <mat-card class="order-card mat-elevation-z4">
+        <mat-card-header
+          [ngClass]="{
+            'new-order': getOrderStatusLabel(order.orderId) === 'Nuevo',
+            'updated-order':
+              getOrderStatusLabel(order.orderId) === 'Actualizado'
+          }"
+        >
+          <div class="header-left">
+            <mat-icon color="primary">table_restaurant</mat-icon>
+            <span class="tables">Mesa(s): {{ order.tableNumbers }}</span>
+          </div>
+
+          <span
+            *ngIf="getOrderStatusLabel(order.orderId)"
+            class="status-badge"
+            [ngClass]="{
+              new: getOrderStatusLabel(order.orderId) === 'Nuevo',
+              updated: getOrderStatusLabel(order.orderId) === 'Actualizado'
+            }"
+          >
+            {{ getOrderStatusLabel(order.orderId) }}
+          </span>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="info-row">
+            <mat-icon>person</mat-icon>
+            <span>Creado por: {{ order.waiterName || "Sin asignar" }}</span>
+          </div>
+
+          <div class="info-row">
+            <mat-icon>payments</mat-icon>
+            <span
+              >Total: <strong>${{ order.total }}</strong></span
+            >
+          </div>
+
+          <div class="info-row notes">
+            <mat-icon>notes</mat-icon>
+            <span>{{ order.notes || "Sin notas" }}</span>
+          </div>
+
+          <mat-divider class="my-2"></mat-divider>
+
+          <div class="items">
+            <h6 class="items-title">
+              <mat-icon>restaurant_menu</mat-icon>
+              Items
+            </h6>
+            <ul class="list-unstyled">
+              <li *ngFor="let item of order.items">
+                <span class="qty">{{ item.qty }}x</span>
+                <span class="name">{{ item.name }}</span>
+                <span class="price">${{ item.subtotal }}</span>
+              </li>
+            </ul>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions class="actions">
+          <button mat-flat-button color="primary">
+            <mat-icon>schedule</mat-icon>
+            Preparar
+          </button>
+          <button mat-flat-button color="accent">
+            <mat-icon>check_circle</mat-icon>
+            Listo
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>

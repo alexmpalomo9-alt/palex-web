@@ -1,5 +1,4 @@
 <div class="tables-card-container" [class.dark-theme]="isDarkMode">
-
   <!-- HEADER CON SECTION-HEADER -->
   <app-section-header
     icon="table_restaurant"
@@ -26,7 +25,10 @@
       <!-- HEADER -->
       <mat-card-header class="card-header">
         <mat-card-title>Mesa {{ t.number }}</mat-card-title>
-        <span class="status-pill" [ngClass]="[t.currentOrderId ? 'active' : t.status]">
+        <span
+          class="status-pill"
+          [ngClass]="[t.currentOrderId ? 'active' : t.status]"
+        >
           {{
             t.currentOrderId
               ? "Pedido activo"
@@ -43,19 +45,36 @@
 
       <!-- ICONOS DE ACCIONES -->
       <mat-card-actions class="card-icons">
-        <button mat-icon-button matTooltip="Cambiar estado" [matMenuTriggerFor]="menu">
+        <button
+          mat-icon-button
+          matTooltip="Cambiar estado"
+          [matMenuTriggerFor]="menu"
+        >
           <mat-icon>swap_horiz</mat-icon>
         </button>
 
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="changeStatus(t, 'available')">Disponible</button>
-          <button mat-menu-item (click)="changeStatus(t, 'seated')">Cliente sentado</button>
-          <button mat-menu-item (click)="changeStatus(t, 'occupied')">Ocupada</button>
-          <button mat-menu-item (click)="changeStatus(t, 'reserved')">Reservada</button>
+          <button mat-menu-item (click)="changeStatus(t, 'available')">
+            Disponible
+          </button>
+          <button mat-menu-item (click)="changeStatus(t, 'seated')">
+            Cliente sentado
+          </button>
+          <button mat-menu-item (click)="changeStatus(t, 'occupied')">
+            Ocupada
+          </button>
+          <button mat-menu-item (click)="changeStatus(t, 'reserved')">
+            Reservada
+          </button>
           <mat-divider></mat-divider>
         </mat-menu>
 
-        <button mat-icon-button color="accent" matTooltip="Ver QR" (click)="openQr(t)">
+        <button
+          mat-icon-button
+          color="accent"
+          matTooltip="Ver QR"
+          (click)="openQr(t)"
+        >
           <mat-icon>qr_code</mat-icon>
         </button>
       </mat-card-actions>
@@ -67,7 +86,10 @@
           color="primary"
           class="full-width-btn"
           (click)="viewOrder(t.currentOrderId ?? null, t)"
-          [disabled]="!t.currentOrderId && !(t.status === 'available' || t.status === 'seated')"
+          [disabled]="
+            !t.currentOrderId &&
+            !(t.status === 'available' || t.status === 'seated')
+          "
         >
           <mat-icon>receipt_long</mat-icon>
           {{ t.currentOrderId ? "Ver / Editar Pedido" : "Crear Pedido" }}
@@ -80,5 +102,4 @@
   <div *ngIf="!loading && filteredTables.length === 0" class="empty-state">
     <p>No hay mesas registradas.</p>
   </div>
-
 </div>

@@ -1,13 +1,13 @@
 import { Routes } from '@angular/router';
 import { RestaurantInfoComponent } from '../restaurant-info/restaurant-info/restaurant-info.component';
 import { RestaurantMenuComponent } from '../restaurant-menu/restaurant-menu/restaurant-menu.component';
-import { RestaurantOrdersComponent } from '../restaurant-orders/restaurant-orders/restaurant-orders.component';
 import { RestaurantStaffComponent } from '../restaurant-staff/restaurant-staff/restaurant-staff.component';
 import { RestaurantStatsComponent } from '../restaurant-stats/restaurant-stats/restaurant-stats.component';
 import { RestaurantTablesComponent } from '../restaurant-tables/restaurant-tables/restaurant-tables.component';
 import { RestaurantShellComponent } from '../restaurant-shell/restaurant-shell/restaurant-shell.component';
 import { RestaurantProductsComponent } from '../restaurant-products/restaurant-products/restaurant-products.component';
 import { RestaurantTablesCardComponent } from '../restaurant-tables/restaurant-tables-card/restaurant-tables-card.component';
+import { RestaurantKitchenComponent } from '../restaurant-kitchen/restaurant-kitchen/restaurant-kitchen.component';
 // import { RestaurantKitchenComponent } from '../restaurant-kitchen/restaurant-kitchen/restaurant-kitchen.component';
 
 export const RESTAURANT_ROUTES: Routes = [
@@ -29,9 +29,8 @@ export const RESTAURANT_ROUTES: Routes = [
       { path: 'products', component: RestaurantProductsComponent },
       { path: 'staff', component: RestaurantStaffComponent },
       { path: 'tables', component: RestaurantTablesComponent },
-      { path: 'orders', component: RestaurantOrdersComponent },
       { path: 'stats', component: RestaurantStatsComponent },
-      // { path: 'kitchen', component: RestaurantKitchenComponent },
+      { path: 'kitchen', component: RestaurantKitchenComponent },
       { path: 'waiter', component: RestaurantTablesCardComponent },
     ],
   },

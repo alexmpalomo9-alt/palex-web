@@ -2,31 +2,27 @@ export interface Order {
   orderId: string;
   restaurantId: string;
 
-  // Mesa
-  tableIds: string[];  //Lista de mesas
-  
-  tableNumber?: number;
-  sector?: string;
-  capacity?: number;
+  // Mesas
+  tableIds: string[];
+  tableNumbers: number[];   // 🔥 DESNORMALIZADO
+
+  // Usuario
+  waiterId?: string;
+  waiterName?: string;      // 🔥 DESNORMALIZADO
+  waiterRole?: string;      // 🔥 DESNORMALIZADO
 
   // Estado
   status: OrderStatus;
   total: number;
   itemsCount: number;
 
-  // Usuarios
-  waiter?: string; // mozo asignado
-  createdBy?: string; // waiter | customer
-
   // Extras
   notes?: string;
-  items?: OrderItem[];
 
   createdAt: any;
   updatedAt: any;
-  closedAt?: any;
-  cancelledAt?: any;
 }
+
 
 export type OrderStatus =
   | 'draft' // Cliente/mozo creando pedido

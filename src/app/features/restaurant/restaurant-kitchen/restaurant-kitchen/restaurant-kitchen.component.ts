@@ -1,56 +1,53 @@
-import { Component, inject, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Order } from '../../../order/models/order.model';
-import { OrdersService } from '../../../order/services/order.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { SharedModule } from '../../../../shared/shared.module';
-import { Restaurant } from '../../model/restaurant.model';
+import { KitchenOrder, KitchenFacade } from '../facade/kitchen-facade.service';
 import { ActivatedRoute } from '@angular/router';
+import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
 
 @Component({
   selector: 'app-restaurant-kitchen',
-  imports: [SharedModule],
   templateUrl: './restaurant-kitchen.component.html',
-  styleUrl: './restaurant-kitchen.component.scss'
+  styleUrls: ['./restaurant-kitchen.component.scss'],
+  imports: [SharedModule],
 })
-export class RestaurantKitchenComponent {
+export class RestaurantKitchenComponent implements OnInit {
+  activeOrders$!: Observable<KitchenOrder[]>;
+  restaurantId!: string;
   @Input() restaurant: Restaurant | null = null;
 
-  private orderService = inject(OrdersService);
-    private restaurantService = inject(RestaurantService);
-  private route = inject(ActivatedRoute);
-
+  constructor(
+    private kitchenFacade: KitchenFacade,
+    private route: ActivatedRoute,
+    private restaurantService: RestaurantService
+  ) {}
 
   ngOnInit() {
-  this.route.parent?.paramMap.subscribe(params => {
-    const slug = params.get('restaurantId');
-    if (!slug) return;
+    // Obtenemos el 'restaurantId' desde el ancestro correcto
+    const restaurantId =
+      this.route.snapshot.parent?.paramMap.get('restaurantId');
 
-    this.restaurantService.getRestaurantBySlug(slug).subscribe(restaurant => {
-      if (!restaurant) return;
+    if (!restaurantId) {
+      console.error('No se encontró restaurantId en la URL');
+      return;
+    }
 
-      this.restaurant = restaurant;
-      console.log(this.restaurant)
-      
-    });
-  });
-}
-  // // 🔥 Pedidos para cocina (approved + preparing)
-  // kitchenOrders = toSignal(
-  //   this.orderService.getKitchenOrders(),
-  //   { initialValue: [] as Order[] }
-  // );
+    this.restaurantId = restaurantId; // guardar para usarlo más adelante
 
-  // // ----------------------------------------------------------------
-  // // Cambiar estados
-  // // ----------------------------------------------------------------
+    this.restaurantService
+      .getRestaurantBySlug(restaurantId)
+      .subscribe((restaurant) => {
+        if (!restaurant) return;
 
-  // markAsPreparing(order: Order) {
-  //   this.orderService.updateOrderStatus(order.orderId!, 'preparing', 'kitchen');
-  // }
+        this.restaurant = restaurant;
 
-  // markAsReady(order: Order) {
-  //   this.orderService.updateOrderStatus(order.orderId!, 'ready', 'kitchen');
-  // }
+        this.activeOrders$ = this.kitchenFacade.getActiveOrders(
+          this.restaurant.restaurantId!
+        );
+      });
+  }
+  getOrderStatusLabel(orderId: string) {
+    return this.kitchenFacade.getOrderStatusLabel(orderId);
+  }
 }

@@ -212,58 +212,65 @@ export class OrderDialogFacade {
     }));
   }
 
-  // ---------------------------
-  // 🟩 Crear Orden
-  // ---------------------------
-  async createOrder(): Promise<boolean> {
-    const { items, notes, restaurantId, tableIds, tableNumbers } = this.state();
 
-    if (!items.length) {
-      await firstValueFrom(
-        this.dialog.confirmDialog({
-          title: 'Pedido vacío',
-          message: 'No se puede crear un pedido sin productos.',
-          type: 'error',
-        })
-      );
-      return false;
-    }
+  
+// ---------------------------
+// 🟩 Crear Orden
+// ---------------------------
+async createOrder(): Promise<boolean> {
+  const { items, notes, restaurantId, tableIds, tableNumbers } = this.state();
 
-    const confirmed = await firstValueFrom(
+  if (!items.length) {
+    await firstValueFrom(
       this.dialog.confirmDialog({
-        title: 'Crear pedido',
-        message: `¿Deseas crear este pedido para las mesas ${tableNumbers.join(
-          ', '
-        )}?`,
-        type: 'question',
+        title: 'Pedido vacío',
+        message: 'No se puede crear un pedido sin productos.',
+        type: 'error',
       })
     );
-
-    if (!confirmed) return false;
-
-    this.setLoading(true);
-
-    try {
-      const waiter = this.requireUserId();
-
-      await this.orderService.createOrderForMozo(restaurantId, {
-        tableIds,
-        createdBy: waiter,
-        waiter,
-        notes,
-        items,
-      });
-
-      // 🚫 NO volver a tocar mesas aquí
-
-      return true;
-    } catch (error: any) {
-      this.dialog.errorDialog('Error', error.message);
-      return false;
-    } finally {
-      this.setLoading(false);
-    }
+    return false;
   }
+
+  const confirmed = await firstValueFrom(
+    this.dialog.confirmDialog({
+      title: 'Crear pedido',
+      message: `¿Deseas crear este pedido para las mesas ${tableNumbers.join(
+        ', '
+      )}?`,
+      type: 'question',
+    })
+  );
+
+  if (!confirmed) return false;
+
+  this.setLoading(true);
+
+  try {
+    // 🔹 Snapshot del usuario (SIN LECTURAS)
+    const user = this.auth.getUserSnapshot();
+
+    await this.orderService.createOrderForMozo(restaurantId, {
+      tableIds,
+
+      waiterId: user.uid,
+      waiterName: user.name,
+      waiterRole: user.role,
+
+      createdBy: user.uid,
+      notes,
+      items,
+    });
+
+    // 🚫 NO volver a tocar mesas aquí
+
+    return true;
+  } catch (error: any) {
+    this.dialog.errorDialog('Error', error.message);
+    return false;
+  } finally {
+    this.setLoading(false);
+  }
+}
 
   // ---------------------------
   // 🟩 Actualizar Orden (comparo canónica para evitar escrituras)
@@ -327,9 +334,6 @@ export class OrderDialogFacade {
     }
   }
 
-  // ---------------------------
-  // 🟩 Cerrar Orden (pago)
-  // ---------------------------
   // ---------------------------
   // 🟩 Cerrar Orden (pago)
   // ---------------------------

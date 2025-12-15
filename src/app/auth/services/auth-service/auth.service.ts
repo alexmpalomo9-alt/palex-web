@@ -256,4 +256,36 @@ export class AuthService {
   getUserID(): string | null {
     return this.auth.currentUser?.uid ?? null;
   }
+
+  // -------------------------------------------------------------
+// SNAPSHOT DEL USUARIO LOGUEADO (SIN LECTURAS)
+// -------------------------------------------------------------
+getUserSnapshot(): {
+  uid: string;
+  name: string;
+  role: string;
+} {
+  const user = this.currentUserSubject.value;
+
+  if (!user) {
+    throw new Error('Usuario no autenticado');
+  }
+
+  // Nombre completo para display
+  const name = `${user.name ?? ''} ${user.lastname ?? ''}`.trim();
+
+  // ⚠️ Ajustá esta lógica según tu modelo real de roles
+  // Ejemplo: mozo por restaurante
+  const role =
+    user.globalRoles?.adminGlobal
+      ? 'Admin'
+      : 'Mozo';
+
+  return {
+    uid: user.uid,
+    name,
+    role,
+  };
+}
+
 }
