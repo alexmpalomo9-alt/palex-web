@@ -1,44 +1,29 @@
 import { Injectable } from '@angular/core';
 import { OrderStatus } from '../../../features/order/models/order.model';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class OrderStatusService {
-  constructor() {}
 
-  getOrderStatusLabel(status: OrderStatus): string {
-    switch (status) {
-      case 'draft':
-        return 'Borrador';
-      case 'pending':
-        return 'Pendiente';
-      case 'updated':
-        return 'Actualizado';
-      case 'update_rejected':
-        return 'Modificación rechazada';
-      case 'approved':
-        return 'Aprobado';
-      case 'preparing':
-        return 'En preparación';
-      case 'ready':
-        return 'Listo para entregar';
-      case 'delivered':
-        return 'Entregado';
-      case 'closed':
-        return 'Finalizado';
-      case 'closed_cash':
-      case 'closed_qr':
-      case 'closed_mp_pos':
-      case 'closed_credit':
-      case 'closed_debit':
-      case 'closed_house':
-      case 'closed_other':
-        return ''; // No mostrar cuando se cierra
-      case 'cancelled':
-        return 'Cancelado';
-      default:
-        return status; // Por si llega un valor no contemplado
-    }
+  private readonly map: Record<OrderStatus, string> = {
+    draft: 'Borrador',
+    approved: 'Aprobado',
+    preparing: 'En preparación',
+    ready: 'Listo para entregar',
+    closed: 'Cerrado',
+    cancelled: 'Cancelado',
+    updated: 'Actualizado',
+    pending: 'Pendiente',
+    update_rejected: 'Actualización Rechazada',
+    delivered: 'Entregado',
+    closed_cash: 'Pago en efectivo',
+    closed_qr: 'Pago con QR',
+    closed_mp_pos: 'Pago con POS',
+    closed_credit: 'Pago con tarjeta de credito',
+    closed_debit: 'Pago con tarjeta de debito',
+    closed_other: 'Pago con otros metodos de pago'
+  };
+
+  getOrderStatusLabel(status: OrderStatus | string): string {
+    return this.map[status as OrderStatus] ?? 'Desconocido';
   }
 }

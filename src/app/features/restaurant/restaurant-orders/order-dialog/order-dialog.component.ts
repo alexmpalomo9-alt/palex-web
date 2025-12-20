@@ -14,6 +14,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { OrderItemsTableComponent } from '../../../order/components/order-items-table/order-items-table.component';
 import { PaymentMethodDialogComponent } from '../payment-method-dialog/payment-method-dialog.component';
 import { firstValueFrom } from 'rxjs';
+import { OrderStatusService } from '../../../../shared/services/order-status/order-status.service';
 
 @Component({
   selector: 'app-order-dialog',
@@ -45,13 +46,16 @@ export class OrderDialogComponent implements OnInit {
   }
 
   get orderStatusLabel() {
-    return this.facade.getOrderStatusLabel(this.facade.state().status);
+    return this.orderStatusService.getOrderStatusLabel(
+      this.facade.state().status
+    );
   }
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<OrderDialogComponent>,
     public facade: OrderDialogFacade,
+    private orderStatusService: OrderStatusService,
     private dialog: MatDialog
   ) {}
 

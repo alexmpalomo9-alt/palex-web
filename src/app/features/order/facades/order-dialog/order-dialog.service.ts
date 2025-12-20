@@ -143,21 +143,6 @@ export class OrderDialogFacade {
   }
 
   // ---------------------------
-  // 🟦 Label de estado
-  // ---------------------------
-  getOrderStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      draft: 'Borrador',
-      approved: 'Aprobado',
-      preparing: 'En preparación',
-      closed: 'Cerrado',
-      cancelled: 'Cancelado',
-      updated: 'Actualizado',
-    };
-    return map[status] ?? 'Desconocido';
-  }
-
-  // ---------------------------
   // 🟩 Agregar Item (desde diálogo de menú)
   // ---------------------------
   async addItemDialog() {
@@ -212,65 +197,63 @@ export class OrderDialogFacade {
     }));
   }
 
+  // ---------------------------
+  // 🟩 Crear Orden
+  // ---------------------------
+  async createOrder(): Promise<boolean> {
+    const { items, notes, restaurantId, tableIds, tableNumbers } = this.state();
 
-  
-// ---------------------------
-// 🟩 Crear Orden
-// ---------------------------
-async createOrder(): Promise<boolean> {
-  const { items, notes, restaurantId, tableIds, tableNumbers } = this.state();
+    if (!items.length) {
+      await firstValueFrom(
+        this.dialog.confirmDialog({
+          title: 'Pedido vacío',
+          message: 'No se puede crear un pedido sin productos.',
+          type: 'error',
+        })
+      );
+      return false;
+    }
 
-  if (!items.length) {
-    await firstValueFrom(
+    const confirmed = await firstValueFrom(
       this.dialog.confirmDialog({
-        title: 'Pedido vacío',
-        message: 'No se puede crear un pedido sin productos.',
-        type: 'error',
+        title: 'Crear pedido',
+        message: `¿Deseas crear este pedido para las mesas ${tableNumbers.join(
+          ', '
+        )}?`,
+        type: 'question',
       })
     );
-    return false;
+
+    if (!confirmed) return false;
+
+    this.setLoading(true);
+
+    try {
+      // 🔹 Snapshot del usuario (SIN LECTURAS)
+      const user = this.auth.getUserSnapshot();
+
+      await this.orderService.createOrderForMozo(restaurantId, {
+        tableIds,
+
+        waiterId: user.uid,
+        waiterName: user.name,
+        waiterRole: user.role,
+
+        createdBy: user.uid,
+        notes,
+        items,
+      });
+
+      // 🚫 NO volver a tocar mesas aquí
+
+      return true;
+    } catch (error: any) {
+      this.dialog.errorDialog('Error', error.message);
+      return false;
+    } finally {
+      this.setLoading(false);
+    }
   }
-
-  const confirmed = await firstValueFrom(
-    this.dialog.confirmDialog({
-      title: 'Crear pedido',
-      message: `¿Deseas crear este pedido para las mesas ${tableNumbers.join(
-        ', '
-      )}?`,
-      type: 'question',
-    })
-  );
-
-  if (!confirmed) return false;
-
-  this.setLoading(true);
-
-  try {
-    // 🔹 Snapshot del usuario (SIN LECTURAS)
-    const user = this.auth.getUserSnapshot();
-
-    await this.orderService.createOrderForMozo(restaurantId, {
-      tableIds,
-
-      waiterId: user.uid,
-      waiterName: user.name,
-      waiterRole: user.role,
-
-      createdBy: user.uid,
-      notes,
-      items,
-    });
-
-    // 🚫 NO volver a tocar mesas aquí
-
-    return true;
-  } catch (error: any) {
-    this.dialog.errorDialog('Error', error.message);
-    return false;
-  } finally {
-    this.setLoading(false);
-  }
-}
 
   // ---------------------------
   // 🟩 Actualizar Orden (comparo canónica para evitar escrituras)
@@ -414,9 +397,6 @@ async createOrder(): Promise<boolean> {
 
     try {
       await this.orderService.cancelOrder(restaurantId, orderId!, userId);
-
-      // ✅ limpiar todas las mesas
-      await this.tableService.clearTables(restaurantId, tableIds);
 
       return true;
     } catch (error: any) {

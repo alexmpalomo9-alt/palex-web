@@ -20,7 +20,7 @@
     color="primary"
     *ngIf="
       status !== 'closed' &&
-      ['approved', 'preparing', 'updated'].includes(status)
+      ['approved', 'preparing', 'updated', 'ready'].includes(status)
     "
     (click)="closeOrder.emit()"
   >

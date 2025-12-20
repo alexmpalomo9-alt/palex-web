@@ -2,23 +2,15 @@ import { Injectable } from '@angular/core';
 import {
   Firestore,
   collection,
-  collectionData,
   doc,
-  docData,
   addDoc,
   updateDoc,
   getDoc,
   getDocs,
-  deleteDoc,
   writeBatch,
   serverTimestamp,
-  query,
-  where,
   runTransaction,
-  DocumentData,
-  orderBy,
 } from '@angular/fire/firestore';
-import { BehaviorSubject, combineLatest, map, Observable, of, switchMap } from 'rxjs';
 
 import { OrderStatus, OrderItem, Order } from '../../models/order.model';
 
@@ -30,6 +22,7 @@ interface TableDoc {
   number: number;
   status: 'available' | 'seated' | 'occupied' | 'reserved';
   currentOrderId?: string | null;
+  currentOrderStatus?: OrderStatus | null; // ✅ AGREGAR
 }
 
 /* =====================================================
@@ -125,139 +118,138 @@ export class OrderService {
      CREATE ORDER FOR MOZO (MULTI MESA)
   ===================================================== */
 
-async createOrderForMozo(
-  restaurantId: string,
-  data: {
-    tableIds: string[];
+  async createOrderForMozo(
+    restaurantId: string,
+    data: {
+      tableIds: string[];
 
-    // 🔹 MOZO (desnormalizado)
-    waiterId: string;
-    waiterName: string;
-    waiterRole: string;
+      // 🔹 MOZO (desnormalizado)
+      waiterId: string;
+      waiterName: string;
+      waiterRole: string;
 
-    createdBy: string;
-    notes?: string;
-    items: OrderItem[];
-  }
-): Promise<string> {
+      createdBy: string;
+      notes?: string;
+      items: OrderItem[];
+    }
+  ): Promise<string> {
+    const db = this.firestore;
+    const tablesCol = collection(db, `restaurants/${restaurantId}/tables`);
+    const ordersCol = this.ordersCol(restaurantId);
 
-  const db = this.firestore;
-  const tablesCol = collection(db, `restaurants/${restaurantId}/tables`);
-  const ordersCol = this.ordersCol(restaurantId);
-
-  // 🔹 Total calculado una sola vez
-  const total = data.items.reduce(
-    (acc, item) => acc + item.price * item.qty,
-    0
-  );
-
-  return await runTransaction(db, async (tx) => {
-
-    /* =====================================================
-       1️⃣ LEER TODAS LAS MESAS (1 lectura por mesa)
-    ===================================================== */
-    const tableSnaps = await Promise.all(
-      data.tableIds.map(id => tx.get(doc(tablesCol, id)))
+    // 🔹 Total calculado una sola vez
+    const total = data.items.reduce(
+      (acc, item) => acc + item.price * item.qty,
+      0
     );
 
-    const tableNumbers: number[] = [];
-
-    tableSnaps.forEach(snap => {
-      if (!snap.exists()) {
-        throw new Error('Mesa no existe');
-      }
-
-      const table = snap.data() as TableDoc;
-
-      if (table.currentOrderId) {
-        throw new Error(`Mesa ${table.number} ocupada`);
-      }
-
-      tableNumbers.push(table.number);
-    });
-
-    /* =====================================================
-       2️⃣ CREAR PEDIDO PRINCIPAL (DESNORMALIZADO)
+    return await runTransaction(db, async (tx) => {
+      /* =====================================================
+       1️⃣ LEER TODAS LAS MESAS (1 lectura por mesa)
     ===================================================== */
-    const orderRef = doc(ordersCol);
-
-    tx.set(orderRef, {
-      restaurantId,
-
-      // 🔹 Mesas
-      tableIds: data.tableIds,
-      tableNumbers, // ✅ DESNORMALIZADO
-
-      // 🔹 Mozo
-      waiterId: data.waiterId,
-      waiterName: data.waiterName,
-      waiterRole: data.waiterRole,
-
-      createdBy: data.createdBy,
-      notes: data.notes ?? '',
-
-      status: 'approved' as OrderStatus,
-      total,
-      itemsCount: data.items.length,
-
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    /* =====================================================
-       3️⃣ CREAR ITEMS (SUBCOLECCIÓN)
-    ===================================================== */
-    data.items.forEach((item, index) => {
-      const itemRef = doc(
-        collection(
-          db,
-          `restaurants/${restaurantId}/orders/${orderRef.id}/items`
-        )
+      const tableSnaps = await Promise.all(
+        data.tableIds.map((id) => tx.get(doc(tablesCol, id)))
       );
 
-      tx.set(itemRef, {
-        productId: item.productId,
-        name: item.name,
-        price: item.price,
-        qty: item.qty,
-        position: index,
-        subtotal: item.price * item.qty,
-        notes: item.notes ?? '',
+      const tableNumbers: number[] = [];
+
+      tableSnaps.forEach((snap) => {
+        if (!snap.exists()) {
+          throw new Error('Mesa no existe');
+        }
+
+        const table = snap.data() as TableDoc;
+
+        if (table.currentOrderId) {
+          throw new Error(`Mesa ${table.number} ocupada`);
+        }
+
+        tableNumbers.push(table.number);
+      });
+
+      /* =====================================================
+       2️⃣ CREAR PEDIDO PRINCIPAL (DESNORMALIZADO)
+    ===================================================== */
+      const orderRef = doc(ordersCol);
+
+      tx.set(orderRef, {
+        restaurantId,
+
+        // 🔹 Mesas
+        tableIds: data.tableIds,
+        tableNumbers, // ✅ DESNORMALIZADO
+
+        // 🔹 Mozo
+        waiterId: data.waiterId,
+        waiterName: data.waiterName,
+        waiterRole: data.waiterRole,
+
+        createdBy: data.createdBy,
+        notes: data.notes ?? '',
+
+        status: 'approved' as OrderStatus,
+        total,
+        itemsCount: data.items.length,
+
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-    });
 
-    /* =====================================================
-       4️⃣ OCUPAR TODAS LAS MESAS
+      /* =====================================================
+       3️⃣ CREAR ITEMS (SUBCOLECCIÓN)
     ===================================================== */
-    tableSnaps.forEach(snap => {
-      tx.update(snap.ref, {
-        currentOrderId: orderRef.id,
-        status: 'occupied',
-        updatedAt: serverTimestamp(),
-      });
-    });
+      data.items.forEach((item, index) => {
+        const itemRef = doc(
+          collection(
+            db,
+            `restaurants/${restaurantId}/orders/${orderRef.id}/items`
+          )
+        );
 
-    /* =====================================================
+        tx.set(itemRef, {
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          qty: item.qty,
+          position: index,
+          subtotal: item.price * item.qty,
+          notes: item.notes ?? '',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      });
+
+      /* =====================================================
+   4️⃣ OCUPAR TODAS LAS MESAS
+===================================================== */
+      tableSnaps.forEach((snap) => {
+        tx.update(snap.ref, {
+          currentOrderId: orderRef.id,
+          currentOrderStatus: 'approved',
+          status: 'occupied',
+          updatedAt: serverTimestamp(),
+        });
+      });
+
+      /* =====================================================
        5️⃣ HISTORIAL
     ===================================================== */
-    const historyRef = doc(
-      collection(
-        db,
-        `restaurants/${restaurantId}/orders/${orderRef.id}/history`
-      )
-    );
+      const historyRef = doc(
+        collection(
+          db,
+          `restaurants/${restaurantId}/orders/${orderRef.id}/history`
+        )
+      );
 
-    tx.set(historyRef, {
-      status: 'approved',
-      userId: data.createdBy,
-      timestamp: serverTimestamp(),
+      tx.set(historyRef, {
+        status: 'approved',
+        userId: data.createdBy,
+        timestamp: serverTimestamp(),
+      });
+
+      return orderRef.id;
     });
-
-    return orderRef.id;
-  });
-}
+  }
 
   /* =====================================================
      UPDATE ORDER STATUS
@@ -269,18 +261,50 @@ async createOrderForMozo(
     status: OrderStatus,
     userId: string | null
   ) {
-    const data: any = {
-      status,
-      updatedAt: serverTimestamp(),
-    };
+    await runTransaction(this.firestore, async (tx) => {
+      const orderRef = doc(
+        this.firestore,
+        `restaurants/${restaurantId}/orders/${orderId}`
+      );
 
-    if (status === 'closed') data.closedAt = serverTimestamp();
-    if (status === 'cancelled') data.cancelledAt = serverTimestamp();
+      const orderSnap = await tx.get(orderRef);
+      if (!orderSnap.exists()) return;
 
-    await updateDoc(this.orderDoc(restaurantId, orderId), data);
-    await this.addStatusHistory(restaurantId, orderId, status, userId);
+      const order = orderSnap.data() as Order;
+
+      // 1️⃣ actualizar pedido
+      tx.update(orderRef, {
+        status,
+        updatedAt: serverTimestamp(),
+        ...(status === 'preparing' && { preparingAt: serverTimestamp() }),
+        ...(status === 'ready' && { readyAt: serverTimestamp() }),
+      });
+
+      // 2️⃣ actualizar mesas 🔥🔥🔥
+      for (const tableId of order.tableIds) {
+        const tableRef = doc(
+          this.firestore,
+          `restaurants/${restaurantId}/tables/${tableId}`
+        );
+
+        tx.update(tableRef, {
+          currentOrderStatus: status,
+        });
+      }
+
+      // 3️⃣ historial
+      const historyRef = collection(
+        this.firestore,
+        `restaurants/${restaurantId}/orders/${orderId}/history`
+      );
+
+      tx.set(doc(historyRef), {
+        status,
+        userId,
+        timestamp: serverTimestamp(),
+      });
+    });
   }
-
   /* =====================================================
      GET ORDER + ITEMS
   ===================================================== */
@@ -300,36 +324,8 @@ async createOrderForMozo(
   }
 
   /* =====================================================
-     OBSERVABLES OBTIENE PEDIDOS DEL RESTAURANT
+     ACTUALIZAR PEDIDOS DEL RESTAURANT
   ===================================================== */
-
-getActiveOrdersWithItemsRealtime(restaurantId: string): Observable<(Order & { items: OrderItem[] })[]> {
-  const ordersRef = collection(this.firestore, `restaurants/${restaurantId}/orders`);
-  const q = query(
-    ordersRef,
-    where('status', 'in', ['approved','preparing','updated']),
-    orderBy('createdAt')
-  );
-
-  return collectionData(q, { idField: 'orderId' }).pipe(
-    switchMap(orders => {
-      if (!orders.length) return of([]);
-      return combineLatest(orders.map(o => this.getOrderWithItemsRealtime(restaurantId, o.orderId)));
-    })
-  );
-}
-
-getOrderWithItemsRealtime(restaurantId: string, orderId: string): Observable<Order & { items: OrderItem[] }> {
-  const orderDoc = doc(this.firestore, `restaurants/${restaurantId}/orders/${orderId}`);
-  const itemsCol = collection(this.firestore, `restaurants/${restaurantId}/orders/${orderId}/items`);
-
-  return combineLatest([
-    docData(orderDoc, { idField: 'orderId' }) as Observable<Order>,
-    collectionData(itemsCol, { idField: 'itemId' }) as Observable<OrderItem[]>
-  ]).pipe(
-    map(([order, items]) => ({ ...order, items }))
-  );
-}
 
   async updateOrder(
     restaurantId: string,
@@ -416,7 +412,9 @@ getOrderWithItemsRealtime(restaurantId: string, orderId: string): Observable<Ord
     });
   }
 
-  //Cancelar pedido
+  /* =====================================================
+     CANCELAR UN PEDIDO 
+  ===================================================== */
   async cancelOrder(restaurantId: string, orderId: string, userId: string) {
     const db = this.firestore;
     const orderRef = this.orderDoc(restaurantId, orderId);
@@ -459,6 +457,7 @@ getOrderWithItemsRealtime(restaurantId: string, orderId: string): Observable<Ord
 
         tx.update(tableRef, {
           currentOrderId: null,
+          currentOrderStatus: null, // limpiar
           status: 'available',
           updatedAt: serverTimestamp(),
         });
@@ -523,8 +522,9 @@ getOrderWithItemsRealtime(restaurantId: string, orderId: string): Observable<Ord
             `restaurants/${restaurantId}/tables/${tableId}`
           );
           tx.update(tableRef, {
-            status: 'available',
             currentOrderId: null,
+            currentOrderStatus: null, // limpiar
+            status: 'available',
             updatedAt: serverTimestamp(),
           });
         }

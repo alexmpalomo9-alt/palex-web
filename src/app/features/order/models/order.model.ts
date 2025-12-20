@@ -39,7 +39,6 @@ export type OrderStatus =
   | 'closed_mp_pos'
   | 'closed_credit'
   | 'closed_debit'
-  | 'closed_house'
   | 'closed_other'
   | 'cancelled'; // Pedido anulado
 

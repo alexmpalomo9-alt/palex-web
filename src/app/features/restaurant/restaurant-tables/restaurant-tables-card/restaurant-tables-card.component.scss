@@ -184,3 +184,33 @@
     color: #eee;
   }
 }
+.status-pill {
+  &.draft { background-color: #f0ad4e; }           // Borrador
+  &.pending { background-color: #5bc0de; }         // Pendiente de aprobación
+  &.approved { background-color: #0275d8; }        // Aprobado
+  &.updated { background-color: #f7c851; }         // Actualizado
+  &.preparing { background-color: #f0ad4e; }       // En preparación
+  &.ready { background-color: #5cb85c; }           // Listo para entregar
+  &.delivered { background-color: #292b2c; }       // Entregado
+  &.update_rejected { background-color: #d9534f; } // Modificación rechazada
+  &.available { background-color: #5cb85c; }
+  &.seated { background-color: #5bc0de; }
+  &.occupied { background-color: #f0ad4e; }
+  &.reserved { background-color: #292b2c; }
+}
+.status-pill, .order-status {
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  display: inline-block;
+}
+.order-status.draft { background-color: #f0ad4e; }
+.order-status.pending { background-color: #5bc0de; }
+.order-status.approved { background-color: #0275d8; }
+.order-status.updated { background-color: #f7c851; }
+.order-status.preparing { background-color: #f0ad4e; }
+.order-status.ready { background-color: #5cb85c; }
+.order-status.delivered { background-color: #292b2c; }
+.order-status.update_rejected { background-color: #d9534f; }

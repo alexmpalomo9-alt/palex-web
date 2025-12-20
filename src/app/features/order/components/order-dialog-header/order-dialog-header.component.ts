@@ -1,19 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  OnDestroy,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
-import { ThemeService } from '../../../../core/services/theme/theme.service';
-
-// Angular Material
-import { MatChipsModule } from '@angular/material/chips';
-import { MatCommonModule } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
 
 @Component({

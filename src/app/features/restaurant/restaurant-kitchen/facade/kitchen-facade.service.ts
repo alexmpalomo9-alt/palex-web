@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { Order, OrderItem } from '../../../order/models/order.model';
-import { OrderService } from '../../../order/services/order-service/order.service';
+import { OrderItem, OrderStatus } from '../../../order/models/order.model';
+import { KitchenService } from '../services/kitchen.service';
 
+/* =====================================================
+   🔹 MODELO QUE USA LA UI DE COCINA
+===================================================== */
 export interface KitchenOrder {
   orderId: string;
   tableNumbers: number[];
@@ -10,40 +13,71 @@ export interface KitchenOrder {
   total: number;
   items: OrderItem[];
   notes: string;
-  statusLabel: 'Nuevo' | 'Actualizado' | null;
+
+  // 🔹 UI
+  status: OrderStatus; 
+  // 🔹 Tiempos
+  createdAt: any;
+  updatedAt?: any;
+  preparingAt?: any;
+  readyAt?: any;
 }
 
 @Injectable({ providedIn: 'root' })
 export class KitchenFacade {
-  private changedOrders = new Map<string, { statusLabel: 'Nuevo' | 'Actualizado' | null }>();
+  constructor(private kitchenService: KitchenService) {}
 
-  constructor(private orderService: OrderService) {}
+  /* =====================================================
+     📡 PEDIDOS ACTIVOS
+  ===================================================== */
 
   getActiveOrders(restaurantId: string): Observable<KitchenOrder[]> {
-    return this.orderService.getActiveOrdersWithItemsRealtime(restaurantId).pipe(
-      map((orders) =>
-        orders.map((o) => {
-          let label: 'Nuevo' | 'Actualizado' | null = null;
-          if (o.status === 'approved') label = 'Nuevo';
-          else if (o.status === 'updated') label = 'Actualizado';
-
-          this.changedOrders.set(o.orderId, { statusLabel: label });
-
-          return {
+    return this.kitchenService
+      .getActiveOrdersWithItemsRealtime(restaurantId)
+      .pipe(
+        map((orders) =>
+          orders.map((o) => ({
             orderId: o.orderId,
             tableNumbers: o.tableNumbers ?? [],
             waiterName: o.waiterName ?? 'Sin asignar',
             total: o.total ?? 0,
             items: o.items ?? [],
             notes: o.notes ?? '',
-            statusLabel: label,
-          };
-        })
-      )
+            status: o.status,
+            createdAt: o.createdAt,
+            updatedAt: o.updatedAt,
+            preparingAt: (o as any).preparingAt,
+            readyAt: (o as any).readyAt,
+          }))
+        )
+      );
+  }
+
+  /* =====================================================
+     🍳 ACCIONES
+  ===================================================== */
+
+  markPreparing(
+    restaurantId: string,
+    orderId: string,
+    userId: string | null
+  ) {
+    return this.kitchenService.markPreparing(
+      restaurantId,
+      orderId,
+      userId
     );
   }
 
-  getOrderStatusLabel(orderId: string) {
-    return this.changedOrders.get(orderId)?.statusLabel ?? null;
+  markReady(
+    restaurantId: string,
+    orderId: string,
+    userId: string | null
+  ) {
+    return this.kitchenService.markReady(
+      restaurantId,
+      orderId,
+      userId
+    );
   }
 }

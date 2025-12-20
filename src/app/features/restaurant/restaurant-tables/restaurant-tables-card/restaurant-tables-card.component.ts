@@ -12,11 +12,12 @@ import { TableQrDialogComponent } from '../../../../shared/components/qr-preview
 import { TableService } from '../services/table.service';
 import { RestaurantService } from '../../services/restaurant.service';
 import { TableStatusService } from '../../../../shared/services/table-status/table-status.service';
-import { SharedModule } from '../../../../shared/shared.module';
 import { ThemeService } from '../../../../core/services/theme/theme.service';
 import { SelectTablesDialogComponent } from '../../../order/components/select-tables-dialog/select-tables-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
+import { OrderStatusService } from '../../../../shared/services/order-status/order-status.service';
+import { SharedModule } from '../../../../shared/shared.module';
 
 @Component({
   selector: 'app-restaurant-tables-card',
@@ -44,14 +45,17 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     public tableStatusService: TableStatusService,
     private themeService: ThemeService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private orderStatusService: OrderStatusService
   ) {}
 
+  // ================================
+  // INIT / DESTROY
+  // ================================
   ngOnInit() {
     const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
     if (!slug) return;
 
-    // Cargar restaurante y mesas
     this.sub = this.restaurantService
       .getRestaurantBySlug(slug)
       .subscribe((restaurant) => {
@@ -63,18 +67,14 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
         this.sub = this.tableService
           .getTablesByRestaurant(this.restaurantId)
           .subscribe((tables) => {
-            this.tables = tables || [];
-            this.filteredTables = [...this.tables]; // Inicialmente mostrar todas
+            this.tables = tables ?? [];
+            this.filteredTables = [...this.tables];
             this.loading = false;
           });
       });
-
-    // Escuchar cambios del tema
     this.themeService.darkModeObservable
       .pipe(takeUntil(this.destroy$))
-      .subscribe((value) => {
-        this.isDarkMode = value;
-      });
+      .subscribe((value) => (this.isDarkMode = value));
   }
 
   ngOnDestroy(): void {
@@ -84,7 +84,7 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
   }
 
   // ================================
-  // BUSCADOR DE MESAS
+  // BUSCADOR
   // ================================
   onSearch(searchTerm: string) {
     if (!searchTerm) {
@@ -96,13 +96,13 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     this.filteredTables = this.tables.filter(
       (t) =>
         t.number.toString().includes(term) ||
-        (t.name?.toLowerCase().includes(term) ?? false) ||
-        (t.sector?.toLowerCase().includes(term) ?? false)
+        t.name?.toLowerCase().includes(term) ||
+        t.sector?.toLowerCase().includes(term)
     );
   }
 
   // ================================
-  // CAMBIO DE ESTADO
+  // ESTADO MESA
   // ================================
   changeStatus(table: Table, status: Table['status']) {
     if (!this.restaurant) return;
@@ -113,7 +113,21 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
   }
 
   // ================================
-  // VER QR
+  // STATUS PEDIDO (LABEL)
+  // ================================
+  getStatusLabelForTable(table: Table): string {
+    // Si no hay pedido, no mostramos nada
+    if (!table.currentOrderId || !table.currentOrderStatus) {
+      return '';
+    }
+
+    return this.orderStatusService.getOrderStatusLabel(
+      table.currentOrderStatus
+    );
+  }
+
+  // ================================
+  // QR
   // ================================
   openQr(table: Table) {
     const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
@@ -129,9 +143,11 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     if (table.currentOrderId) orderId = table.currentOrderId;
 
     if (!orderId) {
-      const canCreate = table.status === 'available' || table.status === 'seated';
+      const canCreate =
+        table.status === 'available' || table.status === 'seated';
       if (!canCreate) {
-        return alert(`Mesa ${table.number} no disponible`);
+        alert(`Mesa ${table.number} no disponible`);
+        return;
       }
     }
 
@@ -156,13 +172,15 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.success) {
-        this.snackBar.open('Pedido creado correctamente', 'OK', { duration: 3000 });
+        this.snackBar.open('Pedido creado correctamente', 'OK', {
+          duration: 3000,
+        });
       }
     });
   }
 
   // ================================
-  // CREAR PEDIDO DESDE BOTÓN SUPERIOR
+  // CREAR PEDIDO DESDE HEADER
   // ================================
   async createOrderFromMenu() {
     if (!this.restaurant) return;
@@ -171,8 +189,10 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
       data: { tables: this.tables, baseTable: null },
     });
 
-    const selectedTables: Table[] = await firstValueFrom(selectRef.afterClosed());
-    if (!selectedTables || !selectedTables.length) return;
+    const selectedTables: Table[] = await firstValueFrom(
+      selectRef.afterClosed()
+    );
+    if (!selectedTables?.length) return;
 
     const orderRef = this.dialog.open(OrderDialogComponent, {
       disableClose: true,
@@ -187,13 +207,15 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
 
     orderRef.afterClosed().subscribe((result) => {
       if (result?.success) {
-        this.snackBar.open('Pedido creado correctamente', 'OK', { duration: 3000 });
+        this.snackBar.open('Pedido creado correctamente', 'OK', {
+          duration: 3000,
+        });
       }
     });
   }
 
   // ================================
-  // SELECCIONAR MESAS PARA NUEVO PEDIDO
+  // SELECCIONAR MESAS
   // ================================
   async selectTablesForNewOrder(baseTable: Table): Promise<Table[]> {
     const dialogRef = this.dialog.open(SelectTablesDialogComponent, {
@@ -201,7 +223,24 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
       data: { tables: this.tables, baseTable },
     });
 
-    const result = await firstValueFrom(dialogRef.afterClosed());
-    return result ?? [];
+    return (await firstValueFrom(dialogRef.afterClosed())) ?? [];
   }
+
+
+
+  getStatusClass(table: Table): string {
+  if (!table.currentOrderStatus) return '';
+  const statusMap: Record<string, string> = {
+    draft: 'draft',
+    pending: 'pending',
+    approved: 'approved',
+    updated: 'updated',
+    preparing: 'preparing',
+    ready: 'ready',
+    delivered: 'delivered',
+    update_rejected: 'update_rejected'
+  };
+  return statusMap[table.currentOrderStatus] ?? '';
+}
+
 }

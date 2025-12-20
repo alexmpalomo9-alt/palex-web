@@ -26,14 +26,11 @@
       <mat-card-header class="card-header">
         <mat-card-title>Mesa {{ t.number }}</mat-card-title>
         <span
+          *ngIf="getStatusLabelForTable(t)"
           class="status-pill"
-          [ngClass]="[t.currentOrderId ? 'active' : t.status]"
+          [ngClass]="getStatusClass(t)"
         >
-          {{
-            t.currentOrderId
-              ? "Pedido activo"
-              : tableStatusService.getTableStatusLabel(t.status)
-          }}
+          {{ getStatusLabelForTable(t) }}
         </span>
       </mat-card-header>
 
