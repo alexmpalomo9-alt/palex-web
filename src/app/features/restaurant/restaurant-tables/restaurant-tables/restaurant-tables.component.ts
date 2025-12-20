@@ -13,13 +13,14 @@ import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order
 import { ThemeService } from '../../../../core/services/theme/theme.service';
 import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
+import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 
 @Component({
   selector: 'app-restaurant-tables',
   templateUrl: './restaurant-tables.component.html',
   styleUrls: ['./restaurant-tables.component.scss'],
   standalone: true,
-  imports: [SharedModule, SectionHeaderComponent],
+  imports: [SharedModule, SectionHeaderComponent, AddButtonComponent],
 })
 export class RestaurantTablesComponent implements OnInit, OnDestroy {
   @Input() restaurant: Restaurant | null = null;

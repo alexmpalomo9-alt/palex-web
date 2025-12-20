@@ -7,18 +7,18 @@ import { ProductListComponent } from '../../../../products/components/product-li
 import { Product } from '../../../../products/model/product.model';
 import { ProductDialogService } from '../../../../products/services/product-dialog.service';
 import { ProductService } from '../../../../products/services/product.service';
-import { CategoryManagementComponent } from '../../categories/components/category-management/category-management.component';
 import { SharedModule } from '../../../../shared/shared.module';
 import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
+import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 
 @Component({
   selector: 'app-restaurant-products',
   imports: [
     ProductListComponent,
-    CategoryManagementComponent,
     SharedModule,
     SectionHeaderComponent,
+    AddButtonComponent,
   ],
   templateUrl: './restaurant-products.component.html',
   styleUrls: ['./restaurant-products.component.scss'],

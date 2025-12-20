@@ -17,6 +17,5 @@ export class SectionHeaderComponent {
   @Input() sticky = true;
   @Input() filterPlaceholder?: string;
 
-  /** 🔥 Emite el texto de búsqueda */
   @Output() search = new EventEmitter<string>();
 }

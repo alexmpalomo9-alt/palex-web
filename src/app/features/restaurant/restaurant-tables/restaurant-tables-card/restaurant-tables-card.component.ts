@@ -18,11 +18,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 import { OrderStatusService } from '../../../../shared/services/order-status/order-status.service';
 import { SharedModule } from '../../../../shared/shared.module';
+import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 
 @Component({
   selector: 'app-restaurant-tables-card',
   standalone: true,
-  imports: [SharedModule, SectionHeaderComponent],
+  imports: [SharedModule, SectionHeaderComponent, AddButtonComponent],
   templateUrl: './restaurant-tables-card.component.html',
   styleUrls: ['./restaurant-tables-card.component.scss'],
 })

@@ -48,15 +48,22 @@ export class RestaurantKitchenComponent implements OnInit, OnDestroy {
         this.restaurantId
       );
 
+      let isFirstLoad = true; // 🔹 Flag para la carga inicial
+
       this.subscription = this.activeOrders$.subscribe((orders) => {
         const currentOrderIds = new Set(orders.map((o) => o.orderId));
 
-        // Detectar pedidos nuevos
-        orders.forEach((order) => {
-          if (!this.previousOrderIds.has(order.orderId)) {
-            this.playNewOrderSound();
-          }
-        });
+        if (!isFirstLoad) {
+          // Detectar pedidos nuevos solo después de la carga inicial
+          orders.forEach((order) => {
+            if (!this.previousOrderIds.has(order.orderId)) {
+              this.playNewOrderSound();
+            }
+          });
+        } else {
+          // Primera carga, no reproducir sonido
+          isFirstLoad = false;
+        }
 
         // Actualizar el set de pedidos anteriores
         this.previousOrderIds = currentOrderIds;

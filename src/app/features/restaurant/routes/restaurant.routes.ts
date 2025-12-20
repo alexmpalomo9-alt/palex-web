@@ -8,17 +8,9 @@ import { RestaurantShellComponent } from '../restaurant-shell/restaurant-shell/r
 import { RestaurantProductsComponent } from '../restaurant-products/restaurant-products/restaurant-products.component';
 import { RestaurantTablesCardComponent } from '../restaurant-tables/restaurant-tables-card/restaurant-tables-card.component';
 import { RestaurantKitchenComponent } from '../restaurant-kitchen/restaurant-kitchen/restaurant-kitchen.component';
-// import { RestaurantKitchenComponent } from '../restaurant-kitchen/restaurant-kitchen/restaurant-kitchen.component';
+import { CategoryManagementComponent } from '../categories/components/category-management/category-management.component';
 
 export const RESTAURANT_ROUTES: Routes = [
-  // Listado de restaurantes
-  // {
-  //   path: 'list',
-  //   loadComponent: () =>
-  //     import('../../../restaurant/components/restaurant-page/restaurant-page.component')
-  //       .then(c => c.RestaurantPageComponent),
-  // },
-
   {
     path: ':restaurantId',
     component: RestaurantShellComponent,
@@ -32,6 +24,7 @@ export const RESTAURANT_ROUTES: Routes = [
       { path: 'stats', component: RestaurantStatsComponent },
       { path: 'kitchen', component: RestaurantKitchenComponent },
       { path: 'waiter', component: RestaurantTablesCardComponent },
+      { path: 'categories', component: CategoryManagementComponent },
     ],
   },
 

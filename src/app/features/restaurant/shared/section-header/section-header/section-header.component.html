@@ -1,7 +1,4 @@
-<header
-  class="section-header"
-  [class.sticky-header]="sticky"
->
+<header class="section-header" [class.sticky-header]="sticky">
   <div class="section-info">
     <div class="section-icon">
       <mat-icon>{{ icon }}</mat-icon>
@@ -9,20 +6,16 @@
 
     <div class="section-texts">
       <h2 class="section-title">{{ title }}</h2>
-      <p class="section-subtitle" *ngIf="subtitle">
-        {{ subtitle }}
-      </p>
+      <p class="section-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
     </div>
   </div>
 
-  <!-- Buscador -->
   <app-search-box
     *ngIf="filterPlaceholder"
     [placeholder]="filterPlaceholder"
     (search)="search.emit($event)"
   ></app-search-box>
 
-  <!-- Zona de acciones -->
   <div class="actions-container">
     <ng-content></ng-content>
   </div>

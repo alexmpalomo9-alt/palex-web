@@ -1,12 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { SharedModule } from '../../shared.module';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-search-box',
   templateUrl: './search-box.component.html',
   styleUrls: ['./search-box.component.css'],
   standalone: true,
-  imports: [SharedModule],
+  imports: [CommonModule, MatFormFieldModule, MatInputModule, MatIconModule],
 })
 export class SearchBoxComponent {
   @Input() placeholder: string = 'Buscar';

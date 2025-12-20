@@ -23,8 +23,9 @@ import { RolePermissionsInfoComponent } from '../role-permissions-info/role-perm
 import { RestaurantStaffService } from '../services/restaurant-staff.service';
 import { User } from '../../../../users/model/user.model';
 import { ThemeService } from '../../../../core/services/theme/theme.service';
-import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
+import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
+import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 
 @Component({
   selector: 'app-restaurant-staff',
@@ -34,7 +35,8 @@ import { DialogService } from '../../../../core/services/dialog-service/dialog.s
     BaseTableComponent,
     MatChipsModule,
     RolePermissionsInfoComponent,
-    SectionHeaderComponent,
+    AddButtonComponent,
+    SectionHeaderComponent
   ],
   templateUrl: './restaurant-staff.component.html',
   styleUrls: ['./restaurant-staff.component.scss'],
