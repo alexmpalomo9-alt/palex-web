@@ -24,36 +24,33 @@
   .category-swiper {
     width: 100%;
     max-width: 100%;
-    overflow: visible;
+    padding: 10px 0;
 
-    .swiper-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-    }
     .category-slide {
-      width: auto !important;
-      flex-shrink: 0;
+      width: auto;
     }
 
     .category-tab {
       padding: 8px 20px;
       border-radius: 20px;
       background: #eee;
-      color: #222;
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
-      user-select: none;
-      transition: background 0.3s, color 0.2s;
-      text-align: center;
+      transition: 0.3s;
 
       &.active {
         background: #1976d2;
-        color: white;
+        color: #fff;
       }
     }
 
+    /* Flechas azules (opcional, por si theme las pisa) */
+    .category-swiper::part(button-prev),
+    .category-swiper::part(button-next) {
+      color: #1976d2;
+    }
+    /* Centrar en pantallas grandes */
     @media (min-width: 768px) {
       max-width: 700px;
       margin: 0 auto;
@@ -143,6 +140,8 @@
 
       .price-wrapper {
         display: flex;
+        flex-wrap: wrap; // permite salto de línea
+        max-width: 100%;
         align-items: center;
         gap: 8px;
         margin-bottom: 12px;
@@ -195,16 +194,16 @@
 
   .header-menu .title-container {
     .title {
-      color: #fff;
+      color: var(--text-color);
     }
     .subtitle {
-      color: #ccc;
+      color: var(--text-color);
     }
   }
 
   .category-swiper .category-tab {
     background: #333;
-    color: #ccc;
+    color: var(--text-color);
 
     &.active {
       background: #1976d2;
@@ -213,8 +212,8 @@
   }
 
   .menu-card {
-    background: var(--card-bg) !important; /* NUEVO */
-    color: var(--text-color) !important; /* NUEVO */
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 
     &:hover {

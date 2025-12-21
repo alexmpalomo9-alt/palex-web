@@ -11,7 +11,7 @@ describe('LoginDialogComponent', () => {
       imports: [LoginDialogComponent]
     })
     .compileComponents();
-    
+
     fixture = TestBed.createComponent(LoginDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

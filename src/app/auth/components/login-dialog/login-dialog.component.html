@@ -1,15 +1,18 @@
 <div mat-dialog-content class="medidas-dialog glass">
-  <button class="close-button" mat-icon-button (click)="closeDialog()">
+  <!-- Botón de cierre -->
+  <button class="close-button" mat-icon-button (click)="closeDialog()" aria-label="Cerrar">
     <mat-icon>close</mat-icon>
   </button>
 
   <div class="text-center form-wrapper">
+    <!-- Logo -->
     <div class="img-logo">
       <img class="logo mb-4" src="assets/img/small_logo.png" alt="Logo" />
     </div>
     <h2 class="title">Iniciar Sesión</h2>
     <p class="subtitle">Ingresá tus datos para continuar</p>
 
+    <!-- Formulario -->
     <form [formGroup]="loginUser" (ngSubmit)="login()">
       <mat-form-field appearance="fill" class="w100">
         <mat-label>Correo Electrónico</mat-label>
@@ -31,34 +34,35 @@
         />
       </mat-form-field>
 
-      <button
-        class="btn-primary-main w100"
-        type="submit"
-        [disabled]="!isFormValid || loading"
-      >
-        <span>Ingresar</span>
-
-        <mat-progress-spinner
-          *ngIf="loading"
-          diameter="24"
-          mode="indeterminate"
-          color="accent"
-          class="spinner-button"
-        ></mat-progress-spinner>
-      </button>
-
+      <!-- Botón principal -->
+      <app-add-button class="btn-primary-main"
+        [label]="'Ingresar'"
+        [icon]="'login'"
+        (onClick)="login()"
+      ></app-add-button>
 
       <hr class="divider" />
+
+      <!-- Botones adicionales -->
       <button
         mat-button
-        color="warn"
-        class="btn-link"
+        class="btn-secondary"
+        type="button"
+        (click)="registerDialog()"
+      >
+        Registrarse
+      </button>
+
+      <button
+        mat-button
+        class="btn-secondary"
         type="button"
         (click)="openResetDialog()"
       >
         ¿Olvidaste tu contraseña?
       </button>
 
+      <!-- Botón Google -->
       <button
         mat-stroked-button
         color="accent"
@@ -72,16 +76,6 @@
           class="google-logo"
         />
         Ingresar con Google
-      </button>
-
-      <button
-        mat-button
-        color="warn"
-        class="btn-secondary"
-        type="button"
-        (click)="registerDialog()"
-      >
-        Registrarse
       </button>
     </form>
   </div>

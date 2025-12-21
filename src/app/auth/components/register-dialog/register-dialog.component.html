@@ -1,15 +1,16 @@
 <div mat-dialog-content class="medidas-dialog glass">
-    <!-- BOTÓN VOLVER -->
+  <!-- Botón Volver -->
   <button class="back-button" mat-icon-button (click)="backToLogin()">
     <mat-icon>arrow_back</mat-icon>
   </button>
 
-  <!-- BOTÓN CERRAR -->
+  <!-- Botón Cerrar -->
   <button class="close-button" mat-icon-button (click)="closeDialog()">
     <mat-icon>close</mat-icon>
   </button>
 
   <div class="text-center form-wrapper">
+    <!-- Logo -->
     <div class="img-logo">
       <img class="logo mb-3" src="assets/img/small_logo.png" alt="Logo" />
     </div>
@@ -18,8 +19,7 @@
     <p class="subtitle">Completá los datos para registrarte</p>
 
     <form [formGroup]="userForm" (ngSubmit)="registerUser()">
-
-      <!-- FILA NOMBRE + APELLIDO -->
+      <!-- Fila Nombre + Apellido -->
       <div class="row-2">
         <mat-form-field appearance="fill">
           <mat-label>Nombre</mat-label>
@@ -32,6 +32,7 @@
         </mat-form-field>
       </div>
 
+      <!-- Correo Electrónico -->
       <mat-form-field appearance="fill" class="w100">
         <mat-label>Correo Electrónico</mat-label>
         <input
@@ -40,7 +41,6 @@
           formControlName="email"
           placeholder="email@example.com"
         />
-
         <mat-error *ngIf="userForm.controls['email'].hasError('required')">
           El campo es requerido
         </mat-error>
@@ -52,6 +52,7 @@
         </mat-error>
       </mat-form-field>
 
+      <!-- Contraseña -->
       <mat-form-field appearance="fill" class="w100">
         <mat-label>Contraseña</mat-label>
         <input
@@ -62,7 +63,7 @@
         />
       </mat-form-field>
 
-      <!-- REQUISITOS -->
+      <!-- Requisitos contraseña -->
       <div class="requisitosContrasena" *ngIf="userForm.get('password')?.dirty">
         <p>La contraseña debe cumplir:</p>
         <ul>
@@ -81,9 +82,13 @@
         </ul>
       </div>
 
-      <button class="btn-primary-main w100" type="submit">
-        Registrarse
-      </button>
+      <!-- Botón Registrar -->
+      <app-add-button class="btn-primary-main"
+        [label]="'Registrarse'"
+        [icon]="'login'"
+        (onClick)="registerUser()"
+      ></app-add-button>
+
     </form>
   </div>
 </div>

@@ -4,13 +4,17 @@ import {
   Output,
   EventEmitter,
   OnInit,
-  CUSTOM_ELEMENTS_SCHEMA,
+  AfterViewInit,
+  OnChanges,
   SimpleChanges,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
 import { Product } from '../../products/model/product.model';
 import { Restaurant } from '../../features/restaurant/model/restaurant.model';
-import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../shared/shared.module';
 import { ThemeService } from '../../core/services/theme/theme.service';
 
@@ -22,7 +26,7 @@ import { ThemeService } from '../../core/services/theme/theme.service';
   templateUrl: './menu-palex.component.html',
   styleUrls: ['./menu-palex.component.scss'],
 })
-export class MenuPalexComponent implements OnInit {
+export class MenuPalexComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() restaurant!: Restaurant | null;
   @Input() categories!: { label: string; products$: Observable<Product[]> }[];
   @Input() offerProducts$!: Observable<Product[]>;
@@ -30,18 +34,25 @@ export class MenuPalexComponent implements OnInit {
   @Output() addProduct = new EventEmitter<Product>();
   @Output() openImage = new EventEmitter<string>();
 
+  @ViewChild('swiper', { static: false }) swiper?: ElementRef;
+
   selectedCategoryIndex = 0;
   currentProducts$!: Observable<Product[]>;
   isDarkMode = false;
 
   allCategories: { label: string; products$: Observable<Product[]> }[] = [];
+
   constructor(private themeService: ThemeService) {}
 
   ngOnInit() {
     this.updateCategories();
-    this.themeService.darkModeObservable.subscribe((value) => {
-      this.isDarkMode = value;
-    });
+    this.themeService.darkModeObservable.subscribe(
+      (value) => (this.isDarkMode = value)
+    );
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => this.centerSlide(), 200);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -59,15 +70,23 @@ export class MenuPalexComponent implements OnInit {
     ];
 
     this.loadCategoryProducts();
+    setTimeout(() => this.centerSlide(), 100);
   }
 
   selectCategory(index: number) {
     this.selectedCategoryIndex = index;
     this.loadCategoryProducts();
+    this.centerSlide();
   }
 
-  loadCategoryProducts() {
-    if (this.allCategories.length === 0) return;
+  private centerSlide() {
+    const swiperEl = this.swiper?.nativeElement;
+    if (swiperEl?.swiper) {
+      swiperEl.swiper.slideTo(this.selectedCategoryIndex);
+    }
+  }
+
+  private loadCategoryProducts() {
     this.currentProducts$ =
       this.allCategories[this.selectedCategoryIndex].products$;
   }

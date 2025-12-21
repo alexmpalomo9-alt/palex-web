@@ -1,7 +1,6 @@
 .category-management {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  background: var(--card-bg);
+  color: var(--text-color);
 }
 
 .loading {

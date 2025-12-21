@@ -14,11 +14,12 @@
 
   <!-- SWIPER DE CATEGORÍAS -->
   <swiper-container
+    #swiper
     class="category-swiper"
-    navigation="true"
     slides-per-view="auto"
     space-between="12"
-    style="padding: 10px 0"
+    centered-slides="true"
+    navigation="true"
   >
     <swiper-slide
       *ngFor="let category of allCategories; let i = index"
@@ -35,56 +36,57 @@
   </swiper-container>
 
   <!-- GRID DE PRODUCTOS -->
-  <div
-    class="grid"
-    *ngIf="currentProducts$ | async as currentProducts; else emptyCategory"
-  >
-    <mat-card
-      class="menu-card"
-      *ngFor="let item of currentProducts"
-      [class.offer]="item.isOffer"
-    >
-      <div class="card-content-wrapper">
-        <div class="image-section">
-          <img
-            mat-card-image
-            [src]="item.imageUrl || 'assets/img/not-found.png'"
-            alt="{{ item.name }}"
-            (click)="onOpenImage(item.imageUrl)"
-            (error)="onImageError($event)"
-          />
+  <ng-container *ngIf="currentProducts$ | async as currentProducts">
+    <div class="grid" *ngIf="currentProducts.length > 0; else emptyCategory">
+      <mat-card
+        class="menu-card"
+        *ngFor="let item of currentProducts"
+        [class.offer]="item.isOffer"
+      >
+        <div class="card-content-wrapper">
+          <div class="image-section">
+            <img
+              mat-card-image
+              [src]="item.imageUrl || 'assets/img/not-found.png'"
+              alt="{{ item.name }}"
+              (click)="onOpenImage(item.imageUrl)"
+              (error)="onImageError($event)"
+            />
+          </div>
+
+          <div class="text-section">
+            <h2>{{ item.name }}</h2>
+            <div class="text-scroll">
+              <p>{{ item.description }}</p>
+            </div>
+
+            <div class="price-wrapper">
+              <ng-container *ngIf="item.isOffer; else priceNormal">
+                <span class="old-price">{{ item.price | currency }}</span>
+                <span class="offer-price">{{
+                  item.offerPrice | currency
+                }}</span>
+              </ng-container>
+
+              <ng-template #priceNormal>
+                <span class="price-normal">{{ item.price | currency }}</span>
+              </ng-template>
+            </div>
+
+            <div class="button-wrapper">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="onAddProduct(item)"
+              >
+                Añadir 🛒
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div class="text-section">
-          <h2>{{ item.name }}</h2>
-          <div class="text-scroll">
-            <p>{{ item.description }}</p>
-          </div>
-
-          <div class="price-wrapper">
-            <ng-container *ngIf="item.isOffer; else priceNormal">
-              <span class="old-price">{{ item.price | currency }}</span>
-              <span class="offer-price">{{ item.offerPrice | currency }}</span>
-            </ng-container>
-
-            <ng-template #priceNormal>
-              <span class="price-normal">{{ item.price | currency }}</span>
-            </ng-template>
-          </div>
-
-          <div class="button-wrapper">
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="onAddProduct(item)"
-            >
-              Añadir 🛒
-            </button>
-          </div>
-        </div>
-      </div>
-    </mat-card>
-  </div>
+      </mat-card>
+    </div>
+  </ng-container>
 
   <ng-template #emptyCategory>
     <div class="empty-message">No hay productos disponibles.</div>

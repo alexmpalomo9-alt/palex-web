@@ -1,0 +1,93 @@
+/* === Contenedor del diálogo === */
+.medidas-dialog {
+  max-height: 100vh;
+  max-width: 420px;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 20px;
+  position: relative;
+  overflow-y: auto;
+  animation: fadeIn 0.4s ease;
+}
+.img-logo img {
+  height: 6rem;
+}
+/* Título y subtítulo */
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+/* === GLASSMORPHISM === */
+.glass {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.subtitle {
+  color: var(--text-color);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* === Google Button === */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 14px;
+  padding: 0.85rem;
+  width: 100%;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: 0.3s ease;
+  // color: var(--text-color);
+
+  &.dark-theme {
+    background: rgba(30, 30, 30, 0.3);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+  }
+
+  &:hover {
+    background-color: var(--card-bg);
+  }
+}
+
+.google-logo {
+  height: 20px;
+}
+
+/* === Botón principal === */
+.btn-primary-main {
+  display: flex;
+  justify-content: center;
+}
+
+/* === Inputs Material === */
+mat-form-field {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.mat-form-field-appearance-fill .mat-form-field-flex {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* === Botón de cierre === */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 50%;
+}
+
+.close-button:hover {
+  background: var(--card-bg);
+}

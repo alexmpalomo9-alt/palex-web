@@ -33,18 +33,25 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #2961b4;
+  color: var(--text-color);
 }
 
 .subtitle {
-  color: #2961b4;
+  color: var(--text-color);
+
   font-size: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -60,22 +67,12 @@ mat-form-field {
   backdrop-filter: blur(8px);
 }
 
-/* Botón principal */
+/* === Botón principal === */
 .btn-primary-main {
-  position: relative;
-  padding: 0.85rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  border: none;
-  background: #2961b4;
-  color: #fff !important;
-  transition: 0.3s ease;
-  min-height: 48px;
+  display: flex;
+  justify-content: center;
 }
-.btn-primary-main:hover {
-  background: rgba(8, 0, 160, 0.95);
-}
+
 
 /* Cerrar */
 .close-button {
@@ -83,6 +80,16 @@ mat-form-field {
   top: 10px;
   right: 10px;
   color: #f5eaea;
+  background: rgba(0, 0, 0, 0.37);
+  border-radius: 50%;
+}
+
+/* Botón Volver */
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: var(--text-color);
   background: rgba(0, 0, 0, 0.37);
   border-radius: 50%;
 }
@@ -100,7 +107,10 @@ mat-form-field {
 .requisitosContrasena {
   font-size: 0.9rem;
   margin-bottom: 1rem;
-  color: #2961b4;
+  color: var(--text-color);
+  font-family: "Arial Narrow";
+  font-size: large;
+  font-weight: 600;
 }
 
 .requisitosContrasena ul {
@@ -118,12 +128,4 @@ mat-form-field {
 }
 .invalido {
   color: #e74c3c;
-}
-.back-button {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  color: #f5eaea;
-  background: rgba(0, 0, 0, 0.37);
-  border-radius: 50%;
 }

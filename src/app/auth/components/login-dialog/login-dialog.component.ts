@@ -5,20 +5,22 @@ import {
   MatDialog,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { DialogService } from '../../../core/services/dialog-service/dialog.service';
+import { ErrorHandlerService } from '../../../shared/services/error-firebase/error-handler.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { UserCredentials } from '../../../users/model/user.model';
+import { AuthService } from '../../services/auth-service/auth.service';
 import { RegisterDialogComponent } from '../register-dialog/register-dialog.component';
 import { ResetPasswordDialogComponent } from '../reset-password-dialog/reset-password-dialog.component';
-import { AuthService } from '../../services/auth-service/auth.service';
-import { UserCredentials } from '../../../users/model/user.model';
-import { DialogService } from '../../../core/services/dialog-service/dialog.service';
+import { AddButtonComponent } from '../../../shared/components/button/add-button/add-button.component';
 
 @Component({
   selector: 'app-login-dialog',
-  standalone: true,
-  imports: [SharedModule],
+  imports: [SharedModule, AddButtonComponent],
   templateUrl: './login-dialog.component.html',
-  styleUrls: ['./login-dialog.component.css'],
+  styleUrl: './login-dialog.component.scss',
 })
 export class LoginDialogComponent {
   loginUser: FormGroup;
@@ -27,9 +29,10 @@ export class LoginDialogComponent {
   constructor(
     private dialogRef: MatDialogRef<LoginDialogComponent>,
     private dialog: MatDialog,
-    private dialogService: DialogService,
     private authService: AuthService,
     private router: Router,
+    private snackBar: MatSnackBar,
+    private errorHandler: ErrorHandlerService,
     @Inject(MAT_DIALOG_DATA) public data: UserCredentials
   ) {
     this.loginUser = new FormGroup({
@@ -47,32 +50,32 @@ export class LoginDialogComponent {
 
   async login() {
     if (!this.isFormValid) {
-      this.dialogService.infoDialog(
-        'Error',
-        'Por favor, complete todos los campos correctamente.'
+      this.snackBar.open(
+        'Por favor, complete todos los campos correctamente.',
+        'Cerrar',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }
       );
       return;
     }
     this.loading = true;
 
     try {
-      await this.authService.login(this.loginUser.value); // o registerUser
-      this.dialogService.infoDialog('Éxito', 'Operación exitosa');
+      await this.authService.login(this.loginUser.value);
+      this.snackBar.open('Inicio de sesión exitoso', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['success-snackbar'],
+      });
       this.dialogRef.close();
-      this.router.navigate(['/']);
     } catch (error: any) {
-      // Mensajes específicos según error
-      let message =
-        'No se pudo iniciar sesión. Intente de nuevo o contacte al administrador.';
-      if (error.code === 'auth/user-not-found') {
-        message = 'Usuario no encontrado. Verifique su correo.';
-      } else if (error.code === 'auth/wrong-password') {
-        message = 'Contraseña incorrecta. Intente nuevamente.';
-      } else if (error.code === 'auth/too-many-requests') {
-        message = 'Demasiados intentos fallidos. Intente más tarde.';
-      }
-      this.dialogService.infoDialog('Error de credenciales', message);
-      console.error(error);
+      const message = this.errorHandler.handleFirebaseError(error);
+      this.snackBar.open(message, 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+      this.errorHandler.log(error);
     } finally {
       this.loading = false;
     }
@@ -84,15 +87,29 @@ export class LoginDialogComponent {
       .then((response) => {
         if ('newUser' in response && (response as any).newUser) {
           this.router.navigate(['/form']);
+          this.snackBar.open(
+            'Bienvenido, nuevo usuario. Completa tu perfil.',
+            'Cerrar',
+            {
+              duration: 3000,
+              panelClass: ['success-snackbar'],
+            }
+          );
         } else {
           this.router.navigate(['/']);
+          this.snackBar.open('Inicio de sesión exitoso', 'Cerrar', {
+            duration: 3000,
+            panelClass: ['success-snackbar'],
+          });
         }
         this.dialogRef.close();
       })
       .catch((error: any) => {
-        let message =
-          'No se pudo iniciar sesión con Google. Intente nuevamente.';
-        this.dialogService.infoDialog('Error', message);
+        const message = this.errorHandler.handleFirebaseError(error);
+        this.snackBar.open(message, 'Cerrar', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        });
         console.error(error);
       });
   }
