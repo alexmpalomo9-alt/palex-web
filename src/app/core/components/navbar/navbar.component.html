@@ -1,67 +1,44 @@
-<nav class="navbar navbar-expand-lg app-navbar">
-  <div class="container-fluid">
-    <!-- LOGO -->
-    <a class="navbar-brand" routerLink="/">
-      <img class="logo" src="assets/img/small_logo.png"  alt="Logo" /> Palex
-    </a>
-
-    <!-- BOTÓN HAMBURGUESA -->
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
+<nav class="navbar app-navbar">
+  <div class="container-fluid d-flex align-items-center">
+    <!-- BOTÓN MENÚ (solo mobile) -->
+    <button mat-icon-button *ngIf="isMobile" (click)="toggleMenu()">
+      <mat-icon>menu</mat-icon>
     </button>
 
-    <!-- NAV CONTENT -->
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <!-- LINKS IZQUIERDA -->
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/">Home</a>
-        </li>
+    <!-- LOGO -->
+    <a class="navbar-brand ms-2" routerLink="/">
+      <img class="logo" src="assets/img/small_logo.png" alt="Logo" />
+      Palex
+    </a>
 
-        <!-- LOGUEADO -->
-        <ng-container *ngIf="isLoggedIn$ | async; else notLoggedIn">
-          <li class="nav-item">
-            <a class="nav-link" routerLink="users/profile">Mi Perfil</a>
-          </li>
-        </ng-container>
+    <span class="flex-grow-1"></span>
 
-        <!-- NO LOGUEADO -->
-        <ng-template #notLoggedIn>
-          <!-- <li class="nav-item">
-            <a class="nav-link" (click)="loginDialog()">Acceder</a>
-          </li> -->
-        </ng-template>
-      </ul>
+    <!-- TEMA -->
+    <button mat-icon-button (click)="toggleTheme()">
+      <mat-icon>{{ isDarkMode ? "light_mode" : "dark_mode" }}</mat-icon>
+    </button>
 
-      <!-- ICONO MODO OSCURO -->
-      <button
-        mat-icon-button
-        (click)="toggleTheme()"
-        [title]="isDarkMode ? 'Modo Claro' : 'Modo Oscuro'"
-      >
-        <mat-icon>{{ isDarkMode ? "light_mode" : "dark_mode" }}</mat-icon>
+    <!-- USUARIO -->
+    <ng-container *ngIf="isLoggedIn$ | async; else loginBtn">
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
       </button>
+    </ng-container>
 
-      <!-- ACCESOS -->
-      <section *ngIf="(isLoggedIn$ | async) === false">
-        <button mat-flat-button color="primary" (click)="loginDialog()">
-          Acceder
-        </button>
-      </section>
-
-      <section *ngIf="(isLoggedIn$ | async) === true">
-        <button mat-flat-button color="primary" (click)="logOut()">
-          Cerrar Sesión
-        </button>
-      </section>
-    </div>
+    <ng-template #loginBtn>
+      <app-add-button label="Acceder" icon="login" (onClick)="loginDialog()" />
+    </ng-template>
   </div>
 </nav>
+
+<mat-menu #userMenu="matMenu">
+  <button mat-menu-item routerLink="/users/profile">
+    <mat-icon>person</mat-icon>
+    Perfil
+  </button>
+
+  <button mat-menu-item (click)="logOut()">
+    <mat-icon>logout</mat-icon>
+    Cerrar sesión
+  </button>
+</mat-menu>

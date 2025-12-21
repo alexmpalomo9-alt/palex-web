@@ -36,11 +36,13 @@ export class LoginDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: UserCredentials
   ) {
     this.loginUser = new FormGroup({
-      email: new FormControl(data.email, [
+      email: new FormControl(this.data?.email ?? '', [
         Validators.required,
         Validators.email,
       ]),
-      password: new FormControl(data.password, [Validators.required]),
+      password: new FormControl(this.data?.password ?? '', [
+        Validators.required,
+      ]),
     });
   }
 
@@ -48,38 +50,28 @@ export class LoginDialogComponent {
     return this.loginUser.valid;
   }
 
-  async login() {
-    if (!this.isFormValid) {
-      this.snackBar.open(
-        'Por favor, complete todos los campos correctamente.',
-        'Cerrar',
-        {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-        }
-      );
-      return;
-    }
-    this.loading = true;
-
-    try {
-      await this.authService.login(this.loginUser.value);
-      this.snackBar.open('Inicio de sesión exitoso', 'Cerrar', {
-        duration: 3000,
-        panelClass: ['success-snackbar'],
-      });
-      this.dialogRef.close();
-    } catch (error: any) {
-      const message = this.errorHandler.handleFirebaseError(error);
-      this.snackBar.open(message, 'Cerrar', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
-      this.errorHandler.log(error);
-    } finally {
-      this.loading = false;
-    }
+// En tu componente donde gestionas el login
+async login() {
+  try {
+    await this.authService.login(this.loginUser.value);
+    this.snackBar.open('Inicio de sesión exitoso', 'Cerrar', {
+      duration: 3000,
+      panelClass: ['success-snackbar'],
+    });
+    this.router.navigate(['/users/profile']);  // Redirige al perfil después de login
+    this.dialogRef.close();
+  } catch (error: any) {
+    // Manejo de errores
+    const message = this.errorHandler.handleFirebaseError(error);
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 3000,
+      panelClass: ['error-snackbar'],
+    });
+    this.errorHandler.log(error);
+  } finally {
+    this.loading = false;
   }
+}
 
   loginGoogle() {
     this.authService

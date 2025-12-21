@@ -1,14 +1,6 @@
 import { Routes } from '@angular/router';
-// import { LoginComponent } from './login/login.component';
+import { LoginDialogComponent } from '../components/login-dialog/login-dialog.component';
 
 export const AUTH_ROUTES: Routes = [
-  // { path: 'iniciar-sesion', component: LoginComponent },
-  // { path: 'registrarse', component: RegistrarseComponent },
-  // {
-  //   path: 'registrarse',
-  //   component: RegistrarseComponent,
-  //   children: [
-  //     { path: 'form', component: FormComponent }
-  //   ]
-  // }
+  // { path: 'login', component: LoginDialogComponent },  // Descomenta o agrega esta ruta
 ];

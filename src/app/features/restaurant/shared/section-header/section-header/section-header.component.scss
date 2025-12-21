@@ -10,7 +10,7 @@
   z-index: 10;
 
   /* Para que el header se adapte */
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
 }
 
 /* Contenedor izquierdo: icono + textos */
@@ -71,12 +71,9 @@ app-search-box {
 /* Responsive */
 @media (max-width: 768px) {
   .section-header {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 12px;
   }
-
-  ::ng-deep app-add-button {
-    width: 100%;
+  .section-info {
+    gap: 12px;
   }
 }

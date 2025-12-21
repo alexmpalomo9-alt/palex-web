@@ -1,7 +1,7 @@
 /* Contenedor principal */
 .sidenav-container {
   height: 100vh;
-  background: #f9f9fb; /* color más limpio y moderno */
+  background: var(--card-bg) !important; /* color más limpio y moderno */
   font-family: 'Roboto', sans-serif;
   position: relative;
   overflow-x: hidden;

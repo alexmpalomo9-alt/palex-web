@@ -69,7 +69,7 @@ export class CategoryManagementComponent implements OnInit, AfterViewInit {
 
           this.restaurant = restaurant;
           this.restaurantId = restaurant.restaurantId; // 🔑 asignar ID real
-          console.log('restaurantId detectado:', this.restaurantId);
+          // console.log('restaurantId detectado:', this.restaurantId);
           this.loadCategories();
         });
     });
@@ -86,7 +86,7 @@ export class CategoryManagementComponent implements OnInit, AfterViewInit {
 
   loadCategories() {
     this.categoryService.getCategories(this.restaurantId).subscribe((cats) => {
-      console.log('Categorías recibidas:', cats);
+      // console.log('Categorías recibidas:', cats);
       this.categories = cats.map((c, i) => ({ ...c, order: i + 1 }));
     });
   }

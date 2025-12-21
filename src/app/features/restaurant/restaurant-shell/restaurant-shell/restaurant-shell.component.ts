@@ -3,11 +3,12 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { RestaurantNavComponent } from '../../restaurant-nav/restaurant-nav/restaurant-nav.component';
 import { RestaurantService } from '../../services/restaurant.service';
 import { SharedModule } from '../../../../shared/shared.module';
+import { NavbarComponent } from '../../../../core/components/navbar/navbar.component';
 
 @Component({
   selector: 'app-restaurant-shell',
   standalone: true,
-  imports: [RestaurantNavComponent, SharedModule, RouterModule],
+  imports: [RestaurantNavComponent, SharedModule, RouterModule, NavbarComponent],
   templateUrl: './restaurant-shell.component.html',
   styleUrls: ['./restaurant-shell.component.scss'],
 })

@@ -1,6 +1,6 @@
 .menu-container {
   padding: 16px;
-  background: #f2f2f7;
+  background: var(--card-bg) !important;
 
   .header-menu {
     margin-bottom: 20px;

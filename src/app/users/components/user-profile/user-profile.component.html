@@ -1,4 +1,4 @@
-<div class="background">
+<div class="user-container">
   <mat-card class="profile-container" *ngIf="!loading">
     <!-- FOTO + NOMBRE -->
     <div class="profile-header">
@@ -8,12 +8,13 @@
           [src]="imagePreview || 'assets/img/default-user.png'"
           alt="Foto de perfil"
         />
-
+        
         <!-- LUPA DE CARGA -->
         <div class="upload-overlay" *ngIf="uploading">
           <mat-progress-spinner
             mode="indeterminate"
             diameter="40"
+            color="primary"
           ></mat-progress-spinner>
         </div>
       </div>
@@ -23,7 +24,7 @@
       </h2>
       <p class="profile-email">{{ profileForm.value.email }}</p>
 
-      <button mat-stroked-button color="primary" (click)="fileInput.click()">
+      <button mat-stroked-button color="accent" (click)="fileInput.click()">
         Cambiar foto
       </button>
       <input
@@ -107,7 +108,7 @@
             <div class="col-12">
               <button
                 mat-raised-button
-                color="accent"
+                color="primary"
                 type="submit"
                 [disabled]="saving || profileForm.invalid"
                 class="save-btn"

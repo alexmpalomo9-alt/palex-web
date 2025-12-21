@@ -15,7 +15,7 @@ import { ImageUploadService } from '../../../shared/services/image-upload/image-
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [SharedModule,MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [SharedModule],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css']
 })
@@ -35,25 +35,25 @@ export class UserProfileComponent implements OnInit {
     private snack: MatSnackBar
   ) {}
 
-  ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-      if (!user) return;
+ngOnInit(): void {
+  this.authService.currentUser$.subscribe(user => {
+    if (!user) return;
 
-      this.currentUser = user;
-      this.imagePreview = user.photoURL || null;
+    this.currentUser = user;
+    this.imagePreview = user.photoURL || null;
 
-      this.profileForm = this.fb.group({
-        name: [user.name || ''],
-        lastname: [user.lastname || ''],
-        email: [{ value: user.email, disabled: true }],
-        birthdate: [user.birthdate || null],
-        address: [user.address || ''],
-        phone: [user.phone || '']
-      });
-
-      this.loading = false;
+    this.profileForm = this.fb.group({
+      name: [user.name || ''],
+      lastname: [user.lastname || ''],
+      email: [{ value: user.email, disabled: true }],
+      birthdate: [user.birthdate || null],
+      address: [user.address || ''],
+      phone: [user.phone || '']
     });
-  }
+
+    this.loading = false; // Cuando los datos están listos, ocultamos el spinner
+  });
+}
 
   async onPhotoSelect(event: any): Promise<void> {
     const file: File = event.target.files?.[0];
