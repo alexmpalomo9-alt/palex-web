@@ -1,37 +1,34 @@
-<mat-dialog-actions class="order-footer">
-  <button
-    mat-raised-button
-    color="accent"
-    *ngIf="!isEditMode && status !== 'closed'"
-    (click)="create.emit()"
-  >
-    Enviar orden
-  </button>
-  <button
-    mat-raised-button
-    color="accent"
-    *ngIf="isEditMode && status !== 'closed'"
-    (click)="update.emit()"
-  >
-    Actualizar estado
-  </button>
-  <button
-    mat-raised-button
-    color="primary"
-    *ngIf="
-      status !== 'closed' &&
-      ['approved', 'preparing', 'updated', 'ready'].includes(status)
-    "
-    (click)="closeOrder.emit()"
-  >
-    Cerrar pedido
-  </button>
-  <button
-    mat-raised-button
-    color="warn"
-    *ngIf="isEditMode && status !== 'closed' && status !== 'cancelled'"
-    (click)="cancelOrder.emit()"
-  >
-    Cancelar pedido
-  </button>
-</mat-dialog-actions>
+<div class="order-footer">
+
+  <!-- Enviar pedido -->
+  <app-add-button
+    *ngIf="canCreate"
+    class="btn-main"
+    label="Enviar pedido"
+    icon="send"
+    (onClick)="create.emit()"
+    [disabled]="loading"
+  ></app-add-button>
+
+  <!-- Marcar como entregado -->
+  <app-add-button
+    *ngIf="canDeliver"
+    class="btn-main"
+    label="Marcar como entregado"
+    icon="local_shipping"
+    (onClick)="markDelivered.emit()"
+    [disabled]="loading"
+  ></app-add-button>
+
+  <!-- Cerrar pedido -->
+  <app-add-button
+    *ngIf="canClose"
+    class="btn-main"
+    label="Cerrar pedido"
+    icon="check_circle"
+    (onClick)="closeOrder.emit()"
+    [isSecondary]="true"
+    [disabled]="loading"
+  ></app-add-button>
+
+</div>

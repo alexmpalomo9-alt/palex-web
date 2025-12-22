@@ -11,6 +11,7 @@
       label="Realizar pedido"
       icon="add_shopping_cart"
       (onClick)="createOrderFromMenu()"
+      [isSecondary]="false"
     ></app-add-button>
   </app-section-header>
 
@@ -78,19 +79,19 @@
 
       <!-- BOTÓN PRINCIPAL -->
       <mat-card-actions>
-        <button
-          mat-flat-button
-          color="primary"
+        <app-add-button
           class="full-width-btn"
-          (click)="viewOrder(t.currentOrderId ?? null, t)"
+          label="{{
+            t.currentOrderId ? 'Ver / Editar Pedido' : 'Crear Pedido'
+          }}"
+          icon="add_shopping_cart"
+          (onClick)="viewOrder(t.currentOrderId ?? null, t)"
+          [isSecondary]="true"
           [disabled]="
             !t.currentOrderId &&
             !(t.status === 'available' || t.status === 'seated')
           "
-        >
-          <mat-icon>receipt_long</mat-icon>
-          {{ t.currentOrderId ? "Ver / Editar Pedido" : "Crear Pedido" }}
-        </button>
+        ></app-add-button>
       </mat-card-actions>
     </mat-card>
   </div>

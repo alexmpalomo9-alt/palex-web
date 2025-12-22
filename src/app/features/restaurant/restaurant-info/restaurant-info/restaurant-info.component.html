@@ -22,16 +22,12 @@
       </div>
 
       <!-- Botón editar -->
-      <button
-        mat-flat-button
-        color="primary"
-        class="edit-btn pulse"
-        (click)="editRestaurant()"
-        matTooltip="Editar restaurante"
-      >
-        <mat-icon>edit</mat-icon>
-        Editar restaurante
-      </button>
+      <app-add-button
+        class="btn-primary-main"
+        [label]="'Editar restaurante'"
+        [icon]="'edit'"
+        (onClick)="editRestaurant()"
+      ></app-add-button>
     </div>
 
     <!-- ======= CONTENIDO ======= -->

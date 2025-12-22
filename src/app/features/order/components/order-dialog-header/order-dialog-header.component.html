@@ -1,34 +1,54 @@
 <div class="order-dialog-header">
+  <!-- Menú -->
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="menu"
+    aria-label="Más acciones"
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
+
+  <!-- Título -->
   <div class="dialog-title-group">
     <h2 class="title-with-chips">
       <span class="pedido-label">Pedido:</span>
       <span class="table-chip">{{ tableLabel }}</span>
     </h2>
-    <ng-template #noTables>
-      <span class="no-tables">---</span>
-    </ng-template>
 
-    <span
-      *ngIf="statusLabel"
-      class="order-status"
-      [ngClass]="statusLabel | lowercase"
-    >
+    <span *ngIf="statusLabel" class="order-status">
       {{ statusLabel }}
     </span>
   </div>
 
+  <!-- Acción principal -->
   <div class="dialog-actions">
-    <button
-      mat-flat-button
-      color="primary"
-      (click)="addItem.emit()"
-      class="action-button"
-    >
-      <mat-icon>add</mat-icon> Agregar
-    </button>
-
-    <button mat-icon-button (click)="close.emit()" class="close-button">
-      <mat-icon>close</mat-icon>
-    </button>
+    <app-add-button
+      label="Agregar productos"
+      icon="add"
+      (onClick)="addItem.emit()"
+    ></app-add-button>
   </div>
+
+  <!-- Cerrar -->
+  <button
+    mat-icon-button
+    class="close-button"
+    (click)="close.emit()"
+    aria-label="Cerrar"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
 </div>
+
+<!-- MENU -->
+<mat-menu #menu="matMenu">
+  <button mat-menu-item (click)="updateOrder.emit()" *ngIf="canEdit">
+    <mat-icon>edit</mat-icon>
+    <span>Editar pedido</span>
+  </button>
+
+  <button mat-menu-item (click)="cancelOrder.emit()" *ngIf="canEdit">
+    <mat-icon>cancel</mat-icon>
+    <span>Cancelar pedido</span>
+  </button>
+</mat-menu>

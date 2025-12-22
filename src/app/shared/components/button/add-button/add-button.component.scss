@@ -16,6 +16,30 @@
     background: linear-gradient(135deg, #1565c0, #1e88e5);
   }
 }
+/* ================= Estilo para el botón secundario ================= */
+.add-btn.secondary {
+  /* Colores por defecto (light mode) */
+  background: linear-gradient(135deg, #768c9e, #1976d2);
+  color: #fff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+    background: linear-gradient(135deg, #1565c0, #1e88e5);
+  }
+
+  &.dark-theme {
+  background: linear-gradient(135deg, #768c9e, #79a2c2);
+  color: #fff;
+
+    &:hover {
+      background: rgba(94, 143, 184, 0.507); /* Fondo suave en dark mode */
+      box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+    }
+  }
+}
+
 
 /* ================= Dark Mode ================= */
 .add-btn.dark-theme {

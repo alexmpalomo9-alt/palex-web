@@ -12,6 +12,8 @@ import { ThemeService } from '../../../../core/services/theme/theme.service';
 export class AddButtonComponent implements OnInit {
   @Input() label: string = 'Agregar'; // Texto del botón
   @Input() icon: string = 'add';      // Icono dinámico
+  @Input() isSecondary: boolean = false; // Determina si el botón es secundario
+  @Input() disabled: boolean = false;  // Nuevo: propiedad para deshabilitar el botón
   @Output() onClick = new EventEmitter<void>();
 
   isDarkMode: boolean = false;

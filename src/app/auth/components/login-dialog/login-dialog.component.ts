@@ -7,14 +7,13 @@ import {
 } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { DialogService } from '../../../core/services/dialog-service/dialog.service';
+import { AddButtonComponent } from '../../../shared/components/button/add-button/add-button.component';
 import { ErrorHandlerService } from '../../../shared/services/error-firebase/error-handler.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { UserCredentials } from '../../../users/model/user.model';
 import { AuthService } from '../../services/auth-service/auth.service';
 import { RegisterDialogComponent } from '../register-dialog/register-dialog.component';
 import { ResetPasswordDialogComponent } from '../reset-password-dialog/reset-password-dialog.component';
-import { AddButtonComponent } from '../../../shared/components/button/add-button/add-button.component';
 
 @Component({
   selector: 'app-login-dialog',

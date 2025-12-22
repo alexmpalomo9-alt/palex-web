@@ -1,178 +1,67 @@
 .order-dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem 1.3rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-  gap: 0.8rem;
-
-  &.dark-theme {
-    background: rgba(30, 30, 30, 0.3);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .dialog-title-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-
-    h2 {
-      margin: 0;
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .table-chip-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-
-      mat-chip {
-        font-weight: 500;
-        border-radius: 8px;
-      }
-    }
-
-    .no-tables {
-      font-size: 1.1rem;
-      color: var(--text-color-secondary);
-    }
-
-    .order-status {
-      display: inline-block;
-      margin-top: 0.3rem;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-transform: capitalize;
-      color: var(--text-color); /* color texto adaptable */
-
-      &.activo {
-        background-color: #28a745;
-      }
-      &.pendiente {
-        background-color: #ffc107;
-        color: #000;
-      }
-      &.cancelado {
-        background-color: #dc3545;
-      }
-    }
-  }
-
-  .dialog-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-
-    .action-button {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-weight: 500;
-      text-transform: none;
-      transition: transform 0.15s ease, box-shadow 0.2s ease;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      }
-
-      mat-icon {
-        font-size: 20px;
-      }
-    }
-
-    .close-button {
-      color: var(--text-color);
-      transition: transform 0.2s ease, color 0.2s ease;
-
-      &:hover {
-        color: #2e2c2c;
-      }
-    }
-  }
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--md-sys-color-surface);
+  border-radius: 16px;
+  box-shadow: var(--md-sys-elevation-2);
 }
 
-/* RESPONSIVE */
-@media (max-width: 500px) {
-  .order-dialog-header {
-    flex-direction: column;
-    align-items: flex-start;
-
-    .dialog-actions {
-      width: 100%;
-      justify-content: flex-start;
-      gap: 0.5rem;
-    }
-  }
-}
-.table-chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-
-  mat-chip {
-    font-weight: 500;
-    border-radius: 8px;
-  }
-}
+/* Evita que el texto empuje la X en mobile */
 .dialog-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  min-width: 0;
+}
 
-  .title-with-chips {
+/* Chip */
+.table-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* Estado */
+.order-status {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Botón cerrar */
+.close-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--md-sys-color-on-surface-variant);
+
+  &:hover {
+    background: var(--md-sys-color-surface-variant);
+  }
+}
+/* 📱 Mobile */
+@media (max-width: 480px) {
+  .order-dialog-header {
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+  }
+
+  /* El título ocupa toda la fila */
+  .dialog-title-group {
+    grid-column: 1 / -1;
+  }
+
+  /* Botón en fila propia */
+  .dialog-actions {
+    grid-column: 1 / -1;
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 1.6rem;
-    font-weight: 700;
-
-    .pedido-label {
-      margin-right: 0.5rem;
-    }
-
-    .table-chip {
-      background: rgba(0, 123, 255, 0.15); // azul suave
-      color: var(--text-color-secondary);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: 500;
-      font-size: 1rem;
-    }
+    justify-content: stretch;
   }
 
-  .no-tables {
-    font-size: 1.1rem;
-    color: var(--text-color-secondary);
-  }
-
-  .order-status {
-    margin-top: 0.3rem;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-transform: capitalize;
-    color: #fff;
-
-    &.activo {
-      background-color: #28a745;
-    }
-    &.pendiente {
-      background-color: #ffc107;
-      color: #000;
-    }
-    &.cancelado {
-      background-color: #dc3545;
-    }
+  .dialog-actions app-add-button {
+    width: 100%;
   }
 }

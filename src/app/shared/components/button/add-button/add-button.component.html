@@ -1,7 +1,9 @@
 <button
   mat-flat-button
-  class="add-btn pulse"
+  class="add-btn"
   [class.dark-theme]="isDarkMode"
+  [ngClass]="{'secondary': isSecondary, 'pulse': !disabled}"
+  [disabled]="disabled"
   (click)="onClick.emit()"
 >
   <mat-icon>{{ icon }}</mat-icon>

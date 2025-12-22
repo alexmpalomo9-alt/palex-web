@@ -1,19 +1,17 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantDialogService } from '../../services/restaurant-dialog.service';
 import { RestaurantService } from '../../services/restaurant.service';
 import { ActivatedRoute } from '@angular/router';
 import { Timestamp } from 'firebase/firestore';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
+import { SharedModule } from '../../../../shared/shared.module';
+import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 
 @Component({
   selector: 'app-restaurant-info',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [SharedModule, AddButtonComponent],
   templateUrl: './restaurant-info.component.html',
   styleUrls: ['./restaurant-info.component.scss'],
 })

@@ -1,11 +1,13 @@
 <div class="order-dialog">
   <!-- HEADER -->
-  <app-order-dialog-header
-    [tableNumbers]="tableNumbers"
-    [statusLabel]="orderStatusLabel"
-    (addItem)="addItemDialog()"
-    (close)="cancel()"
-  ></app-order-dialog-header>
+<app-order-dialog-header
+  [tableNumbers]="tableNumbers"
+  [status]="state.status"
+  (addItem)="addItemDialog()"
+  (updateOrder)="updateOrder()"
+  (cancelOrder)="cancelOrder()"
+  (close)="close()"
+></app-order-dialog-header>
 
   <!-- ITEMS -->
   <app-order-items-table
@@ -26,10 +28,9 @@
   <!-- FOOTER -->
   <app-order-dialog-footer
     [status]="state.status"
-    [isEditMode]="state.isEditMode"
+    [loading]="state.loading"
     (create)="createOrder()"
-    (update)="updateOrder()"
+    (markDelivered)="facade.markAsDelivered()"
     (closeOrder)="closeOrder()"
-    (cancelOrder)="cancelOrder()"
   ></app-order-dialog-footer>
 </div>

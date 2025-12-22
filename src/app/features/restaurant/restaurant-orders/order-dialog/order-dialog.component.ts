@@ -31,31 +31,23 @@ import { OrderStatusService } from '../../../../shared/services/order-status/ord
   styleUrls: ['./order-dialog.component.scss'],
 })
 export class OrderDialogComponent implements OnInit {
-  displayedColumns = ['name', 'qty', 'price', 'subtotal', 'actions'];
   dataSource = new MatTableDataSource<any>();
 
   // ---------------------------
-  // 🟩 Estado
+  // 🟩 Estado (solo lectura)
   // ---------------------------
   get state() {
     return this.facade.state();
   }
 
   get tableNumbers(): number[] {
-    return this.facade.state().tableNumbers;
-  }
-
-  get orderStatusLabel() {
-    return this.orderStatusService.getOrderStatusLabel(
-      this.facade.state().status
-    );
+    return this.state.tableNumbers;
   }
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<OrderDialogComponent>,
     public facade: OrderDialogFacade,
-    private orderStatusService: OrderStatusService,
     private dialog: MatDialog
   ) {}
 
@@ -65,7 +57,7 @@ export class OrderDialogComponent implements OnInit {
   }
 
   // ---------------------------
-  // 🟦 Métodos puente para hijos
+  // 🟦 Delegaciones simples
   // ---------------------------
   addItemDialog() {
     this.facade.addItemDialog();
@@ -76,20 +68,33 @@ export class OrderDialogComponent implements OnInit {
     this.dataSource.data = this.state.items;
   }
 
-  cancel() {
-    this.close();
-  }
-
   close() {
     this.dialogRef.close();
   }
 
   async createOrder() {
     const ok = await this.facade.createOrder();
-    if (ok) {
-      this.dialogRef.close({ success: true });
-    }
+    if (ok) this.close();
   }
+
+  async closeOrder() {
+    const payment = await firstValueFrom(
+      this.dialog
+        .open(PaymentMethodDialogComponent, {
+          disableClose: true,
+          width: '700px',
+          data: { orderTotal: this.facade.getTotal() },
+        })
+        .afterClosed()
+    );
+
+    if (!payment) return;
+
+    const ok = await this.facade.closeOrder(payment);
+    if (ok) this.close();
+  }
+
+
 
   async updateOrder() {
     try {
@@ -98,33 +103,9 @@ export class OrderDialogComponent implements OnInit {
     } catch (error) {}
   }
 
-  async cancelOrder() {
-    try {
-      await this.facade.cancelOrder();
-      this.close();
-    } catch (error) {}
-  }
 
-  async closeOrder() {
-    try {
-      // Abrir diálogo de método de pago
-      const payment = await firstValueFrom(
-        this.dialog
-          .open(PaymentMethodDialogComponent, {
-            disableClose: true,
-            width: '700px',
-            data: { orderTotal: this.facade.getTotal() },
-          })
-          .afterClosed()
-      );
+cancelOrder() {
+  this.facade.cancelOrder();
+}
 
-      if (!payment) return; // usuario canceló
-
-      // Pasar el método de pago al facade para registrar
-      const ok = await this.facade.closeOrder(payment);
-      if (ok) this.close();
-    } catch (error) {
-      console.error(error);
-    }
-  }
 }

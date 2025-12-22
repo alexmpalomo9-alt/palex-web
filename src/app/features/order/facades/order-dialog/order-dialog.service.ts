@@ -4,15 +4,15 @@ import { AuthService } from '../../../../auth/services/auth-service/auth.service
 import { OrderItemService } from '../../../order/services/order-item/order-item.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MenuDialogComponent } from '../../../restaurant/restaurant-menu/menu-dialog/menu-dialog.component';
-import { PaymentMethodDialogComponent } from '../../../restaurant/restaurant-orders/payment-method-dialog/payment-method-dialog.component';
 import { OrderService } from '../../services/order-service/order.service';
 import { TableService } from '../../../restaurant/restaurant-tables/services/table.service';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
+import { OrderStatus } from '../../models/order.model';
 
 export interface OrderDialogState {
   items: any[];
   notes: string;
-  status: string;
+  status: OrderStatus;
   isEditMode: boolean;
 
   originalItems: any[];
@@ -406,6 +406,11 @@ export class OrderDialogFacade {
       this.setLoading(false);
     }
   }
+enableEditMode() {
+  this.state.update(s =>
+    s.isEditMode ? s : { ...s, isEditMode: true }
+  );
+}
 
   // ---------------------------
   // 🟦 Helpers
@@ -463,4 +468,42 @@ export class OrderDialogFacade {
 
     return JSON.stringify(canonA) === JSON.stringify(canonB);
   }
+
+  // ---------------------------
+// 🟩 Marcar pedido como entregado
+// ---------------------------
+async markAsDelivered(): Promise<boolean> {
+  const { restaurantId, orderId, status } = this.state();
+
+  if (status !== 'ready') return false;
+
+  const userId = this.requireUserId();
+
+  this.setLoading(true);
+
+  try {
+    await this.orderService.updateOrderStatus(
+      restaurantId,
+      orderId!,
+      'delivered',
+      userId
+    );
+
+    this.state.update((s) => ({
+      ...s,
+      status: 'delivered',
+    }));
+
+    return true;
+  } catch (error: any) {
+    this.dialog.errorDialog(
+      'Error',
+      error.message || 'No se pudo marcar como entregado'
+    );
+    return false;
+  } finally {
+    this.setLoading(false);
+  }
+}
+
 }
