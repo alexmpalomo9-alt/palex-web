@@ -24,6 +24,7 @@ export interface OrderDialogState {
 
   tableIds: string[]; // IDs reales
   tableNumbers: number[]; // SOLO UI
+  currentTable?: number;
   orderId?: string;
 }
 
@@ -44,6 +45,7 @@ export class OrderDialogFacade {
       restaurantId: '',
       tableIds: [], // ✅ array
       tableNumbers: [],
+      currentTable: undefined,
       orderId: undefined,
     };
   }
@@ -96,6 +98,7 @@ export class OrderDialogFacade {
       restaurantId: data.restaurantId,
       tableIds: data.tableIds,
       tableNumbers: data.tableNumbers,
+      currentTable: data.tableNumbers[0],
       orderId: data.orderId,
     }));
 
@@ -134,6 +137,11 @@ export class OrderDialogFacade {
         notes: order.notes ?? '',
         status: order.status ?? 'draft',
         isEditMode: order.status !== 'draft',
+
+        // Guardar originales para comparación al actualizar
+        tableIds: order.tableIds ?? s.tableIds,
+        tableNumbers: order.tableNumbers ?? s.tableNumbers,
+
         originalItems: structuredClone(normalizedItems),
         originalNotes: order.notes ?? '',
       }));
@@ -203,16 +211,7 @@ export class OrderDialogFacade {
   async createOrder(): Promise<boolean> {
     const { items, notes, restaurantId, tableIds, tableNumbers } = this.state();
 
-    if (!items.length) {
-      await firstValueFrom(
-        this.dialog.confirmDialog({
-          title: 'Pedido vacío',
-          message: 'No se puede crear un pedido sin productos.',
-          type: 'error',
-        })
-      );
-      return false;
-    }
+    if (!(await this.validateItems(items))) return false;
 
     const confirmed = await firstValueFrom(
       this.dialog.confirmDialog({
@@ -271,6 +270,9 @@ export class OrderDialogFacade {
     const itemsChanged = !this.itemsEqual(items ?? [], originalItems ?? []);
     const notesChanged = (notes ?? '') !== (originalNotes ?? '');
 
+    //Valida que el pedido no este vacio
+    if (!(await this.validateItems(items))) return false;
+
     if (!itemsChanged && !notesChanged) {
       await firstValueFrom(
         this.dialog.confirmDialog({
@@ -315,6 +317,20 @@ export class OrderDialogFacade {
     } finally {
       this.setLoading(false);
     }
+  }
+
+  private async validateItems(items: any[]): Promise<boolean> {
+    if (!items.length) {
+      await firstValueFrom(
+        this.dialog.confirmDialog({
+          title: 'Pedido vacío',
+          message: 'No se puede guardar un pedido sin productos.',
+          type: 'error',
+        })
+      );
+      return false;
+    }
+    return true;
   }
 
   // ---------------------------
@@ -406,11 +422,9 @@ export class OrderDialogFacade {
       this.setLoading(false);
     }
   }
-enableEditMode() {
-  this.state.update(s =>
-    s.isEditMode ? s : { ...s, isEditMode: true }
-  );
-}
+  enableEditMode() {
+    this.state.update((s) => (s.isEditMode ? s : { ...s, isEditMode: true }));
+  }
 
   // ---------------------------
   // 🟦 Helpers
@@ -470,40 +484,39 @@ enableEditMode() {
   }
 
   // ---------------------------
-// 🟩 Marcar pedido como entregado
-// ---------------------------
-async markAsDelivered(): Promise<boolean> {
-  const { restaurantId, orderId, status } = this.state();
+  // 🟩 Marcar pedido como entregado
+  // ---------------------------
+  async markAsDelivered(): Promise<boolean> {
+    const { restaurantId, orderId, status } = this.state();
 
-  if (status !== 'ready') return false;
+    if (status !== 'ready') return false;
 
-  const userId = this.requireUserId();
+    const userId = this.requireUserId();
 
-  this.setLoading(true);
+    this.setLoading(true);
 
-  try {
-    await this.orderService.updateOrderStatus(
-      restaurantId,
-      orderId!,
-      'delivered',
-      userId
-    );
+    try {
+      await this.orderService.updateOrderStatus(
+        restaurantId,
+        orderId!,
+        'delivered',
+        userId
+      );
 
-    this.state.update((s) => ({
-      ...s,
-      status: 'delivered',
-    }));
+      this.state.update((s) => ({
+        ...s,
+        status: 'delivered',
+      }));
 
-    return true;
-  } catch (error: any) {
-    this.dialog.errorDialog(
-      'Error',
-      error.message || 'No se pudo marcar como entregado'
-    );
-    return false;
-  } finally {
-    this.setLoading(false);
+      return true;
+    } catch (error: any) {
+      this.dialog.errorDialog(
+        'Error',
+        error.message || 'No se pudo marcar como entregado'
+      );
+      return false;
+    } finally {
+      this.setLoading(false);
+    }
   }
-}
-
 }

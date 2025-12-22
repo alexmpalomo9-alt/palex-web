@@ -1,27 +1,50 @@
 <div class="order-dialog-header">
   <!-- Menú -->
   <button
+    *ngIf="showMenu"
     mat-icon-button
     [matMenuTriggerFor]="menu"
     aria-label="Más acciones"
+    class="menu-button"
   >
     <mat-icon>more_vert</mat-icon>
   </button>
 
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="updateOrder.emit()" *ngIf="canUpdate">
+      <mat-icon>edit</mat-icon>
+      <span>Actualizar Pedido</span>
+    </button>
+
+    <button mat-menu-item (click)="cancelOrder.emit()" *ngIf="canCancel">
+      <mat-icon>cancel</mat-icon>
+      <span>Cancelar Pedido</span>
+    </button>
+  </mat-menu>
+
   <!-- Título -->
   <div class="dialog-title-group">
     <h2 class="title-with-chips">
-      <span class="pedido-label">Pedido:</span>
-      <span class="table-chip">{{ tableLabel }}</span>
-    </h2>
+      <span class="pedido-label">
+        {{
+          tableNumbers.length > 1 ? "Pedido compartido:" : "Pedido realizado:"
+        }}
+      </span>
 
-    <span *ngIf="statusLabel" class="order-status">
-      {{ statusLabel }}
-    </span>
+      <span class="table-chip">
+        <mat-icon inline class="tables-icon">{{ tableIcon }}</mat-icon>
+        {{ tableLabel }}
+      </span>
+    </h2>
   </div>
 
   <!-- Acción principal -->
   <div class="dialog-actions">
+    <span *ngIf="statusLabel" class="order-status" [ngClass]="status">
+      {{ statusLabel }}
+    </span>
+
+    <!-- Botón Agregar productos -->
     <app-add-button
       label="Agregar productos"
       icon="add"
@@ -39,16 +62,3 @@
     <mat-icon>close</mat-icon>
   </button>
 </div>
-
-<!-- MENU -->
-<mat-menu #menu="matMenu">
-  <button mat-menu-item (click)="updateOrder.emit()" *ngIf="canEdit">
-    <mat-icon>edit</mat-icon>
-    <span>Editar pedido</span>
-  </button>
-
-  <button mat-menu-item (click)="cancelOrder.emit()" *ngIf="canEdit">
-    <mat-icon>cancel</mat-icon>
-    <span>Cancelar pedido</span>
-  </button>
-</mat-menu>

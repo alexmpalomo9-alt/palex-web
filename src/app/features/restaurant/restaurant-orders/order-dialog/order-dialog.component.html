@@ -1,20 +1,21 @@
 <div class="order-dialog">
   <!-- HEADER -->
-<app-order-dialog-header
-  [tableNumbers]="tableNumbers"
-  [status]="state.status"
-  (addItem)="addItemDialog()"
-  (updateOrder)="updateOrder()"
-  (cancelOrder)="cancelOrder()"
-  (close)="close()"
-></app-order-dialog-header>
+  <app-order-dialog-header
+    [tableNumbers]="tableNumbers"
+    [status]="state.status"
+    (addItem)="addItemDialog()"
+    (updateOrder)="updateOrder()"
+    (cancelOrder)="cancelOrder()"
+    (close)="close()"
+  ></app-order-dialog-header>
 
   <!-- ITEMS -->
-  <app-order-items-table
-    [items]="state.items"
-    (remove)="removeItem($event)"
-    (quantityChange)="dataSource.data = state.items"
-  ></app-order-items-table>
+<app-order-items-table
+  [items]="state.items"
+  (remove)="removeItem($event)"
+  (quantityChange)="dataSource.data = state.items"
+  (addItems)="addItemDialog()"
+></app-order-items-table>
 
   <!-- TOTAL -->
   <app-order-total [total]="facade.getTotal()"></app-order-total>

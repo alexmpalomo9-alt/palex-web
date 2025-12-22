@@ -77,3 +77,42 @@
     }
   }
 }
+.empty-items {
+  border: 2px dashed #ddd;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  color: #666;
+
+  mat-icon {
+    font-size: 40px;
+    margin-bottom: 0.5rem;
+  }
+
+  span {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: #1976d2;
+  }
+
+  &:hover {
+    background: #f9f9f9;
+  }
+}
+
+.add-items-row {
+  cursor: pointer;
+  text-align: center;
+  font-weight: 600;
+  color: #1976d2;
+
+  td {
+    padding: 1rem;
+  }
+
+  &:hover {
+    background: #f5f7fa;
+  }
+}

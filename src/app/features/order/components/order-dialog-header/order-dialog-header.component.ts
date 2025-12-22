@@ -3,43 +3,57 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 import { OrderStatus } from '../../models/order.model';
 
-// ⬇️ IMPORTS MATERIAL NECESARIOS
-import { MatMenuModule } from '@angular/material/menu';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-
 @Component({
   selector: 'app-order-dialog-header',
   standalone: true,
-  imports: [
-    SharedModule,
-    AddButtonComponent,
-
-    // ⬇️ MUY IMPORTANTE
-    MatMenuModule,
-    MatIconModule,
-    MatButtonModule,
-  ],
+  imports: [SharedModule, AddButtonComponent],
   templateUrl: './order-dialog-header.component.html',
   styleUrls: ['./order-dialog-header.component.scss'],
 })
 export class OrderDialogHeaderComponent {
   @Input() tableNumbers: number[] = [];
   @Input() status!: OrderStatus;
+  @Input() currentTable?: number;
 
   @Output() addItem = new EventEmitter<void>();
   @Output() updateOrder = new EventEmitter<void>();
   @Output() cancelOrder = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
-  get canEdit(): boolean {
-    return ['draft', 'approved', 'preparing', 'updated'].includes(this.status);
+  get canUpdate(): boolean {
+    return ['approved', 'preparing', 'updated'].includes(this.status);
+  }
+
+  get canCancel(): boolean {
+    return ['pending', 'approved', 'preparing', 'updated', 'ready'].includes(
+      this.status
+    );
+  }
+
+  get showMenu(): boolean {
+    return this.canUpdate || this.canCancel;
   }
 
   get tableLabel(): string {
     if (!this.tableNumbers?.length) return '---';
-    if (this.tableNumbers.length === 1) return `Mesa: ${this.tableNumbers[0]}`;
-    return `Mesas: ${this.tableNumbers.join(', ')}`;
+
+    if (this.tableNumbers.length === 1) {
+      return `Mesa ${this.tableNumbers[0]}`;
+    }
+
+    if (this.currentTable) {
+      return `Mesas ${this.tableNumbers.join(', ')} (desde mesa ${
+        this.currentTable
+      })`;
+    }
+
+    return `Mesas ${this.tableNumbers.join(', ')}`;
+  }
+
+  get tableIcon(): string {
+    if (this.tableNumbers.length === 1) return 'person';
+    if (this.tableNumbers.length === 2) return 'groups';
+    return 'people'; // 3 o más mesas
   }
 
   get statusLabel(): string {

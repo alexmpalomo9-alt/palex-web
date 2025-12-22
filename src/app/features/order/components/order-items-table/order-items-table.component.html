@@ -1,4 +1,12 @@
 <div class="section items-section">
+  <!-- Estado vacío -->
+  <div *ngIf="items.length === 0" class="empty-items" (click)="onAddItems()">
+    <mat-icon>shopping_cart</mat-icon>
+    <p>No hay productos en el pedido</p>
+    <span>Agregar productos</span>
+  </div>
+
+  <!-- Tabla -->
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z1">
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>Producto</th>
@@ -41,5 +49,10 @@
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <!-- Fila acción -->
+    <tr class="add-items-row" (click)="onAddItems()">
+      <td [attr.colspan]="displayedColumns.length">➕ Agregar productos</td>
+    </tr>
   </table>
 </div>

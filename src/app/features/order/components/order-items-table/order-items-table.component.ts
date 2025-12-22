@@ -12,6 +12,7 @@ export class OrderItemsTableComponent {
   @Input() items: any[] = [];
   @Output() remove = new EventEmitter<number>();
   @Output() quantityChange = new EventEmitter<void>();
+  @Output() addItems = new EventEmitter<void>();
 
   displayedColumns = ['name', 'qty', 'price', 'subtotal', 'actions'];
   dataSource = new MatTableDataSource<any>();
@@ -26,5 +27,9 @@ export class OrderItemsTableComponent {
 
   onQuantityChange() {
     this.quantityChange.emit();
+  }
+
+  onAddItems() {
+    this.addItems.emit();
   }
 }
