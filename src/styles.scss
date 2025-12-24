@@ -87,6 +87,8 @@ body {
   --text-color: #222222;
   --border-color: #dddddd;
   --primary-color: #008080;
+  --button-background: #f0f0f0;
+  --hover-background: #e0e0e0;
 }
 
 /* Variables CSS para tema oscuro */
@@ -94,5 +96,41 @@ body {
   --card-bg: #1e1e1e;
   --text-color: #eee;
   --border-color: #444444;
-  --primary-color: #3f51b5;
+  --primary-color: #33cccc;
+  --button-background: #1a1919;
+  --hover-background: #333333;
+}
+
+
+:root {
+  /* Neutros */
+  --status-draft: rgba(148, 163, 184, 0.95);      // gris suave
+  --status-closed: rgba(100, 116, 139, 0.95);     // gris oscuro
+
+  /* Flujo del pedido */
+  --status-pending: rgba(251, 146, 60, 0.95);     // naranja (espera)
+  --status-approved: rgba(59, 130, 246, 0.95);    // azul (confirmado)
+  --status-updated: rgba(168, 85, 247, 0.95);     // violeta (cambio)
+  --status-preparing: rgba(245, 158, 11, 0.95);   // ámbar (cocina)
+  --status-ready: rgba(34, 197, 94, 0.95);        // verde (ok)
+  --status-delivered: rgba(20, 184, 166, 0.95);   // teal (finalizado)
+
+  /* Error / rechazo */
+  --status-rejected: rgba(239, 68, 68, 0.95);     // rojo
+  --status-cancelled: rgba(239, 68, 68, 0.95);    // rojo
+}
+
+.dark-theme {
+  --status-draft: rgba(148, 163, 184, 0.8);
+  --status-closed: rgba(100, 116, 139, 0.85);
+
+  --status-pending: rgba(251, 146, 60, 0.85);
+  --status-approved: rgba(59, 130, 246, 0.85);
+  --status-updated: rgba(168, 85, 247, 0.85);
+  --status-preparing: rgba(245, 158, 11, 0.85);
+  --status-ready: rgba(34, 197, 94, 0.85);
+  --status-delivered: rgba(20, 184, 166, 0.85);
+
+  --status-rejected: rgba(239, 68, 68, 0.85);
+  --status-cancelled: rgba(239, 68, 68, 0.85);
 }

@@ -6,6 +6,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { KitchenFacade, KitchenOrder } from '../facade/kitchen-facade.service';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
+import { OrderStatusService } from '../../../order/status/order-status/order-status.service';
 
 @Component({
   selector: 'app-restaurant-kitchen',
@@ -25,7 +26,8 @@ export class RestaurantKitchenComponent implements OnInit, OnDestroy {
   constructor(
     private kitchenFacade: KitchenFacade,
     private route: ActivatedRoute,
-    private restaurantService: RestaurantService
+    private restaurantService: RestaurantService,
+    private orderStatusService: OrderStatusService
   ) {}
 
   ngOnInit(): void {
@@ -107,22 +109,9 @@ export class RestaurantKitchenComponent implements OnInit, OnDestroy {
   /* =====================================================
      🔹 LABEL Y ESTADO DE PEDIDOS
   ===================================================== */
-  getStatusLabel(
-    order: KitchenOrder
-  ): 'Nuevo' | 'Actualizado' | 'En preparación' | 'Listo' | undefined {
-    switch (order.status) {
-      case 'approved':
-        return 'Nuevo';
-      case 'updated':
-        return 'Actualizado';
-      case 'preparing':
-        return 'En preparación';
-      case 'ready':
-        return 'Listo';
-      default:
-        return undefined;
-    }
-  }
+getStatusLabel(order: KitchenOrder): string | null {
+  return this.orderStatusService.getKitchenLabel(order.status);
+}
 
   isPreparingDisabled(order: KitchenOrder): boolean {
     return order.status === 'preparing' || order.status === 'ready';

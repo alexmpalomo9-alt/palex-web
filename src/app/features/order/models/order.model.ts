@@ -1,15 +1,17 @@
+import { PaymentMethod } from '../../restaurant/restaurant-orders/payment/model/payment.model';
+
 export interface Order {
   orderId: string;
   restaurantId: string;
 
   // Mesas
   tableIds: string[];
-  tableNumbers: number[];   // 🔥 DESNORMALIZADO
+  tableNumbers: number[]; // 🔥 DESNORMALIZADO
 
   // Usuario
   waiterId?: string;
-  waiterName?: string;      // 🔥 DESNORMALIZADO
-  waiterRole?: string;      // 🔥 DESNORMALIZADO
+  waiterName?: string; // 🔥 DESNORMALIZADO
+  waiterRole?: string; // 🔥 DESNORMALIZADO
 
   // Estado
   status: OrderStatus;
@@ -19,10 +21,11 @@ export interface Order {
   // Extras
   notes?: string;
 
+  paymentMethod?: PaymentMethod;
+
   createdAt: any;
   updatedAt: any;
 }
-
 
 export type OrderStatus =
   | 'draft' // Cliente/mozo creando pedido
@@ -34,12 +37,6 @@ export type OrderStatus =
   | 'ready' // Cocina terminó el pedido
   | 'delivered' // Mozo entregó el pedido al cliente
   | 'closed' // Pedido cobrado / finalizado
-  | 'closed_cash'
-  | 'closed_qr'
-  | 'closed_mp_pos'
-  | 'closed_credit'
-  | 'closed_debit'
-  | 'closed_other'
   | 'cancelled'; // Pedido anulado
 
 //Historial

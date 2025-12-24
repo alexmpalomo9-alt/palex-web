@@ -27,6 +27,7 @@ export interface OrderDialogState {
   currentTable?: number;
   orderId?: string;
 }
+export type UpdateOrderResult = 'UPDATED' | 'NO_CHANGES' | 'CANCELLED';
 
 @Injectable({ providedIn: 'root' })
 export class OrderDialogFacade {
@@ -155,36 +156,41 @@ export class OrderDialogFacade {
   // ---------------------------
   async addItemDialog() {
     const restaurantId = this.state().restaurantId;
+
     const dialogRef = this.matDialog.open(MenuDialogComponent, {
       disableClose: true,
       data: { restaurantId },
     });
 
-    const product = await firstValueFrom(dialogRef.afterClosed());
-    if (!product) return;
+    const products = await firstValueFrom(dialogRef.afterClosed());
 
-    // buildItemFromProduct debería garantizar qty >= 1,
-    // pero normalizamos por si acaso:
-    const newItem = this.orderItemService.buildItemFromProduct(
-      product,
-      this.state().items.length
-    );
-    const normalizedNewItem = {
-      ...newItem,
-      qty: Number(newItem.qty ?? 1),
-      price: Number(newItem.price ?? 0),
-    };
+    if (!Array.isArray(products) || !products.length) return;
 
-    this.state.update((s) => ({
-      ...s,
-      items: this.orderItemService.addItem(
-        s.items,
-        normalizedNewItem,
-        s.status
-      ),
-    }));
+    this.state.update((s) => {
+      let updatedItems = [...s.items];
+
+      products.forEach(({ product, qty }) => {
+        const newItem = this.orderItemService.buildItemFromProduct(
+          product,
+          updatedItems.length
+        );
+
+        updatedItems = this.orderItemService.addItem(
+          updatedItems,
+          {
+            ...newItem,
+            qty,
+          },
+          s.status
+        );
+      });
+
+      return {
+        ...s,
+        items: updatedItems,
+      };
+    });
   }
-
   // ---------------------------
   // 🟩 Remover Item
   // ---------------------------
@@ -257,7 +263,7 @@ export class OrderDialogFacade {
   // ---------------------------
   // 🟩 Actualizar Orden (comparo canónica para evitar escrituras)
   // ---------------------------
-  async updateOrder(): Promise<boolean> {
+  async updateOrder(): Promise<UpdateOrderResult> {
     const {
       items,
       notes,
@@ -270,18 +276,14 @@ export class OrderDialogFacade {
     const itemsChanged = !this.itemsEqual(items ?? [], originalItems ?? []);
     const notesChanged = (notes ?? '') !== (originalNotes ?? '');
 
-    //Valida que el pedido no este vacio
-    if (!(await this.validateItems(items))) return false;
+    // Pedido vacío → ya maneja su propio dialog de error
+    if (!(await this.validateItems(items))) {
+      return 'CANCELLED';
+    }
 
+    // 🟡 Sin cambios → solo informamos el resultado
     if (!itemsChanged && !notesChanged) {
-      await firstValueFrom(
-        this.dialog.confirmDialog({
-          title: 'Sin cambios',
-          message: 'No se detectaron cambios en la orden.',
-          type: 'info',
-        })
-      );
-      return false;
+      return 'NO_CHANGES';
     }
 
     const confirmed = await firstValueFrom(
@@ -292,11 +294,10 @@ export class OrderDialogFacade {
       })
     );
 
-    if (!confirmed) return false;
-
-    if (!confirmed) return false;
+    if (!confirmed) return 'CANCELLED';
 
     this.setLoading(true);
+
     try {
       await this.orderService.updateOrder(
         restaurantId!,
@@ -306,14 +307,13 @@ export class OrderDialogFacade {
         this.requireUserId()
       );
 
-      // Actualizamos originalItems/notes para reflejar el nuevo estado
       this.state.update((s) => ({
         ...s,
         originalItems: structuredClone(items ?? []),
         originalNotes: notes ?? '',
       }));
 
-      return true;
+      return 'UPDATED';
     } finally {
       this.setLoading(false);
     }
@@ -358,14 +358,6 @@ export class OrderDialogFacade {
         status: 'closed',
         tableIds: [],
       }));
-
-      // Mostrar mensaje de éxito (solo información)
-      await firstValueFrom(
-        this.dialog.infoDialog(
-          'Pedido cerrado',
-          'Pedido cerrado y mesas liberadas correctamente'
-        )
-      );
 
       return true;
     } catch (error: any) {

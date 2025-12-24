@@ -1,52 +1,91 @@
 <mat-dialog-content class="menu-dialog-content">
-  <!-- Header -->
-  <div class="menu-dialog-header d-flex justify-content-between align-items-center">
-    <h2 class="menu-title">
-      <span class="menu-title-text">Selecciona los items</span>
-      <button mat-icon-button class="close-button" (click)="close()" aria-label="Cerrar">
-        <mat-icon>close</mat-icon>
-      </button>
-    </h2>
+
+  <!-- HEADER -->
+  <div class="menu-dialog-header">
+    <h2 class="menu-title">Agregar productos</h2>
+
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
-  <!-- Filtros -->
-  <div class="filters-row row g-2">
-    <div class="col-12 col-md-7">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Buscar</mat-label>
-        <input matInput [formControl]="searchControl" />
-      </mat-form-field>
-    </div>
-
-    <div class="col-12 col-md-5">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Categoría</mat-label>
-        <mat-select [formControl]="categoryControl">
-          <mat-option value="all">Todas</mat-option>
-          <mat-option *ngFor="let c of categories" [value]="c">{{ c }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+  <!-- FILTROS -->
+<div class="filters-row">
+  <div>
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar producto</mat-label>
+      <input matInput [formControl]="searchControl" />
+    </mat-form-field>
   </div>
 
-  <!-- Lista de Productos -->
-  <div class="product-list row g-3">
-    <div *ngFor="let product of filteredProducts" class="col-12 col-md-6 col-lg-4">
-      <mat-card class="product-card" (click)="addToOrder(product)">
-        <img mat-card-image [src]="product.imageUrl" alt="{{ product.name }}" />
-        <mat-card-content>
-          <div class="product-info">
-            <strong class="product-name">{{ product.name }}</strong><br />
-            <small class="product-desc">{{ product.description }}</small>
-          </div>
+  <div>
+    <mat-form-field appearance="outline">
+      <mat-label>Categoría</mat-label>
+      <mat-select [formControl]="categoryControl">
+        <mat-option value="all">Todas</mat-option>
+        <mat-option *ngFor="let c of categories" [value]="c">
+          {{ c }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
 
-          <div class="price">
-            <span *ngIf="product.isOffer" class="offer-price">${{ product.offerPrice }}</span>
-            <span [class.strike]="product.isOffer">${{ product.price }}</span>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+  <!-- PRODUCTOS -->
+  <div class="product-list">
+<mat-card
+  *ngFor="let product of filteredProducts"
+  class="product-card"
+  [class.selected]="isSelected(product)"
+  (click)="toggleProduct(product)"
+>
+
+      <!-- BADGE CANTIDAD -->
+      <div
+        class="qty-badge"
+        *ngIf="isSelected(product)"
+        (click)="$event.stopPropagation()"
+      >
+        <button mat-icon-button (click)="decreaseQty(product)">
+          <mat-icon>remove</mat-icon>
+        </button>
+
+        <span class="qty">{{ getQty(product) }}</span>
+
+        <button mat-icon-button (click)="increaseQty(product)">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <!-- IMAGEN -->
+      <img mat-card-image [src]="product.imageUrl" alt="{{ product.name }}" />
+
+      <!-- INFO -->
+      <mat-card-content>
+        <div class="product-info">
+          <strong class="product-name">{{ product.name }}</strong>
+          <small class="product-desc">{{ product.description }}</small>
+        </div>
+        <div class="price">
+          <span *ngIf="product.isOffer" class="offer-price">
+            ${{ product.offerPrice }}
+          </span>
+          <span [class.strike]="product.isOffer"> ${{ product.price }} </span>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 </mat-dialog-content>
 
+<!-- FOOTER POS -->
+<mat-dialog-actions class="dialog-footer" *ngIf="selectedCount > 0">
+  <div class="footer-summary">
+    <div class="items-count">{{ selectedCount }} productos</div>
+    <div class="total">${{ totalSelectedPrice }}</div>
+  </div>
+
+  <div class="footer-actions">
+    <button mat-stroked-button color="warn" (click)="clearSelection()">Limpiar</button>
+    <button mat-raised-button color="primary" (click)="confirmSelection()">Agregar</button>
+  </div>
+</mat-dialog-actions>

@@ -12,8 +12,9 @@ import { OrderNotesComponent } from '../../../order/components/order-notes/order
 import { OrderDialogHeaderComponent } from '../../../order/components/order-dialog-header/order-dialog-header.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { OrderItemsTableComponent } from '../../../order/components/order-items-table/order-items-table.component';
-import { PaymentMethodDialogComponent } from '../payment-method-dialog/payment-method-dialog.component';
+import { PaymentMethodDialogComponent } from '../payment/model/payment-method-dialog/payment-method-dialog.component';
 import { firstValueFrom } from 'rxjs';
+import { UiFeedbackService } from '../../../../shared/services/ui-feedback/ui-feedback.service';
 
 @Component({
   selector: 'app-order-dialog',
@@ -51,7 +52,8 @@ export class OrderDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<OrderDialogComponent>,
     public facade: OrderDialogFacade,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private ui: UiFeedbackService
   ) {}
 
   ngOnInit() {
@@ -77,7 +79,11 @@ export class OrderDialogComponent implements OnInit {
 
   async createOrder() {
     const ok = await this.facade.createOrder();
-    if (ok) this.close();
+
+    if (ok) {
+      this.dialogRef.close(true); // opcional pasar resultado
+      this.ui.success('Pedido creado correctamente');
+    }
   }
 
   async closeOrder() {
@@ -94,14 +100,31 @@ export class OrderDialogComponent implements OnInit {
     if (!payment) return;
 
     const ok = await this.facade.closeOrder(payment);
-    if (ok) this.close();
+        if (ok) {
+      this.dialogRef.close(true); // opcional pasar resultado
+      this.ui.success('Pedido cerrado correctamente');
+    }
+
   }
 
   async updateOrder() {
-    try {
-      await this.facade.updateOrder();
-      this.close();
-    } catch (error) {}
+    const result = await this.facade.updateOrder();
+
+    switch (result) {
+      case 'UPDATED':
+        this.dialogRef.close(true);
+        this.ui.success('Pedido actualizado correctamente');
+        break;
+
+      case 'NO_CHANGES':
+        this.ui.info('No se detectaron cambios en la orden');
+        break;
+
+      case 'CANCELLED':
+      default:
+        // no hacemos nada
+        break;
+    }
   }
 
   cancelOrder() {

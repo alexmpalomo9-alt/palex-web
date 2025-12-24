@@ -1,5 +1,5 @@
 <div class="tables-card-container" [class.dark-theme]="isDarkMode">
-  <!-- HEADER CON SECTION-HEADER -->
+  <!-- HEADER -->
   <app-section-header
     icon="table_restaurant"
     title="Mesas del Restaurante"
@@ -21,17 +21,16 @@
       class="table-card"
       [class.dark-theme]="isDarkMode"
       *ngFor="let t of filteredTables"
-      [ngClass]="[t.currentOrderId ? 'active-order' : '', t.status]"
     >
       <!-- HEADER -->
       <mat-card-header class="card-header">
         <mat-card-title>Mesa {{ t.number }}</mat-card-title>
         <span
-          *ngIf="getStatusLabelForTable(t)"
-          class="status-pill"
-          [ngClass]="getStatusClass(t)"
+          *ngIf="getOrderStatusLabel(t)"
+          class="order-status"
+          [style.backgroundColor]="getOrderStatusColor(t)"
         >
-          {{ getStatusLabelForTable(t) }}
+          {{ getOrderStatusLabel(t) }}
         </span>
       </mat-card-header>
 
@@ -78,7 +77,7 @@
       </mat-card-actions>
 
       <!-- BOTÓN PRINCIPAL -->
-      <mat-card-actions>
+      <mat-card-actions class="card-footer">
         <app-add-button
           class="full-width-btn"
           label="{{

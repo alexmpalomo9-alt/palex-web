@@ -1,92 +1,16 @@
 /* ============================================
-   SECCIONES
+   ESTADO VACÍO
 ============================================ */
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  &.items-section {
-    margin-top: 1rem;
-  }
-
-  &.total-section {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.25rem;
-    margin: 1rem 0;
-  }
-}
-
-/* ============================================
-   RESPONSIVE
-============================================ */
-@media (max-width: 768px) {
-  /* Tabla scrollable y inputs más pequeños */
-  .section.items-section table.mat-elevation-z1 {
-    font-size: 0.9rem;
-
-    input.input-quantity {
-      width: 2.8rem;
-    }
-    table.mat-elevation-z1 {
-      width: 100%;
-      display: block;
-      overflow-x: auto; // scroll horizontal en móviles
-
-      th,
-      td {
-        white-space: nowrap; // evitar que se rompa la tabla
-      }
-
-      input.input-quantity {
-        width: 3.5rem; // ancho fijo en pantallas grandes
-      }
-    }
-  }
-
-  /* Total section vertical en móviles */
-  .section.total-section {
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .section.items-section table.mat-elevation-z1 input.input-quantity {
-    width: 2.2rem;
-  }
-
-  .section.total-section {
-    font-size: 0.95rem;
-  }
-
-  table.mat-elevation-z1 {
-    width: 100%;
-    display: block;
-    overflow-x: auto; // scroll horizontal en móviles
-
-    th,
-    td {
-      white-space: nowrap; // evitar que se rompa la tabla
-    }
-
-    input.input-quantity {
-      width: 3.5rem; // ancho fijo en pantallas grandes
-    }
-  }
-}
 .empty-items {
-  border: 2px dashed #ddd;
+  border: 2px dashed #d1d5db;
   border-radius: 0.75rem;
   padding: 2rem;
   text-align: center;
   cursor: pointer;
-  color: #666;
+  --text-color: #eee;
 
   mat-icon {
-    font-size: 40px;
+    font-size: 25px;
     margin-bottom: 0.5rem;
   }
 
@@ -94,25 +18,73 @@
     display: inline-block;
     margin-top: 0.5rem;
     font-weight: 600;
-    color: #1976d2;
+    --text-color: #eee;
   }
 
   &:hover {
-    background: #f9f9f9;
+    background: var(--hover-background);
   }
 }
 
+/* ============================================
+   TABLA
+============================================ */
+table.mat-elevation-z1 {
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* ============================================
+   INPUT CANTIDAD
+============================================ */
+.input-quantity {
+  width: 4rem;
+  text-align: center;
+}
+
+/* ============================================
+   FILA INVISIBLE POS
+============================================ */
 .add-items-row {
   cursor: pointer;
+  user-select: none;
   text-align: center;
   font-weight: 600;
-  color: #1976d2;
+  color: var(--primary-color);
+  padding: 0.85rem;
+  border-top: 1px dashed #e5e7eb;
 
-  td {
-    padding: 1rem;
+  mat-icon {
+    font-size: 18px;
+    vertical-align: middle;
+    margin-right: 0.25rem;
   }
 
   &:hover {
-    background: #f5f7fa;
+    background: var(--button-background);
+  }
+
+  &:active {
+    background: var(--hover-background);
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media (max-width: 768px) {
+  table.mat-elevation-z1 {
+    display: block;
+    overflow-x: auto;
+
+    th,
+    td {
+      white-space: nowrap;
+    }
+  }
+
+  .input-quantity {
+    width: 2.8rem;
   }
 }

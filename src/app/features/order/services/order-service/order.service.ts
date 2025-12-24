@@ -10,6 +10,8 @@ import {
   writeBatch,
   serverTimestamp,
   runTransaction,
+  query,
+  where,
 } from '@angular/fire/firestore';
 
 import { OrderStatus, OrderItem, Order } from '../../models/order.model';
@@ -531,4 +533,27 @@ export class OrderService {
       }
     });
   }
+
+  // 🔹 Obtener pedidos activos (no cerrados ni cancelados) de un restaurante
+  async getActiveOrdersByRestaurant(restaurantId: string): Promise<Order[]> {
+    const ordersColRef = collection(
+      this.firestore,
+      `restaurants/${restaurantId}/orders`
+    );
+
+    const q = query(
+      ordersColRef,
+      where('status', 'in', ['pending', 'approved', 'preparing', 'updated', 'ready', 'delivered'])
+    );
+
+    const snapshot = await getDocs(q);
+    const orders: Order[] = snapshot.docs.map((doc) => ({
+      orderId: doc.id,
+      ...doc.data(),
+    } as Order));
+
+    return orders;
+  }
+
+
 }

@@ -1,18 +1,19 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
-import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 import { OrderStatus } from '../../models/order.model';
+import { OrderStatusService } from '../../status/order-status/order-status.service';
+import { ORDER_STATUS_CONFIG } from '../../status/model/order.status.model';
 
 @Component({
   selector: 'app-order-dialog-header',
   standalone: true,
-  imports: [SharedModule, AddButtonComponent],
+  imports: [SharedModule],
   templateUrl: './order-dialog-header.component.html',
   styleUrls: ['./order-dialog-header.component.scss'],
 })
-export class OrderDialogHeaderComponent {
+export class OrderDialogHeaderComponent implements OnChanges {
   @Input() tableNumbers: number[] = [];
-  @Input() status!: OrderStatus;
+  @Input() status?: OrderStatus;
   @Input() currentTable?: number;
 
   @Output() addItem = new EventEmitter<void>();
@@ -20,14 +21,19 @@ export class OrderDialogHeaderComponent {
   @Output() cancelOrder = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
-  get canUpdate(): boolean {
-    return ['approved', 'preparing', 'updated'].includes(this.status);
-  }
+  canUpdate = false;
+  canCancel = false;
 
-  get canCancel(): boolean {
-    return ['pending', 'approved', 'preparing', 'updated', 'ready'].includes(
-      this.status
-    );
+  constructor(private orderStatusService: OrderStatusService) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['status'] && this.status) {
+      this.canUpdate = this.orderStatusService.canUpdate(this.status);
+      this.canCancel = this.orderStatusService.canCancel(this.status);
+    } else {
+      this.canUpdate = false;
+      this.canCancel = false;
+    }
   }
 
   get showMenu(): boolean {
@@ -36,46 +42,22 @@ export class OrderDialogHeaderComponent {
 
   get tableLabel(): string {
     if (!this.tableNumbers?.length) return '---';
-
-    if (this.tableNumbers.length === 1) {
-      return `Mesa ${this.tableNumbers[0]}`;
-    }
-
-    if (this.currentTable) {
-      return `Mesas ${this.tableNumbers.join(', ')} (desde mesa ${
-        this.currentTable
-      })`;
-    }
-
+    if (this.tableNumbers.length === 1) return `Mesa ${this.tableNumbers[0]}`;
+    if (this.currentTable) return `Mesas ${this.tableNumbers.join(', ')} (desde mesa ${this.currentTable})`;
     return `Mesas ${this.tableNumbers.join(', ')}`;
   }
 
   get tableIcon(): string {
     if (this.tableNumbers.length === 1) return 'person';
     if (this.tableNumbers.length === 2) return 'groups';
-    return 'people'; // 3 o más mesas
+    return 'people';
   }
 
   get statusLabel(): string {
-    const map: Record<OrderStatus, string> = {
-      draft: 'Borrador',
-      pending: 'Pendiente',
-      updated: 'Modificado',
-      update_rejected: 'Modificación rechazada',
-      approved: 'Aprobado',
-      preparing: 'En preparación',
-      ready: 'Listo para entregar',
-      delivered: 'Entregado',
-      closed: 'Cerrado',
-      closed_cash: 'Cerrado (Efectivo)',
-      closed_qr: 'Cerrado (QR)',
-      closed_mp_pos: 'Cerrado (MP POS)',
-      closed_credit: 'Cerrado (Crédito)',
-      closed_debit: 'Cerrado (Débito)',
-      closed_other: 'Cerrado',
-      cancelled: 'Cancelado',
-    };
+    return this.status ? this.orderStatusService.getLabel(this.status) : 'Cargando...';
+  }
 
-    return map[this.status] ?? '';
+  get statusColor(): string {
+    return this.status ? ORDER_STATUS_CONFIG[this.status]?.color || 'gray' : 'gray';
   }
 }

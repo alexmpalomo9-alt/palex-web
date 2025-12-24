@@ -30,14 +30,13 @@
     text-align: center;
   }
 
-.dialog-actions {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: space-around; /* coloca un botón a la izquierda y otro a la derecha */
-  align-items: center; /* los alinea verticalmente */
-  width: 100%;
-}
-
+  .dialog-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-around; /* coloca un botón a la izquierda y otro a la derecha */
+    align-items: center; /* los alinea verticalmente */
+    width: 100%;
+  }
 
   .shared-badge {
     background-color: #f3e5f5;
@@ -56,31 +55,6 @@
     text-transform: uppercase;
     display: inline-block;
     margin-top: 0.25rem;
-
-    &.draft {
-      background-color: #9e9e9e;
-    }
-    &.pending {
-      background-color: #ffb300;
-    }
-    &.updated {
-      background-color: #0288d1;
-    }
-    &.approved {
-      background-color: #43a047;
-    }
-    &.preparing {
-      background-color: #f4511e;
-    }
-    &.ready {
-      background-color: #7b1fa2;
-    }
-    &.delivered {
-      background-color: #00695c;
-    }
-    &.cancelled {
-      background-color: #e53935;
-    }
   }
 
   @media (max-width: 768px) {

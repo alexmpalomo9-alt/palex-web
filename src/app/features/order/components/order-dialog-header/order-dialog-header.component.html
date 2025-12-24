@@ -38,19 +38,14 @@
     </h2>
   </div>
 
-  <!-- Acción principal -->
-  <div class="dialog-actions">
-    <span *ngIf="statusLabel" class="order-status" [ngClass]="status">
-      {{ statusLabel }}
-    </span>
-
-    <!-- Botón Agregar productos -->
-    <app-add-button
-      label="Agregar productos"
-      icon="add"
-      (onClick)="addItem.emit()"
-    ></app-add-button>
-  </div>
+  <!-- Estado mesas -->
+<span
+  *ngIf="statusLabel"
+  class="order-status"
+  [style.backgroundColor]="statusColor"
+>
+  {{ statusLabel }}
+</span>
 
   <!-- Cerrar -->
   <button
