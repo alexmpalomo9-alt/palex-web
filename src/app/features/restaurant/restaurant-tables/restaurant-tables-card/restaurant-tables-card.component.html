@@ -1,5 +1,4 @@
-<div class="tables-card-container" [class.dark-theme]="isDarkMode">
-  <!-- HEADER -->
+<div class="tables-card-container">
   <app-section-header
     icon="table_restaurant"
     title="Mesas del Restaurante"
@@ -15,57 +14,48 @@
     ></app-add-button>
   </app-section-header>
 
-  <!-- GRID DE MESAS -->
   <div class="cards-wrapper" *ngIf="!loading && filteredTables.length > 0">
-    <mat-card
-      class="table-card"
-      [class.dark-theme]="isDarkMode"
-      *ngFor="let t of filteredTables"
-    >
-      <!-- HEADER -->
-      <mat-card-header class="card-header">
-        <mat-card-title>Mesa {{ t.number }}</mat-card-title>
-        <span
-          *ngIf="getOrderStatusLabel(t)"
-          class="order-status"
-          [style.backgroundColor]="getOrderStatusColor(t)"
-        >
-          {{ getOrderStatusLabel(t) }}
-        </span>
-      </mat-card-header>
+    <mat-card class="table-card" *ngFor="let t of filteredTables">
+      <div class="card-header">
+        <div class="table-number">Mesa {{ t.number }}</div>
+        <div class="status-badges">
+          <span class="badge" [style.backgroundColor]="getOrderStatusColor(t)">
+            {{ getOrderStatusLabel(t) }}
+          </span>
+        </div>
+      </div>
+      <!-- Mensaje de Actualización con Botón de Info -->
+      <ng-container *ngIf="getUpdateMessage(t) as update">
+        <div class="update-message-container">
+          <span class="update-message" [ngClass]="update.type">
+            {{ update.text }}
+          </span>
+          <mat-icon
+            matTooltip="{{
+              update.type === 'rejected'
+                ? 'Las modificaciones solicitadas fueron rechazadas, pero el pedido inicial sigue en preparación.'
+                : 'Actualización aceptada.'
+            }}"
+            class="info-icon"
+            >info</mat-icon
+          >
+        </div>
+      </ng-container>
 
-      <!-- INFO -->
-      <mat-card-content class="card-info">
-        <span><mat-icon>people</mat-icon> Capacidad: {{ t.capacity }}</span>
-        <span><mat-icon>place</mat-icon> Sector: {{ t.sector || "-" }}</span>
-      </mat-card-content>
+      <div class="card-info">
+        <div><mat-icon>people</mat-icon> Capacidad: {{ t.capacity }}</div>
+        <div><mat-icon>place</mat-icon> Sector: {{ t.sector || "-" }}</div>
+      </div>
 
-      <!-- ICONOS DE ACCIONES -->
-      <mat-card-actions class="card-icons">
+      <div class="card-actions">
         <button
           mat-icon-button
+          [disabled]="hasActiveOrder(t)"
           matTooltip="Cambiar estado"
           [matMenuTriggerFor]="menu"
         >
           <mat-icon>swap_horiz</mat-icon>
         </button>
-
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="changeStatus(t, 'available')">
-            Disponible
-          </button>
-          <button mat-menu-item (click)="changeStatus(t, 'seated')">
-            Cliente sentado
-          </button>
-          <button mat-menu-item (click)="changeStatus(t, 'occupied')">
-            Ocupada
-          </button>
-          <button mat-menu-item (click)="changeStatus(t, 'reserved')">
-            Reservada
-          </button>
-          <mat-divider></mat-divider>
-        </mat-menu>
-
         <button
           mat-icon-button
           color="accent"
@@ -74,28 +64,37 @@
         >
           <mat-icon>qr_code</mat-icon>
         </button>
-      </mat-card-actions>
+      </div>
 
-      <!-- BOTÓN PRINCIPAL -->
-      <mat-card-actions class="card-footer">
-        <app-add-button
-          class="full-width-btn"
-          label="{{
-            t.currentOrderId ? 'Ver / Editar Pedido' : 'Crear Pedido'
-          }}"
-          icon="add_shopping_cart"
-          (onClick)="viewOrder(t.currentOrderId ?? null, t)"
-          [isSecondary]="true"
-          [disabled]="
-            !t.currentOrderId &&
-            !(t.status === 'available' || t.status === 'seated')
-          "
-        ></app-add-button>
-      </mat-card-actions>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="changeStatus(t, 'available')">
+          Disponible
+        </button>
+        <button mat-menu-item (click)="changeStatus(t, 'seated')">
+          Cliente sentado
+        </button>
+        <button mat-menu-item (click)="changeStatus(t, 'occupied')">
+          Ocupada
+        </button>
+        <button mat-menu-item (click)="changeStatus(t, 'reserved')">
+          Reservada
+        </button>
+      </mat-menu>
+
+      <app-add-button
+        class="full-width-btn"
+        label="{{ t.currentOrderId ? 'Ver / Editar Pedido' : 'Crear Pedido' }}"
+        icon="add_shopping_cart"
+        (onClick)="viewOrder(t.currentOrderId ?? null, t)"
+        [isSecondary]="true"
+        [disabled]="
+          !t.currentOrderId &&
+          !(t.status === 'available' || t.status === 'seated')
+        "
+      ></app-add-button>
     </mat-card>
   </div>
 
-  <!-- EMPTY STATE -->
   <div *ngIf="!loading && filteredTables.length === 0" class="empty-state">
     <p>No hay mesas registradas.</p>
   </div>

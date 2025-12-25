@@ -121,3 +121,12 @@ mat-card-header {
     font-weight: 600;
   }
 }
+.no-orders-message {
+  color: var(--text-color);
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}

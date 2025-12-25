@@ -1,10 +1,9 @@
-<div class="cart-header" [class.dark-theme]="isDarkMode">
+<div class="cart-header">
   <h2>Tu Carrito</h2>
 </div>
 
 <div class="cart-content">
   <ng-container *ngIf="cartItems.length; else emptyCart">
-
     <!-- LISTA DE ITEMS -->
     <app-cart-item
       *ngFor="let item of cartItems"
@@ -13,7 +12,6 @@
       (decrease)="decrease($event)"
       (remove)="remove($event)"
     ></app-cart-item>
-
   </ng-container>
 
   <!-- CARRITO VACÍO -->

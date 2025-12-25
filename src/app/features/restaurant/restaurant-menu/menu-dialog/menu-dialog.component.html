@@ -1,45 +1,42 @@
 <mat-dialog-content class="menu-dialog-content">
-
   <!-- HEADER -->
   <div class="menu-dialog-header">
-    <h2 class="menu-title">Agregar productos</h2>
-
+    <h2 class="menu-title">Selecciona los items</h2>
     <button mat-icon-button (click)="close()">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
   <!-- FILTROS -->
-<div class="filters-row">
-  <div>
-    <mat-form-field appearance="outline">
-      <mat-label>Buscar producto</mat-label>
-      <input matInput [formControl]="searchControl" />
-    </mat-form-field>
-  </div>
+  <div class="filters-row">
+    <div>
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar producto</mat-label>
+        <input matInput [formControl]="searchControl" />
+      </mat-form-field>
+    </div>
 
-  <div>
-    <mat-form-field appearance="outline">
-      <mat-label>Categoría</mat-label>
-      <mat-select [formControl]="categoryControl">
-        <mat-option value="all">Todas</mat-option>
-        <mat-option *ngFor="let c of categories" [value]="c">
-          {{ c }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div>
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select [formControl]="categoryControl">
+          <mat-option value="all">Todas</mat-option>
+          <mat-option *ngFor="let c of categories" [value]="c">
+            {{ c }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
-</div>
 
   <!-- PRODUCTOS -->
   <div class="product-list">
-<mat-card
-  *ngFor="let product of filteredProducts"
-  class="product-card"
-  [class.selected]="isSelected(product)"
-  (click)="toggleProduct(product)"
->
-
+    <mat-card
+      *ngFor="let product of filteredProducts"
+      class="product-card"
+      [class.selected]="isSelected(product)"
+      (click)="toggleProduct(product)"
+    >
       <!-- BADGE CANTIDAD -->
       <div
         class="qty-badge"
@@ -85,7 +82,11 @@
   </div>
 
   <div class="footer-actions">
-    <button mat-stroked-button color="warn" (click)="clearSelection()">Limpiar</button>
-    <button mat-raised-button color="primary" (click)="confirmSelection()">Agregar</button>
+    <button mat-stroked-button color="warn" (click)="clearSelection()">
+      Limpiar
+    </button>
+    <button mat-raised-button color="primary" (click)="confirmSelection()">
+      Agregar
+    </button>
   </div>
 </mat-dialog-actions>

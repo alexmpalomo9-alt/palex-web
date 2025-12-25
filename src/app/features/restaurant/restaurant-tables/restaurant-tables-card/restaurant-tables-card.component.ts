@@ -5,7 +5,7 @@ import { firstValueFrom, Subject, Subscription, takeUntil } from 'rxjs';
 
 import { Table } from '../model/tables.model';
 import { Restaurant } from '../../model/restaurant.model';
-import { Order, OrderStatus } from '../../../order/models/order.model';
+import { Order } from '../../../order/models/order.model';
 
 import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order-dialog.component';
 import { TableQrDialogComponent } from '../../../../shared/components/qr-preview/table-qr-dialog/table-qr-dialog.component';
@@ -13,20 +13,25 @@ import { TableQrDialogComponent } from '../../../../shared/components/qr-preview
 import { TableService } from '../services/table.service';
 import { RestaurantService } from '../../services/restaurant.service';
 import { TableStatusService } from '../../../../shared/services/table-status/table-status.service';
-import { ThemeService } from '../../../../core/services/theme/theme.service';
 import { SelectTablesDialogComponent } from '../../../order/components/select-tables-dialog/select-tables-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 import { SharedModule } from '../../../../shared/shared.module';
 import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 import { OrderService } from '../../../order/services/order-service/order.service';
 import { OrderStatusService } from '../../../order/status/order-status/order-status.service';
 import { ORDER_STATUS_CONFIG } from '../../../order/status/model/order.status.model';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 
 @Component({
   selector: 'app-restaurant-tables-card',
   standalone: true,
-  imports: [SharedModule, SectionHeaderComponent, AddButtonComponent],
+  imports: [
+    SharedModule,
+    SectionHeaderComponent,
+    AddButtonComponent,
+    MatTooltipModule,
+  ],
   templateUrl: './restaurant-tables-card.component.html',
   styleUrls: ['./restaurant-tables-card.component.scss'],
 })
@@ -37,11 +42,8 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
   tables: Table[] = [];
   filteredTables: Table[] = [];
   loading = true;
-  isDarkMode = false;
 
-  // Map de pedidos activos por orderId
   ordersMap: Map<string, Order> = new Map();
-
   private sub!: Subscription;
   private destroy$ = new Subject<void>();
 
@@ -52,14 +54,10 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     public tableStatusService: TableStatusService,
-    private themeService: ThemeService,
     private snackBar: MatSnackBar,
     private orderStatusService: OrderStatusService
   ) {}
 
-  // ================================
-  // INIT / DESTROY
-  // ================================
   ngOnInit() {
     const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
     if (!slug) return;
@@ -79,14 +77,9 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
             this.filteredTables = [...this.tables];
             this.loading = false;
 
-            // Cargar pedidos activos
             this.loadActiveOrders();
           });
       });
-
-    this.themeService.darkModeObservable
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value) => (this.isDarkMode = value));
   }
 
   ngOnDestroy(): void {
@@ -95,9 +88,9 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ================================
+  // =======================
   // BUSCADOR
-  // ================================
+  // =======================
   onSearch(searchTerm: string) {
     if (!searchTerm) {
       this.filteredTables = [...this.tables];
@@ -113,20 +106,19 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ================================
+  // =======================
   // ESTADO MESA
-  // ================================
+  // =======================
   changeStatus(table: Table, status: Table['status']) {
     if (!this.restaurant) return;
-
     this.tableService.updateTable(this.restaurant.restaurantId, table.tableId, {
       status,
     });
   }
 
-  // ================================
+  // =======================
   // PEDIDOS
-  // ================================
+  // =======================
   async loadActiveOrders() {
     if (!this.restaurantId) return;
     const orders = await this.orderService.getActiveOrdersByRestaurant(
@@ -143,30 +135,38 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     return this.ordersMap.get(table.currentOrderId) ?? null;
   }
 
-  getStatusLabelForTable(table: Table): string {
+  getOrderStatusColor(table: Table): string {
+    const order = this.getOrderForTable(table);
+    if (!order) return 'transparent';
+    return ORDER_STATUS_CONFIG[order.status]?.color || 'gray';
+  }
+
+  getOrderStatusLabel(table: Table): string {
     const order = this.getOrderForTable(table);
     return order ? this.orderStatusService.getLabel(order.status) : '';
   }
 
-  getStatusClass(table: Table): string {
+  getUpdateMessage(
+    table: Table
+  ): { text: string; type: 'accepted' | 'rejected' } | null {
     const order = this.getOrderForTable(table);
-    return order ? this.orderStatusService.getColor(order.status) : '';
+    if (!order?.lastUpdateDecision) return null;
+    return {
+      text:
+        order.lastUpdateDecision === 'accepted'
+          ? 'Actualización aceptada'
+          : 'Actualización rechazada',
+      type: order.lastUpdateDecision,
+    };
   }
 
-getOrderStatusColor(table: Table): string {
-  const order = this.getOrderForTable(table);
-  if (!order) return 'transparent'; // o 'gray'
-  return ORDER_STATUS_CONFIG[order.status]?.color || 'gray';
-}
+  hasActiveOrder(table: Table): boolean {
+    return !!table.currentOrderId && this.ordersMap.has(table.currentOrderId);
+  }
 
-getOrderStatusLabel(table: Table): string {
-  const order = this.getOrderForTable(table);
-  return order ? this.orderStatusService.getLabel(order.status) : '';
-}
-
-  // ================================
+  // =======================
   // QR
-  // ================================
+  // =======================
   openQr(table: Table) {
     const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
     this.dialog.open(TableQrDialogComponent, {
@@ -174,19 +174,16 @@ getOrderStatusLabel(table: Table): string {
     });
   }
 
-  // ================================
-  // VER / CREAR PEDIDO
-  // ================================
+  // =======================
+  // CREAR / VER PEDIDO
+  // =======================
   async viewOrder(orderId: string | null, table: Table) {
     if (table.currentOrderId) orderId = table.currentOrderId;
 
     if (!orderId) {
       const canCreate =
         table.status === 'available' || table.status === 'seated';
-      if (!canCreate) {
-        alert(`Mesa ${table.number} no disponible`);
-        return;
-      }
+      if (!canCreate) return alert(`Mesa ${table.number} no disponible`);
     }
 
     let selectedTables: Table[] = [];
@@ -210,12 +207,21 @@ getOrderStatusLabel(table: Table): string {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.success) {
-        this.snackBar.open('Pedido creado correctamente', 'OK', {
+        this.snackBar.open('Pedido actualizado correctamente', 'OK', {
           duration: 3000,
         });
-        this.loadActiveOrders(); // actualizar mapa de pedidos
+        this.loadActiveOrders();
       }
     });
+  }
+
+  async selectTablesForNewOrder(baseTable: Table): Promise<Table[]> {
+    const dialogRef = this.dialog.open(SelectTablesDialogComponent, {
+      width: '400px',
+      data: { tables: this.tables, baseTable },
+    });
+
+    return (await firstValueFrom(dialogRef.afterClosed())) ?? [];
   }
 
   async createOrderFromMenu() {
@@ -246,17 +252,8 @@ getOrderStatusLabel(table: Table): string {
         this.snackBar.open('Pedido creado correctamente', 'OK', {
           duration: 3000,
         });
-        this.loadActiveOrders(); // actualizar mapa de pedidos
+        this.loadActiveOrders();
       }
     });
-  }
-
-  async selectTablesForNewOrder(baseTable: Table): Promise<Table[]> {
-    const dialogRef = this.dialog.open(SelectTablesDialogComponent, {
-      width: '400px',
-      data: { tables: this.tables, baseTable },
-    });
-
-    return (await firstValueFrom(dialogRef.afterClosed())) ?? [];
   }
 }

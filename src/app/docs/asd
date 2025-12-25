@@ -1,0 +1,25 @@
+order-dialog/
+│
+├── facade/
+│   └── order-dialog.facade.ts
+│
+├── state/
+│   ├── order-dialog.state.ts
+│   └── order-dialog.initial-state.ts
+│
+├── use-cases/
+│   ├── create-order.use-case.ts
+│   ├── update-order.use-case.ts
+│   ├── close-order.use-case.ts
+│   ├── cancel-order.use-case.ts
+│   └── mark-as-delivered.use-case.ts
+│
+├── domain/
+│   ├── order-item.comparator.ts
+│   └── order-validator.ts
+│
+├── ui/
+│   └── order-dialog-ui.service.ts
+│
+└── models/
+    └── order-dialog-state.model.ts

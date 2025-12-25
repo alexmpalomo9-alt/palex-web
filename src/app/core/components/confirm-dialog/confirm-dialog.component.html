@@ -3,13 +3,6 @@
   <p>{{ data.message }}</p>
 </mat-dialog-content>
 <mat-dialog-actions>
-    <button
-    mat-button
-    class="cancel-button"
-    *ngIf="data.type === 'confirm' || data.type === 'question'"
-    (click)="onCancel()">
-    Cancelar
-  </button>
   <button
     mat-button
     [ngClass]="{
@@ -18,8 +11,17 @@
       'question-button': data.type === 'question',
       'enable-button': data.type === 'enable'
     }"
-    (click)="onConfirm()">
-    {{ data.type === 'confirm' ? 'Eliminar' : 'Aceptar' }}
+    (click)="onConfirm()"
+  >
+    {{ data.type === "confirm" ? "Eliminar" : "Aceptar" }}
   </button>
 
+  <button
+    mat-button
+    class="cancel-button"
+    *ngIf="data.type === 'confirm' || data.type === 'question'"
+    (click)="onCancel()"
+  >
+    Cancelar
+  </button>
 </mat-dialog-actions>

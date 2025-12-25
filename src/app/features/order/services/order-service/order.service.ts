@@ -336,36 +336,32 @@ export class OrderService {
     notes: string,
     userId: string
   ) {
-    // 1️⃣ Validar estado actual
     const orderSnap = await getDoc(this.orderDoc(restaurantId, orderId));
     if (!orderSnap.exists()) throw new Error('Pedido no existe');
 
     const currentStatus = orderSnap.data()?.['status'] as OrderStatus;
-
-    if (
-      currentStatus !== 'approved' &&
-      currentStatus !== 'preparing' &&
-      currentStatus !== 'updated'
-    ) {
+    if (!['approved', 'preparing', 'updated'].includes(currentStatus)) {
       throw new Error(
         `El pedido en estado '${currentStatus}' no permite modificaciones.`
       );
     }
 
-    // 2️⃣ Actualizar pedido (estado updated)
+    // Obtener datos actuales del pedido
+    const currentOrder = orderSnap.data() as Order;
+
+    // Crear pendingUpdate en lugar de reemplazar directamente
     await updateDoc(this.orderDoc(restaurantId, orderId), {
-      notes,
+      pendingUpdate: {
+        items,
+        notes,
+        total: items.reduce((acc, i) => acc + i.price * i.qty, 0),
+        requestedAt: serverTimestamp(),
+        kitchenDecision: null,
+      },
       status: 'updated',
       updatedAt: serverTimestamp(),
     });
 
-    // 3️⃣ Reemplazar ítems
-    await this.replaceOrderItems(restaurantId, orderId, items);
-
-    // 4️⃣ Recalcular total
-    await this.updateOrderTotal(restaurantId, orderId);
-
-    // 5️⃣ Historial
     await this.addStatusHistory(restaurantId, orderId, 'updated', userId);
   }
 
@@ -543,17 +539,25 @@ export class OrderService {
 
     const q = query(
       ordersColRef,
-      where('status', 'in', ['pending', 'approved', 'preparing', 'updated', 'ready', 'delivered'])
+      where('status', 'in', [
+        'pending',
+        'approved',
+        'preparing',
+        'updated',
+        'ready',
+        'delivered',
+      ])
     );
 
     const snapshot = await getDocs(q);
-    const orders: Order[] = snapshot.docs.map((doc) => ({
-      orderId: doc.id,
-      ...doc.data(),
-    } as Order));
+    const orders: Order[] = snapshot.docs.map(
+      (doc) =>
+        ({
+          orderId: doc.id,
+          ...doc.data(),
+        } as Order)
+    );
 
     return orders;
   }
-
-
 }

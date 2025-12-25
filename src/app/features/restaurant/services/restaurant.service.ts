@@ -50,7 +50,7 @@ export class RestaurantService {
       .replace(/^-+|-+$/g, '');
   }
 
-  private async generateUniqueSlug(name: string, ignoreId?: string): Promise<string> {
+  async generateUniqueSlug(name: string, ignoreId?: string): Promise<string> {
     return runAsyncInInjectionContext(this.injector, async () => {
       const base = this.generateSlugBase(name);
       const q = query(collection(this.firestore, 'restaurants'), where('slug', '>=', base));

@@ -2,11 +2,13 @@ import { Component, Input } from '@angular/core';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantDialogService } from '../../services/restaurant-dialog.service';
 import { RestaurantService } from '../../services/restaurant.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Timestamp } from 'firebase/firestore';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UiFeedbackService } from '../../../../shared/services/ui-feedback/ui-feedback.service';
 
 @Component({
   selector: 'app-restaurant-info',
@@ -21,14 +23,21 @@ export class RestaurantInfoComponent {
   constructor(
     private restaurantDialogService: RestaurantDialogService,
     private restaurantService: RestaurantService,
-    private dialogService: DialogService,
-    private route: ActivatedRoute
+    private uiFeedback: UiFeedbackService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    const slug = this.route.parent?.snapshot.paramMap.get('restaurantId');
-    if (!slug) return;
+    this.route.parent?.paramMap.subscribe((params) => {
+      const slug = params.get('restaurantId');
+      if (!slug) return;
 
+      this.loadRestaurant(slug);
+    });
+  }
+
+  private loadRestaurant(slug: string) {
     this.restaurantService.getRestaurantBySlug(slug).subscribe((restaurant) => {
       if (!restaurant) return;
 
@@ -46,14 +55,12 @@ export class RestaurantInfoComponent {
 
   editRestaurant() {
     if (!this.restaurant) return;
+
     this.restaurantDialogService
       .openRestaurantDialog({ mode: 'edit', data: this.restaurant })
       .subscribe(async (result) => {
         if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelar',
-            'No se realizaron cambios.'
-          );
+          this.uiFeedback.show('No se realizaron cambios.', 'info');
           return;
         }
 
@@ -62,15 +69,19 @@ export class RestaurantInfoComponent {
             this.restaurant!.restaurantId!,
             result
           );
-          this.dialogService.infoDialog(
-            'Éxito',
-            'Perfil actualizado correctamente.'
-          );
+
+          if (result.name && result.name !== this.restaurant!.name) {
+            const newSlug = await this.restaurantService.generateUniqueSlug(
+              result.name,
+              this.restaurant!.restaurantId!
+            );
+
+            this.router.navigate(['/restaurant', newSlug, 'info']);
+          }
+
+          this.uiFeedback.show('Perfil actualizado correctamente.', 'success');
         } catch (e: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            e.message || 'Ocurrió un error inesperado.'
-          );
+          this.uiFeedback.show('Ocurrió un error inesperado.', 'error');
         }
       });
   }
@@ -86,7 +97,7 @@ export class RestaurantInfoComponent {
         this.restaurant.restaurantId!,
         { menuType: type }
       );
-      console.log('Tipo de menú actualizado:', type);
+      // console.log('Tipo de menú actualizado:', type);
     } catch (err) {
       console.error('Error al actualizar menú:', err);
     }

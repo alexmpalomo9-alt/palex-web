@@ -81,8 +81,8 @@ export class OrderDialogComponent implements OnInit {
     const ok = await this.facade.createOrder();
 
     if (ok) {
-      this.dialogRef.close(true); // opcional pasar resultado
-      this.ui.success('Pedido creado correctamente');
+      this.dialogRef.close(true);
+      this.ui.show('Pedido creado correctamente', 'success');
     }
   }
 
@@ -100,11 +100,11 @@ export class OrderDialogComponent implements OnInit {
     if (!payment) return;
 
     const ok = await this.facade.closeOrder(payment);
-        if (ok) {
-      this.dialogRef.close(true); // opcional pasar resultado
-      this.ui.success('Pedido cerrado correctamente');
-    }
 
+    if (ok) {
+      this.dialogRef.close(true);
+      this.ui.show('Pedido cerrado correctamente', 'success');
+    }
   }
 
   async updateOrder() {
@@ -113,11 +113,11 @@ export class OrderDialogComponent implements OnInit {
     switch (result) {
       case 'UPDATED':
         this.dialogRef.close(true);
-        this.ui.success('Pedido actualizado correctamente');
+        this.ui.show('Pedido actualizado correctamente', 'success');
         break;
 
       case 'NO_CHANGES':
-        this.ui.info('No se detectaron cambios en la orden');
+        this.ui.show('No se detectaron cambios en la orden', 'info');
         break;
 
       case 'CANCELLED':

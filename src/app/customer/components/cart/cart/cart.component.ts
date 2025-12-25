@@ -15,12 +15,8 @@ import { ThemeService } from '../../../../core/services/theme/theme.service';
 export class CartComponent implements OnInit {
   cartItems: CartItem[] = [];
   total = 0;
-  isDarkMode = false; // ✅ variable para dark mode
 
-  constructor(
-    private cartService: CartService,
-    private themeService: ThemeService
-  ) {}
+  constructor(private cartService: CartService) {}
 
   ngOnInit() {
     // Suscribirse al carrito directamente
@@ -34,10 +30,6 @@ export class CartComponent implements OnInit {
       this.cartItems = cart.items;
       this.total = this.cartService.getTotal(cart.restaurantId);
     });
-    // Suscribirse al dark mode
-    this.themeService.darkModeObservable.subscribe(
-      (value) => (this.isDarkMode = value)
-    );
   }
 
   increase(item: CartItem) {

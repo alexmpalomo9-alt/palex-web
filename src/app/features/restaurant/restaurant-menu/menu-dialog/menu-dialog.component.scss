@@ -4,7 +4,13 @@
   flex-direction: column;
   height: 100%;
   max-height: 90vh;
-  background: var(--bg-color);
+  background: var(--card-bg);
+}
+.back-button {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 10;
 }
 /* ===== HEADER ===== */
 .menu-dialog-header {
@@ -80,7 +86,7 @@
   cursor: pointer;
   transition: all 0.25s ease;
   border: 1px solid transparent;
-  background: var(--card-bg);
+  background: var(--bg-color);
 
   img {
     width: 120px;
@@ -144,7 +150,7 @@
   display: flex;
   align-items: center;
   background: var(--button-background);
-  border-radius: 50%;
+  border-radius: 50px;
 
   button {
     background: var(--button-background);
@@ -195,7 +201,6 @@
     button {
       border-radius: 999px;
       padding: 0.35rem 1rem;
-      background: var(--button-background);
     }
   }
 }

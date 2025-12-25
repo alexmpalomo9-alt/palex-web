@@ -1,90 +1,152 @@
 <div class="kitchen-container container-fluid kitchen-mode">
-  <div class="row g-3">
-    <div
-      class="col-12 col-md-6 col-lg-4"
-      *ngFor="let order of activeOrders$ | async"
-    >
-      <mat-card class="order-card mat-elevation-z4">
-        <!-- HEADER -->
-        <mat-card-header
-          [ngClass]="{
-            'new-order': getStatusLabel(order) === 'Nuevo',
-            'updated-order': getStatusLabel(order) === 'Actualizado',
-            'preparing-order': getStatusLabel(order) === 'En preparación'
-          }"
-        >
-          <div class="header-left">
-            <mat-icon color="primary">table_restaurant</mat-icon>
-            <span class="tables">Mesa(s): {{ order.tableNumbers }}</span>
-          </div>
+  <ng-container *ngIf="activeOrders$ | async as orders">
+    <div class="row g-3" *ngIf="orders.length > 0; else noOrders">
+      <div class="col-12 col-md-6 col-lg-4" *ngFor="let order of orders">
+        <mat-card class="order-card mat-elevation-z4">
 
-          <div class="header-right">
-            <span *ngIf="getStatusLabel(order)" class="status-badge">
-              {{ getStatusLabel(order) }}
-            </span>
-          </div>
-        </mat-card-header>
+          <!-- HEADER -->
+<mat-card-header
+  [ngClass]="{
+    'new-order': getStatusLabel(order) === 'Nuevo',
+    'updated-order': order.lastUpdateDecision === 'accepted',
+    'preparing-order': order.status === 'preparing'
+  }"
+>
+  <div class="header-left">
+    <mat-icon color="primary">table_restaurant</mat-icon>
+    <span class="tables">Mesa(s): {{ order.tableNumbers }}</span>
+  </div>
 
-        <!-- CONTENT -->
-        <mat-card-content>
-          <div class="info-row">
-            <mat-icon>person</mat-icon>
-            <span>Creado por: {{ order.waiterName }}</span>
-          </div>
+  <div class="header-right">
+    <span class="status-badge" [style.backgroundColor]="getStatusColor(order)">
+      {{ getEffectiveStatus(order) }}
+    </span>
+  </div>
+</mat-card-header>
 
-          <div class="info-row">
-            <mat-icon>payments</mat-icon>
-            <span
-              >Total: <strong>${{ order.total }}</strong></span
+          <!-- CONTENT -->
+          <mat-card-content>
+            <div class="info-row">
+              <mat-icon>person</mat-icon>
+              <span>Creado por: {{ order.waiterName }}</span>
+            </div>
+
+            <div class="info-row">
+              <mat-icon>payments</mat-icon>
+              <span>
+                Total: <strong>${{ order.total }}</strong>
+              </span>
+            </div>
+
+            <div class="info-row notes">
+              <mat-icon>notes</mat-icon>
+              <span>{{ order.notes || 'Sin notas' }}</span>
+            </div>
+
+            <mat-divider class="my-2"></mat-divider>
+
+            <div class="items">
+              <h6 class="items-title">
+                <mat-icon>restaurant_menu</mat-icon>
+                Items
+              </h6>
+
+              <ul class="list-unstyled">
+                <li *ngFor="let item of order.items">
+                  <span class="qty">{{ item.qty }}x</span>
+                  <span class="name">{{ item.name }}</span>
+                  <span class="price">${{ item.subtotal }}</span>
+                </li>
+              </ul>
+            </div>
+          </mat-card-content>
+
+          <!-- ACCIONES DE COCINA -->
+          <mat-card-actions class="actions">
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="markPreparing(order)"
+              [disabled]="isPreparingDisabled(order)"
             >
-          </div>
+              <mat-icon>schedule</mat-icon>
+              En preparación
+            </button>
 
-          <div class="info-row notes">
-            <mat-icon>notes</mat-icon>
-            <span>{{ order.notes || "Sin notas" }}</span>
-          </div>
+            <button
+              mat-flat-button
+              color="accent"
+              (click)="markReady(order)"
+              [disabled]="isReadyDisabled(order)"
+            >
+              <mat-icon>check_circle</mat-icon>
+              Listo
+            </button>
+          </mat-card-actions>
 
-          <mat-divider class="my-2"></mat-divider>
+          <!-- ACCIONES DE ACTUALIZACIÓN (solo si hay solicitud viva) -->
+          <mat-card-actions
+            class="actions"
+            *ngIf="order.pendingUpdate"
+          >
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="acceptUpdate(order)"
+            >
+              <mat-icon>check_circle</mat-icon>
+              Aceptar cambios
+            </button>
 
-          <div class="items">
-            <h6 class="items-title">
-              <mat-icon>restaurant_menu</mat-icon>
-              Items
-            </h6>
+            <button
+              mat-flat-button
+              color="warn"
+              (click)="rejectUpdate(order)"
+            >
+              <mat-icon>cancel</mat-icon>
+              Rechazar cambios
+            </button>
+          </mat-card-actions>
+
+          <!-- CAMBIOS SOLICITADOS -->
+          <div *ngIf="order.pendingUpdate" class="pending-update">
+            <mat-divider class="my-2"></mat-divider>
+
+            <h6>📝 Cambios solicitados</h6>
+
+            <div class="info-row">
+              <mat-icon>payments</mat-icon>
+              <span>
+                Total:
+                <strong>${{ order.pendingUpdate.total }}</strong>
+              </span>
+            </div>
+
+            <div class="info-row notes">
+              <mat-icon>notes</mat-icon>
+              <span>
+                {{ order.pendingUpdate.notes || 'Sin notas nuevas' }}
+              </span>
+            </div>
 
             <ul class="list-unstyled">
-              <li *ngFor="let item of order.items">
+              <li *ngFor="let item of order.pendingUpdate.items">
                 <span class="qty">{{ item.qty }}x</span>
                 <span class="name">{{ item.name }}</span>
                 <span class="price">${{ item.subtotal }}</span>
               </li>
             </ul>
           </div>
-        </mat-card-content>
 
-        <!-- ACTIONS -->
-        <mat-card-actions class="actions">
-          <button
-            mat-flat-button
-            color="primary"
-            (click)="markPreparing(order)"
-            [disabled]="isPreparingDisabled(order)"
-          >
-            <mat-icon>schedule</mat-icon>
-            En preparación
-          </button>
-
-          <button
-            mat-flat-button
-            color="accent"
-            (click)="markReady(order)"
-            [disabled]="isReadyDisabled(order)"
-          >
-            <mat-icon>check_circle</mat-icon>
-            Listo
-          </button>
-        </mat-card-actions>
-      </mat-card>
+        </mat-card>
+      </div>
     </div>
-  </div>
+  </ng-container>
+
+  <ng-template #noOrders>
+    <div class="no-orders-message text-center my-5">
+      <mat-icon>restaurant_menu</mat-icon>
+      <p class="mt-3">No hay pedidos activos</p>
+    </div>
+  </ng-template>
 </div>

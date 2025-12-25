@@ -32,42 +32,29 @@ export class RestaurantKitchenComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const slug = this.route.snapshot.parent?.paramMap.get('restaurantId');
-
     if (!slug) {
       console.error('No se encontró restaurantId en la URL');
       return;
     }
 
-    // Obtener el restaurante primero
     this.restaurantService.getRestaurantBySlug(slug).subscribe((restaurant) => {
       if (!restaurant) return;
 
       this.restaurant = restaurant;
       this.restaurantId = restaurant.restaurantId!;
 
-      // Suscribirse a los pedidos activos
-      this.activeOrders$ = this.kitchenFacade.getActiveOrders(
-        this.restaurantId
-      );
+      this.activeOrders$ = this.kitchenFacade.getActiveOrders(this.restaurantId);
 
-      let isFirstLoad = true; // 🔹 Flag para la carga inicial
-
+      let isFirstLoad = true;
       this.subscription = this.activeOrders$.subscribe((orders) => {
         const currentOrderIds = new Set(orders.map((o) => o.orderId));
-
         if (!isFirstLoad) {
-          // Detectar pedidos nuevos solo después de la carga inicial
           orders.forEach((order) => {
             if (!this.previousOrderIds.has(order.orderId)) {
               this.playNewOrderSound();
             }
           });
-        } else {
-          // Primera carga, no reproducir sonido
-          isFirstLoad = false;
-        }
-
-        // Actualizar el set de pedidos anteriores
+        } else isFirstLoad = false;
         this.previousOrderIds = currentOrderIds;
       });
     });
@@ -77,41 +64,14 @@ export class RestaurantKitchenComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  /* =====================================================
-     ⏱️ TIEMPO TRANSCURRIDO (UI)
-  ===================================================== */
-  getElapsedMinutes(createdAt: any): number {
-    if (!createdAt) return 0;
-    const created = createdAt.toDate();
-    const now = new Date();
-    const diffMs = now.getTime() - created.getTime();
-    return Math.floor(diffMs / 60000);
+  /* ===================================================== */
+  getStatusLabel(order: KitchenOrder): string | null {
+    return this.orderStatusService.getKitchenLabel(order.status);
   }
 
-  getElapsedLabel(createdAt: any): string {
-    const minutes = this.getElapsedMinutes(createdAt);
-    if (minutes < 1) return 'Recién llegada';
-    if (minutes < 60) return `Hace ${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    return `Hace ${hours} h`;
+  getStatusColor(order: KitchenOrder): string {
+    return this.orderStatusService.getColor(order.status);
   }
-
-  /* =====================================================
-     🔔 SONIDO DE NUEVO PEDIDO
-  ===================================================== */
-  private playNewOrderSound() {
-    const audio = new Audio('/assets/sounds/new-order.wav'); // archivo WAV en assets/sounds
-    audio
-      .play()
-      .catch((err) => console.warn('Error al reproducir sonido', err));
-  }
-
-  /* =====================================================
-     🔹 LABEL Y ESTADO DE PEDIDOS
-  ===================================================== */
-getStatusLabel(order: KitchenOrder): string | null {
-  return this.orderStatusService.getKitchenLabel(order.status);
-}
 
   isPreparingDisabled(order: KitchenOrder): boolean {
     return order.status === 'preparing' || order.status === 'ready';
@@ -121,16 +81,34 @@ getStatusLabel(order: KitchenOrder): string | null {
     return order.status === 'ready';
   }
 
-  /* =====================================================
-     🍳 ACCIONES DE COCINA
-  ===================================================== */
   markPreparing(order: KitchenOrder) {
-    if (order.status === 'preparing' || order.status === 'ready') return;
+    if (this.isPreparingDisabled(order)) return;
     this.kitchenFacade.markPreparing(this.restaurantId, order.orderId, null);
   }
 
   markReady(order: KitchenOrder) {
-    if (order.status === 'ready') return;
+    if (this.isReadyDisabled(order)) return;
     this.kitchenFacade.markReady(this.restaurantId, order.orderId, null);
+  }
+
+  acceptUpdate(order: KitchenOrder) {
+    if (!this.restaurantId || !order.pendingUpdate) return;
+    this.kitchenFacade.acceptUpdate(this.restaurantId, order, null);
+  }
+
+  rejectUpdate(order: KitchenOrder) {
+    if (!this.restaurantId || !order.pendingUpdate) return;
+    this.kitchenFacade.rejectUpdate(this.restaurantId, order, null);
+  }
+
+getEffectiveStatus(order: KitchenOrder): string {
+  // Si la actualización fue aceptada, seguimos mostrando el estado actual
+  // (no usamos pendingUpdate.status porque no existe)
+  return this.orderStatusService.getKitchenLabel(order.status) || 'En preparación';
+}
+
+  private playNewOrderSound() {
+    const audio = new Audio('/assets/sounds/new-order.wav');
+    audio.play().catch((err) => console.warn('Error al reproducir sonido', err));
   }
 }

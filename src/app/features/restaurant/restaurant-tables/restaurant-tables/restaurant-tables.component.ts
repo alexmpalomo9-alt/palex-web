@@ -14,6 +14,7 @@ import { ThemeService } from '../../../../core/services/theme/theme.service';
 import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
+import { UiFeedbackService } from '../../../../shared/services/ui-feedback/ui-feedback.service';
 
 @Component({
   selector: 'app-restaurant-tables',
@@ -49,6 +50,7 @@ export class RestaurantTablesComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private themeService = inject(ThemeService);
   private route = inject(ActivatedRoute);
+    private ui = inject(UiFeedbackService);
 
   constructor() {
     this.isDarkMode = this.themeService.getDarkMode();

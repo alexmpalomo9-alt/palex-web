@@ -14,11 +14,12 @@ import {
   query,
   where,
   orderBy,
-  addDoc,
-  updateDoc,
   runTransaction,
   serverTimestamp,
+  deleteField,
+  getDocs,
 } from '@angular/fire/firestore';
+import { KitchenOrder } from '../facade/kitchen-facade.service';
 
 @Injectable({ providedIn: 'root' })
 export class KitchenService {
@@ -27,7 +28,6 @@ export class KitchenService {
   /* =====================================================
      OBTIENE PEDIDOS ACTIVOS
   ===================================================== */
-
   getActiveOrdersWithItemsRealtime(
     restaurantId: string
   ): Observable<(Order & { items: OrderItem[] })[]> {
@@ -35,7 +35,6 @@ export class KitchenService {
       this.firestore,
       `restaurants/${restaurantId}/orders`
     );
-
     const q = query(
       ordersRef,
       where('status', 'in', ['approved', 'updated', 'preparing']),
@@ -62,7 +61,6 @@ export class KitchenService {
       this.firestore,
       `restaurants/${restaurantId}/orders/${orderId}`
     );
-
     const itemsRef = collection(
       this.firestore,
       `restaurants/${restaurantId}/orders/${orderId}/items`
@@ -70,14 +68,15 @@ export class KitchenService {
 
     return combineLatest([
       docData(orderRef, { idField: 'orderId' }) as Observable<Order>,
-      collectionData(itemsRef, { idField: 'itemId' }) as Observable<OrderItem[]>,
+      collectionData(itemsRef, { idField: 'itemId' }) as Observable<
+        OrderItem[]
+      >,
     ]).pipe(map(([order, items]) => ({ ...order, items })));
   }
 
   /* =====================================================
      HELPERS
   ===================================================== */
-
   private orderRef(restaurantId: string, orderId: string) {
     return doc(this.firestore, `restaurants/${restaurantId}/orders/${orderId}`);
   }
@@ -96,7 +95,6 @@ export class KitchenService {
   /* =====================================================
      🍳 EN PREPARACIÓN
   ===================================================== */
-
   async markPreparing(
     restaurantId: string,
     orderId: string,
@@ -108,21 +106,18 @@ export class KitchenService {
 
       const order = orderSnap.data() as Order;
 
-      // 1️⃣ Pedido
       tx.update(this.orderRef(restaurantId, orderId), {
         status: 'preparing' as OrderStatus,
         preparingAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
-      // 2️⃣ Mesas 🔥
       for (const tableId of order.tableIds ?? []) {
         tx.update(this.tableRef(restaurantId, tableId), {
           currentOrderStatus: 'preparing',
         });
       }
 
-      // 3️⃣ Historial
       tx.set(doc(this.historyCol(restaurantId, orderId)), {
         status: 'preparing',
         userId,
@@ -134,7 +129,6 @@ export class KitchenService {
   /* =====================================================
      ✅ LISTO
   ===================================================== */
-
   async markReady(
     restaurantId: string,
     orderId: string,
@@ -146,23 +140,107 @@ export class KitchenService {
 
       const order = orderSnap.data() as Order;
 
-      // 1️⃣ Pedido
       tx.update(this.orderRef(restaurantId, orderId), {
         status: 'ready' as OrderStatus,
         readyAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
-      // 2️⃣ Mesas 🔥
       for (const tableId of order.tableIds ?? []) {
         tx.update(this.tableRef(restaurantId, tableId), {
           currentOrderStatus: 'ready',
         });
       }
 
-      // 3️⃣ Historial
       tx.set(doc(this.historyCol(restaurantId, orderId)), {
         status: 'ready',
+        userId,
+        timestamp: serverTimestamp(),
+      });
+    });
+  }
+
+  /* =====================================================
+     🍳 ACCIONES DE ACTUALIZACIÓN
+  ===================================================== */
+  async acceptUpdate(
+    restaurantId: string,
+    order: KitchenOrder,
+    userId: string | null
+  ) {
+    if (!order.pendingUpdate) return;
+
+    const { total, items, notes } = order.pendingUpdate;
+
+    await runTransaction(this.firestore, async (tx) => {
+      const orderRef = this.orderRef(restaurantId, order.orderId);
+
+      // 1️⃣ Actualizar pedido (SIN items)
+      tx.update(orderRef, {
+        total,
+        notes,
+        status: 'preparing',
+        updatedAt: serverTimestamp(),
+        pendingUpdate: deleteField(),
+
+        // Mostrar la última decisión tomada sobre la actualización
+        lastUpdateDecision: 'accepted',
+        lastUpdateAt: serverTimestamp(),
+      });
+
+      // 2️⃣ REEMPLAZAR ITEMS (subcolección)
+      const itemsColRef = collection(
+        this.firestore,
+        `restaurants/${restaurantId}/orders/${order.orderId}/items`
+      );
+
+      // borrar existentes
+      const existingItems = await getDocs(itemsColRef);
+      existingItems.forEach((snap) => tx.delete(snap.ref));
+
+      // crear nuevos
+      items.forEach((item, index) => {
+        const ref = doc(itemsColRef);
+        tx.set(ref, {
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          qty: item.qty,
+          position: index,
+          subtotal: item.price * item.qty,
+          notes: item.notes ?? '',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      });
+
+      // 3️⃣ Historial
+      tx.set(doc(this.historyCol(restaurantId, order.orderId)), {
+        status: 'update_accepted',
+        userId,
+        timestamp: serverTimestamp(),
+      });
+    });
+  }
+
+  async rejectUpdate(
+    restaurantId: string,
+    order: KitchenOrder,
+    userId: string | null
+  ) {
+    await runTransaction(this.firestore, async (tx) => {
+      const orderRef = this.orderRef(restaurantId, order.orderId);
+
+      tx.update(orderRef, {
+        pendingUpdate: deleteField(),
+        updatedAt: serverTimestamp(),
+        // Mostrar la última decisión tomada sobre la actualización
+        lastUpdateDecision: 'rejected',
+        lastUpdateAt: serverTimestamp(),
+      });
+
+      tx.set(doc(this.historyCol(restaurantId, order.orderId)), {
+        status: 'update_rejected',
         userId,
         timestamp: serverTimestamp(),
       });

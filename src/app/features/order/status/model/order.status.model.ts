@@ -43,15 +43,6 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, OrderStatusConfig> = {
     visibleInKitchen: true,
   },
 
-  update_rejected: {
-    label: 'Actualización Rechazada',
-    kitchenLabel: 'Rechazado',
-    color: 'var(--status-rejected)',
-    canUpdate: false,
-    canCancel: true,
-    visibleInKitchen: true,
-  },
-
   preparing: {
     label: 'En preparación',
     kitchenLabel: 'En preparación',

@@ -119,45 +119,34 @@ export class AuthService {
   // -------------------------------------------------------------
   // REGISTER NORMAL USER
   // -------------------------------------------------------------
-  async registerUser({ name, lastname, email, password }: any) {
-    try {
-      const cred = await createUserWithEmailAndPassword(
-        this.auth,
-        email,
-        password
-      );
-      const user = cred.user;
+async registerUser({ name, lastname, email, password }: any) {
+  try {
+    const cred = await createUserWithEmailAndPassword(this.auth, email, password);
+    const user = cred.user;
 
-      await this.saveUser(user.uid, {
-        uid: user.uid,
-        email,
-        name,
-        lastname,
-
-        // Roles globales
-        globalRoles: {
-          adminGlobal: false,
-          customer: true,
-          guest: false,
-        },
-
-        // Roles locales por restaurante (vacío por defecto)
-        localRoles: {},
-
-        // Ya no necesitas arrays separados
-        // restaurantsOwner: [],
-        // restaurantsStaff: [],
-
-        enabled: true,
-        createdAt: new Date().toISOString(),
-      });
-
-      return user.uid;
-    } catch (error) {
-      this.handleError(error);
+    // Verificar si el usuario ya existe en Firestore
+    const existingUser = await this.getUserData(user.uid);
+    if (existingUser) {
+      console.log('Usuario ya existe en Firestore');
+      return; // Evitar guardar el usuario de nuevo
     }
-  }
 
+    await this.saveUser(user.uid, {
+      uid: user.uid,
+      email,
+      name,
+      lastname,
+      globalRoles: { adminGlobal: false, customer: true, guest: false },
+      localRoles: {},
+      enabled: true,
+      createdAt: new Date().toISOString(),
+    });
+
+    return user.uid;
+  } catch (error) {
+    this.handleError(error);
+  }
+}
   // -------------------------------------------------------------
   // GET USER DATA
   // -------------------------------------------------------------

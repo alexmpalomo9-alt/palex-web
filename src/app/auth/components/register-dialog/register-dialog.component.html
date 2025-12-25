@@ -18,6 +18,7 @@
     <h2 class="title">Crear cuenta</h2>
     <p class="subtitle">Completá los datos para registrarte</p>
 
+    <!-- Formulario de registro -->
     <form [formGroup]="userForm" (ngSubmit)="registerUser()">
       <!-- Fila Nombre + Apellido -->
       <div class="row-2">
@@ -82,11 +83,10 @@
         </ul>
       </div>
 
-      <!-- Botón Registrar -->
+      <!-- Botón Registrar (sin onClick) -->
       <app-add-button class="btn-primary-main"
         [label]="'Registrarse'"
         [icon]="'login'"
-        (onClick)="registerUser()"
       ></app-add-button>
 
     </form>

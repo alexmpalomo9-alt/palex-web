@@ -1,9 +1,8 @@
 <div *ngIf="restaurant" class="restaurant-container">
-  <mat-card class="info-card shadow-sm">
-    <!-- ======= HEADER ======= -->
-    <div class="restaurant-header sticky-header">
+  <mat-card class="restaurant-card">
+    <!-- HEADER -->
+    <div class="restaurant-header">
       <div class="restaurant-info">
-        <!-- Logo -->
         <div class="restaurant-logo">
           <img
             [src]="restaurant.imageLogo || 'assets/img/not-found.png'"
@@ -11,7 +10,6 @@
           />
         </div>
 
-        <!-- Títulos -->
         <div class="restaurant-texts">
           <h1 class="restaurant-title">{{ restaurant.name }}</h1>
           <p class="restaurant-subtitle">
@@ -30,24 +28,28 @@
       ></app-add-button>
     </div>
 
-    <!-- ======= CONTENIDO ======= -->
-    <mat-card-content>
-      <div class="info-item">
-        <strong>Descripción: </strong>
-        <span>{{ restaurant.description || "Sin descripción" }}</span>
+    <!-- CONTENT -->
+    <mat-card-content class="restaurant-content">
+      <div class="info-row">
+        <span class="label">Descripción</span>
+        <span class="value">
+          {{ restaurant.description || "Sin descripción" }}
+        </span>
       </div>
-      <div class="info-item">
-        <strong>Estado: </strong>
+
+      <div class="info-row">
+        <span class="label">Estado</span>
         <span
-          class="status"
-          [ngClass]="restaurant.enabled ? 'active' : 'inactive'"
+          class="status-chip"
+          [class.active]="restaurant.enabled"
+          [class.inactive]="!restaurant.enabled"
         >
-          ● {{ restaurant.enabled ? "Activo" : "Inactivo" }}
+          {{ restaurant.enabled ? "Activo" : "Inactivo" }}
         </span>
       </div>
 
       <div class="menu-config">
-        <span class="menu-label">Diseño de menú:</span>
+        <span class="label">Diseño de menú</span>
 
         <div class="menu-buttons">
           <button
@@ -71,4 +73,7 @@
       </div>
     </mat-card-content>
   </mat-card>
+</div>
+<div *ngIf="!restaurant" class="loading-container">
+  <mat-spinner></mat-spinner>
 </div>

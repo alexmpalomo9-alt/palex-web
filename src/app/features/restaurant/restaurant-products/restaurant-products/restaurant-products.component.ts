@@ -11,6 +11,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
 import { DialogService } from '../../../../core/services/dialog-service/dialog.service';
 import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
+import { UiFeedbackService } from '../../../../shared/services/ui-feedback/ui-feedback.service';
 
 @Component({
   selector: 'app-restaurant-products',
@@ -34,6 +35,7 @@ export class RestaurantProductsComponent implements OnInit {
     private productService: ProductService,
     private productDialogService: ProductDialogService,
     private dialogService: DialogService,
+    private uiFeedback: UiFeedbackService,
     private router: Router
   ) {}
 
@@ -75,15 +77,11 @@ export class RestaurantProductsComponent implements OnInit {
       })
       .subscribe(async (result) => {
         if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelar',
-            'No se realizaron cambios.'
-          );
+          this.uiFeedback.show('No se realizaron cambios.', 'info');
           return;
         }
 
         try {
-          // 🔥 categoryId ya viene del diálogo
           if (!result.categoryId) {
             throw new Error('El producto debe tener una categoría.');
           }
@@ -93,15 +91,12 @@ export class RestaurantProductsComponent implements OnInit {
             restaurantId: this.restaurant!.restaurantId,
           });
 
-          this.dialogService.infoDialog(
-            'Éxito',
-            'Producto creado correctamente.'
-          );
+          this.uiFeedback.show('Producto creado correctamente.', 'success');
           this.loadProducts(this.restaurant!.restaurantId);
         } catch (e: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            e.message || 'Ocurrió un error inesperado.'
+          this.uiFeedback.show(
+            e.message || 'Ocurrió un error inesperado.',
+            'error'
           );
         }
       });
@@ -118,10 +113,7 @@ export class RestaurantProductsComponent implements OnInit {
       })
       .subscribe(async (result) => {
         if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelar',
-            'No se realizaron cambios.'
-          );
+          this.uiFeedback.show('No se realizaron cambios.', 'info');
           return;
         }
 
@@ -135,36 +127,29 @@ export class RestaurantProductsComponent implements OnInit {
             cleanData
           );
 
-          this.dialogService.infoDialog(
-            'Éxito',
-            'Producto editado correctamente.'
-          );
+          this.uiFeedback.show('Producto editado correctamente.', 'success');
           this.loadProducts(restaurantId);
         } catch (e: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            e.message || 'Ocurrió un error inesperado.'
+          this.uiFeedback.show(
+            e.message || 'Ocurrió un error inesperado.',
+            'error'
           );
         }
       });
   }
-
   deleteProduct(product: Product) {
     if (!product.productId || !this.restaurant) return;
 
     this.dialogService
       .confirmDialog({
-        title: '¿Eliminar Permanente?',
+        title: '¿Eliminar permanente?',
         message:
           '¿Estás seguro de que deseas eliminar el producto de forma permanente? Esta acción no se puede deshacer.',
         type: 'confirm',
       })
       .subscribe(async (result) => {
         if (!result) {
-          this.dialogService.infoDialog(
-            'Cancelado',
-            'No se realizó la acción.'
-          );
+          this.uiFeedback.show('No se realizó la acción.', 'info');
           return;
         }
 
@@ -173,15 +158,16 @@ export class RestaurantProductsComponent implements OnInit {
             this.restaurant!.restaurantId,
             product.productId
           );
-          this.dialogService.infoDialog(
-            'Éxito',
-            'El producto ha sido eliminado correctamente.'
+
+          this.uiFeedback.show(
+            'El producto ha sido eliminado correctamente.',
+            'success'
           );
           this.loadProducts(this.restaurant!.restaurantId);
-        } catch (error: any) {
-          this.dialogService.errorDialog(
-            'Error',
-            error.message || 'Ocurrió un error inesperado.'
+        } catch (e: any) {
+          this.uiFeedback.show(
+            e.message || 'Ocurrió un error inesperado.',
+            'error'
           );
         }
       });

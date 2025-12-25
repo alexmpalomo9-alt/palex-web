@@ -25,13 +25,26 @@ export interface Order {
 
   createdAt: any;
   updatedAt: any;
+
+    // feedback al mozo
+  lastUpdateDecision?: 'accepted' | 'rejected';
+  lastUpdateAt?: any;
+
+  // solicitud viva (si existe)
+  pendingUpdate?: {
+    total: number;
+    items: OrderItem[];
+    notes: string;
+    requestedAt: any;
+    kitchenDecision?: 'accepted' | 'rejected'; // opcional
+  };
+
 }
 
 export type OrderStatus =
   | 'draft' // Cliente/mozo creando pedido
   | 'pending' // Cliente envió pedido, espera aprobación del mozo
   | 'updated' // Pedido modificado (agregar/quitar items) estando ya en proceso
-  | 'update_rejected' //Desde cocina rechazan la modificacion del pedido
   | 'approved' // Pedido aprobado (por mozo)
   | 'preparing' // Cocina recibio el pedido y esta preparando el pedido
   | 'ready' // Cocina terminó el pedido

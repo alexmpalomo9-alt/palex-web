@@ -1,10 +1,14 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { FormControl, FormsModule } from '@angular/forms';
 import { Product } from '../../../../products/model/product.model';
 import { SharedModule } from '../../../../shared/shared.module';
 import { ProductService } from '../../../../products/services/product.service';
-
+import { OrderDialogComponent } from '../../restaurant-orders/order-dialog/order-dialog.component';
 
 interface MenuSelectedItem {
   product: Product;
@@ -20,13 +24,14 @@ interface MenuSelectedItem {
 export class MenuDialogComponent implements OnInit {
   products: Product[] = [];
   filteredProducts: Product[] = [];
-selectedItems: MenuSelectedItem[] = [];
+  selectedItems: MenuSelectedItem[] = [];
   categories: string[] = [];
 
   searchControl = new FormControl('');
   categoryControl = new FormControl('all');
 
   constructor(
+    private dialog: MatDialog,
     private dialogRef: MatDialogRef<MenuDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { restaurantId: string },
     private productService: ProductService
@@ -66,74 +71,74 @@ selectedItems: MenuSelectedItem[] = [];
     );
   }
 
-toggleProduct(product: Product): void {
-  const index = this.selectedItems.findIndex(
-    i => i.product.productId === product.productId
-  );
+  toggleProduct(product: Product): void {
+    const index = this.selectedItems.findIndex(
+      (i) => i.product.productId === product.productId
+    );
 
-  if (index >= 0) {
-    this.selectedItems.splice(index, 1);
-  } else {
-    this.selectedItems.push({
-      product,
-      qty: 1,
-    });
+    if (index >= 0) {
+      this.selectedItems.splice(index, 1);
+    } else {
+      this.selectedItems.push({
+        product,
+        qty: 1,
+      });
+    }
   }
-}
 
-isSelected(product: Product): boolean {
-  return this.selectedItems.some(
-    i => i.product.productId === product.productId
-  );
-}
+  isSelected(product: Product): boolean {
+    return this.selectedItems.some(
+      (i) => i.product.productId === product.productId
+    );
+  }
 
-get totalSelectedPrice(): number {
-  return this.selectedItems.reduce((sum, i) => {
-    const price = i.product.isOffer
-      ? i.product.offerPrice ?? i.product.price
-      : i.product.price;
+  get totalSelectedPrice(): number {
+    return this.selectedItems.reduce((sum, i) => {
+      const price = i.product.isOffer
+        ? i.product.offerPrice ?? i.product.price
+        : i.product.price;
 
-    return sum + price * i.qty;
-  }, 0);
-}
+      return sum + price * i.qty;
+    }, 0);
+  }
 
   clearSelection(): void {
     this.selectedItems = [];
   }
 
   confirmSelection(): void {
-this.dialogRef.close(this.selectedItems);
+    this.dialogRef.close(this.selectedItems);
   }
 
   close(): void {
     this.dialogRef.close();
   }
 
-
   getQty(product: Product): number {
-  return (
-    this.selectedItems.find(
-      i => i.product.productId === product.productId
-    )?.qty ?? 0
-  );
-}
+    return (
+      this.selectedItems.find((i) => i.product.productId === product.productId)
+        ?.qty ?? 0
+    );
+  }
 
-increaseQty(product: Product): void {
-  const item = this.selectedItems.find(
-    i => i.product.productId === product.productId
-  );
-  if (item) item.qty++;
-}
+  increaseQty(product: Product): void {
+    const item = this.selectedItems.find(
+      (i) => i.product.productId === product.productId
+    );
+    if (item) item.qty++;
+  }
 
-decreaseQty(product: Product): void {
-  const item = this.selectedItems.find(
-    i => i.product.productId === product.productId
-  );
-  if (item && item.qty > 1) item.qty--;
-}
-get selectedCount(): number {
-  return this.selectedItems.length;
-}
+  decreaseQty(product: Product): void {
+    const item = this.selectedItems.find(
+      (i) => i.product.productId === product.productId
+    );
+    if (item && item.qty > 1) item.qty--;
+  }
+  get selectedCount(): number {
+    return this.selectedItems.length;
+  }
 
-
+  back() {
+    this.dialogRef.close(null); // no devuelve nada
+  }
 }

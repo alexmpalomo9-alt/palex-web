@@ -21,6 +21,8 @@ import { AddButtonComponent } from '../../../../../shared/components/button/add-
 import { ActivatedRoute } from '@angular/router';
 import { RestaurantService } from '../../../services/restaurant.service';
 import { Restaurant } from '../../../model/restaurant.model';
+import { UiFeedbackService } from '../../../../../shared/services/ui-feedback/ui-feedback.service';
+import { DialogService } from '../../../../../core/services/dialog-service/dialog.service';
 
 @Component({
   selector: 'app-category-management',
@@ -51,7 +53,9 @@ export class CategoryManagementComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private restaurantService: RestaurantService
+    private restaurantService: RestaurantService,
+    private ui: UiFeedbackService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit() {
@@ -103,12 +107,21 @@ export class CategoryManagementComponent implements OnInit, AfterViewInit {
     });
 
     ref.afterClosed().subscribe(async (payload) => {
-      if (!payload) return;
-      await this.categoryService.createCategory({
-        ...payload,
-        restaurantId: this.restaurantId,
-      });
-      this.loadCategories();
+      if (!payload) {
+        this.ui.show('No se creó ninguna categoría', 'info');
+        return;
+      }
+
+      try {
+        await this.categoryService.createCategory({
+          ...payload,
+          restaurantId: this.restaurantId,
+        });
+        this.ui.show('Categoría creada correctamente', 'success');
+        this.loadCategories();
+      } catch (err: any) {
+        this.ui.show(err.message || 'Error al crear la categoría', 'error');
+      }
     });
   }
 
@@ -125,21 +138,56 @@ export class CategoryManagementComponent implements OnInit, AfterViewInit {
     });
 
     ref.afterClosed().subscribe(async (payload) => {
-      if (!payload) return;
-      await this.categoryService.updateCategory(
-        this.restaurantId,
-        c.categoryId!,
-        payload
-      );
-      this.loadCategories();
+      if (!payload) {
+        this.ui.show('No se realizaron cambios', 'info');
+        return;
+      }
+
+      try {
+        await this.categoryService.updateCategory(
+          this.restaurantId,
+          c.categoryId!,
+          payload
+        );
+        this.ui.show('Categoría actualizada correctamente', 'success');
+        this.loadCategories();
+      } catch (err: any) {
+        this.ui.show(
+          err.message || 'Error al actualizar la categoría',
+          'error'
+        );
+      }
     });
   }
 
   deleteCategory(c: Category) {
-    if (!confirm(`Eliminar categoría "${c.name}"?`)) return;
-    this.categoryService
-      .deleteCategory(this.restaurantId, c.categoryId!)
-      .then(() => this.loadCategories());
+    this.dialogService
+      .confirmDialog({
+        title: 'Eliminar categoría del restaurante',
+        message:
+          '¿Deseas eliminar la categoria del restaurante?.',
+        type: 'question',
+      })
+      .subscribe(async (ok) => {
+        if (!ok) {
+          this.ui.show('Acción cancelada', 'info');
+          return;
+        }
+
+        try {
+          await this.categoryService.deleteCategory(
+            this.restaurantId,
+            c.categoryId!
+          );
+          this.ui.show('Categoría eliminada correctamente', 'success');
+          this.loadCategories();
+        } catch (err: any) {
+          this.ui.show(
+            err.message || 'Error al eliminar la categoría',
+            'error'
+          );
+        }
+      });
   }
 
   // Método llamado desde el SectionHeader para filtrar la tabla
