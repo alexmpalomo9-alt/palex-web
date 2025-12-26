@@ -18,27 +18,36 @@
     <mat-card class="table-card" *ngFor="let t of filteredTables">
       <div class="card-header">
         <div class="table-number">Mesa {{ t.number }}</div>
-        <div class="status-badges">
+
+        <!-- Estado de la mesa -->
+        <span class="badge" [style.backgroundColor]="getTableStatusColor(t)">
+          {{ getTableStatusLabel(t) }}
+        </span>
+
+        <!-- Estado del pedido -->
+        <div *ngIf="t.currentOrderId">
           <span class="badge" [style.backgroundColor]="getOrderStatusColor(t)">
             {{ getOrderStatusLabel(t) }}
           </span>
         </div>
       </div>
+
       <!-- Mensaje de Actualización con Botón de Info -->
       <ng-container *ngIf="getUpdateMessage(t) as update">
         <div class="update-message-container">
-          <span class="update-message" [ngClass]="update.type">
+          <span class="badge" [ngClass]="update.type">
             {{ update.text }}
           </span>
           <mat-icon
             matTooltip="{{
               update.type === 'rejected'
-                ? 'Las modificaciones solicitadas fueron rechazadas, pero el pedido inicial sigue en preparación.'
-                : 'Actualización aceptada.'
+                ? 'Las modificaciones solicitadas fueron rechazadas, pero el pedido inicial sigue en proceso.'
+                : 'Los cambios solicitados, fueron aceptados.'
             }}"
             class="info-icon"
-            >info</mat-icon
           >
+            info
+          </mat-icon>
         </div>
       </ng-container>
 
@@ -71,7 +80,7 @@
           Disponible
         </button>
         <button mat-menu-item (click)="changeStatus(t, 'seated')">
-          Cliente sentado
+          Cliente esperando
         </button>
         <button mat-menu-item (click)="changeStatus(t, 'occupied')">
           Ocupada

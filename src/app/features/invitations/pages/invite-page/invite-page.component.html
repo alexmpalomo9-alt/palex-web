@@ -1,7 +1,11 @@
 <div class="invite-container">
+  <!-- Estado de carga -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
 
-  <!-- Invitación inválida -->
-  <ng-container *ngIf="invitation === null">
+  <!-- Invitación no válida -->
+  <ng-container *ngIf="!isLoading && !invitation">
     <mat-card class="invite-card error-card">
       <mat-card-header>
         <mat-icon color="warn">error_outline</mat-icon>
@@ -10,8 +14,8 @@
 
       <mat-card-content>
         <p>
-          Esta invitación ya expiró o no existe.  
-          Verifica el enlace o solicita una nueva invitación.
+          Esta invitación ya expiró o no existe. Verifica el enlace o solicita
+          una nueva invitación.
         </p>
       </mat-card-content>
 
@@ -24,10 +28,8 @@
   </ng-container>
 
   <!-- Invitación válida -->
-  <ng-container *ngIf="invitation">
-
+  <ng-container *ngIf="!isLoading && invitation">
     <mat-card class="invite-card">
-
       <mat-card-header>
         <mat-icon color="primary">mail</mat-icon>
         <mat-card-title>Te invitaron a un restaurante</mat-card-title>
@@ -39,10 +41,9 @@
       <mat-divider></mat-divider>
 
       <mat-card-content>
-
         <div class="details">
+          <p><strong>Restaurante:</strong> {{ invitation.restaurantId }}</p>
           <p><strong>Rol asignado:</strong> {{ invitation.role }}</p>
-          <p><strong>ID del restaurante:</strong> {{ invitation.restaurantId }}</p>
         </div>
 
         <!-- Usuario NO logueado -->
@@ -58,13 +59,16 @@
 
         <!-- Usuario logueado -->
         <ng-container *ngIf="auth.currentUser$ | async as user">
-
           <!-- Invitación privada a email distinto -->
-          <div *ngIf="invitation.email && invitation.email !== user.email" class="warning-box">
+          <div
+            *ngIf="invitation.email && invitation.email !== user.email"
+            class="warning-box"
+          >
             <mat-icon color="warn">warning</mat-icon>
             <p>
-              Esta invitación es para <strong>{{ invitation.email }}</strong>,
-              pero estás logueado como <strong>{{ user.email }}</strong>.
+              Esta invitación es para otro usuario, pero estás logueado como
+              <strong>{{ user.email }}</strong
+              >.
             </p>
 
             <button mat-stroked-button color="warn" (click)="switchAccount()">
@@ -82,13 +86,8 @@
           >
             Aceptar invitación
           </button>
-
         </ng-container>
-
       </mat-card-content>
-
     </mat-card>
-
   </ng-container>
-
 </div>

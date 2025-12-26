@@ -1,14 +1,13 @@
 <mat-nav-list>
+  <div class="sidebar-header">
+    <span class="sidebar-title">Gestión</span>
+  </div>
 
   <!-- BOTÓN DE CERRAR -->
   <!-- Solo cierra el sidenav si es mobile (isMobile = true) -->
-<button 
-  *ngIf="isMobile"
-  mat-icon-button 
-  class="close-btn" 
-  (click)="close()"
->
-  <mat-icon>close</mat-icon>
+<!-- Botón de apertura solo en dispositivos móviles -->
+<button *ngIf="isMobile" mat-icon-button class="open-btn" (click)="sidenav.open()">
+  <mat-icon>menu</mat-icon>
 </button>
   <!-- Cada opción del menú utiliza close(), pero solo cerrará si isMobile es true -->
   <a mat-list-item routerLink="info" routerLinkActive="active" (click)="close()">
@@ -21,10 +20,10 @@
     <span>Productos</span>
   </a>
 
-    <a mat-list-item routerLink="categories" routerLinkActive="active" (click)="close()">
-    <mat-icon class="nav-icon">category-icon</mat-icon>
-    <span>Categorias</span>
-  </a>
+<a mat-list-item routerLink="info" routerLinkActive="active" (click)="close()">
+  <mat-icon class="nav-icon">info</mat-icon>
+  <span>Información</span>
+</a>
 
 
   <a mat-list-item routerLink="staff" routerLinkActive="active" (click)="close()">

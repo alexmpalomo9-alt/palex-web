@@ -17,14 +17,14 @@ export const routes: Routes = [
       { path: 'r/:slug/menu/:tableId', component: RestaurantMenuComponent },
 
       // Invitaciones
-      {
-        path: 'invite/:token',
-        canActivate: [InviteGuard],
-        loadComponent: () =>
-          import(
-            './features/invitations/pages/invite-page/invite-page.component'
-          ).then((m) => m.InvitePageComponent),
-      },
+{
+  path: 'invite/:token',
+  canActivate: [InviteGuard],
+  loadComponent: () =>
+    import('./features/invitations/pages/invite-page/invite-page.component').then(
+      (m) => m.InvitePageComponent
+    ),
+},
 
       // 🔐 AUTH (ACÁ DENTRO)
       {

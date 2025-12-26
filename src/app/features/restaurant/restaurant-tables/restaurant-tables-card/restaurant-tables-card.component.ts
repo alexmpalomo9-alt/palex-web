@@ -12,7 +12,6 @@ import { TableQrDialogComponent } from '../../../../shared/components/qr-preview
 
 import { TableService } from '../services/table.service';
 import { RestaurantService } from '../../services/restaurant.service';
-import { TableStatusService } from '../../../../shared/services/table-status/table-status.service';
 import { SelectTablesDialogComponent } from '../../../order/components/select-tables-dialog/select-tables-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -22,6 +21,9 @@ import { OrderStatusService } from '../../../order/status/order-status/order-sta
 import { ORDER_STATUS_CONFIG } from '../../../order/status/model/order.status.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SectionHeaderComponent } from '../../shared/section-header/section-header/section-header.component';
+import { TableUtilsService } from '../services/table-utils/table-utils.service';
+import { OrderUtilsService } from '../services/order-utils/order-utils.service';
+import { TableStatusService } from '../services/table-status/table-status.service';
 
 @Component({
   selector: 'app-restaurant-tables-card',
@@ -53,9 +55,11 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     private orderService: OrderService,
     private route: ActivatedRoute,
     private dialog: MatDialog,
-    public tableStatusService: TableStatusService,
     private snackBar: MatSnackBar,
-    private orderStatusService: OrderStatusService
+    private orderStatusService: OrderStatusService,
+    private tableUtilsService: TableUtilsService,
+    private orderUtilsService: OrderUtilsService,
+    public tableStatusService: TableStatusService
   ) {}
 
   ngOnInit() {
@@ -88,21 +92,11 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // =======================
-  // BUSCADOR
-  // =======================
+  // búsqueda
   onSearch(searchTerm: string) {
-    if (!searchTerm) {
-      this.filteredTables = [...this.tables];
-      return;
-    }
-
-    const term = searchTerm.toLowerCase();
-    this.filteredTables = this.tables.filter(
-      (t) =>
-        t.number.toString().includes(term) ||
-        t.name?.toLowerCase().includes(term) ||
-        t.sector?.toLowerCase().includes(term)
+    this.filteredTables = this.tableUtilsService.onSearch(
+      this.tables,
+      searchTerm
     );
   }
 
@@ -111,9 +105,11 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
   // =======================
   changeStatus(table: Table, status: Table['status']) {
     if (!this.restaurant) return;
-    this.tableService.updateTable(this.restaurant.restaurantId, table.tableId, {
-      status,
-    });
+    this.tableUtilsService.changeStatus(
+      this.restaurant.restaurantId,
+      table,
+      status
+    );
   }
 
   // =======================
@@ -130,20 +126,28 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
     });
   }
 
-  getOrderForTable(table: Table): Order | null {
-    if (!table.currentOrderId) return null;
-    return this.ordersMap.get(table.currentOrderId) ?? null;
-  }
-
+  // Método para obtener el estado de la orden
   getOrderStatusColor(table: Table): string {
-    const order = this.getOrderForTable(table);
-    if (!order) return 'transparent';
-    return ORDER_STATUS_CONFIG[order.status]?.color || 'gray';
+    return this.tableUtilsService.getOrderStatusColor(table, this.ordersMap);
   }
 
+  // Método para obtener la etiqueta del estado de la orden
   getOrderStatusLabel(table: Table): string {
-    const order = this.getOrderForTable(table);
-    return order ? this.orderStatusService.getLabel(order.status) : '';
+    return this.tableUtilsService.getOrderStatusLabel(table, this.ordersMap);
+  }
+
+  // Método para obtener la orden de la mesa
+  getOrderForTable(table: Table): Order | null {
+    return this.tableUtilsService.getOrderForTable(table, this.ordersMap);
+  }
+  //  obtener el estado de la mesa
+  getTableStatusLabel(table: Table): string {
+    return this.tableStatusService.getTableStatusLabel(table);
+  }
+
+  //  obtener el color de la mesa
+  getTableStatusColor(table: Table): string {
+    return this.tableStatusService.getTableStatusColor(table);
   }
 
   getUpdateMessage(
@@ -168,51 +172,19 @@ export class RestaurantTablesCardComponent implements OnInit, OnDestroy {
   // QR
   // =======================
   openQr(table: Table) {
-    const url = `https://palex-4a139.web.app/r/${this.restaurant?.slug}/menu/${table.tableId}`;
-    this.dialog.open(TableQrDialogComponent, {
-      data: { table, url, logoUrl: 'assets/img/logo-palex.png' },
-    });
+    if (!this.restaurant) return;
+    this.tableUtilsService.openQr(table, this.restaurant.slug);
   }
 
-  // =======================
-  // CREAR / VER PEDIDO
-  // =======================
-  async viewOrder(orderId: string | null, table: Table) {
-    if (table.currentOrderId) orderId = table.currentOrderId;
-
-    if (!orderId) {
-      const canCreate =
-        table.status === 'available' || table.status === 'seated';
-      if (!canCreate) return alert(`Mesa ${table.number} no disponible`);
-    }
-
-    let selectedTables: Table[] = [];
-    if (orderId) {
-      selectedTables = [table];
-    } else {
-      selectedTables = await this.selectTablesForNewOrder(table);
-      if (!selectedTables.length) return;
-    }
-
-    const dialogRef = this.dialog.open(OrderDialogComponent, {
-      disableClose: true,
-      data: {
-        restaurantId: this.restaurant!.restaurantId,
-        orderId,
-        tableIds: selectedTables.map((t) => t.tableId),
-        tableNumbers: selectedTables.map((t) => t.number),
-        isNew: !orderId,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.success) {
-        this.snackBar.open('Pedido actualizado correctamente', 'OK', {
-          duration: 3000,
-        });
-        this.loadActiveOrders();
-      }
-    });
+  // Función para ver un pedido
+  viewOrder(orderId: string | null, table: Table) {
+    if (!this.restaurant) return;
+    this.orderUtilsService.viewOrder(
+      this.restaurant.restaurantId,
+      orderId,
+      table,
+      this.selectTablesForNewOrder.bind(this) // Enviar la función para seleccionar mesas como parámetro
+    );
   }
 
   async selectTablesForNewOrder(baseTable: Table): Promise<Table[]> {

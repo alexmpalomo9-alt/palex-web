@@ -68,3 +68,15 @@
     transform: scale(1);
   }
 }
+.add-btn:disabled {
+  background: linear-gradient(135deg, #e4e1e1, #b0b0b0);
+  color: #888888;
+  cursor: not-allowed;
+  box-shadow: none; /* Para evitar que tenga sombra cuando está deshabilitado */
+}
+.add-btn.secondary:disabled {
+  background: linear-gradient(135deg, #999999, #777777);
+  color: #555555;
+  cursor: not-allowed;
+  box-shadow: none; /* Para evitar que tenga sombra cuando está deshabilitado */
+}

@@ -46,12 +46,20 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Estado</th>
         <td mat-cell *matCellDef="let t">
-          <span
-            class="status-pill"
-            [ngClass]="t.currentOrderId ? 'active' : t.status"
-          >
-            {{ t.currentOrderId ? "Pedido Activo" : (t.status | titlecase) }}
+          <!-- Mostrar el estado de la mesa -->
+          <span class="badge" [style.backgroundColor]="getTableStatusColor(t)">
+            {{ getTableStatusLabel(t) }}
           </span>
+
+          <!-- Si hay un pedido, también mostrar el estado del pedido -->
+          <div *ngIf="t.currentOrderId">
+            <span
+              class="badge"
+              [style.backgroundColor]="getOrderStatusColor(t)"
+            >
+              {{ getOrderStatusLabel(t) }}
+            </span>
+          </div>
         </td>
       </ng-container>
 
@@ -75,6 +83,9 @@
           <mat-menu #menu="matMenu">
             <button mat-menu-item (click)="changeStatus(t, 'available')">
               Disponible
+            </button>
+            <button mat-menu-item (click)="changeStatus(t, 'seated')">
+              Cliente esperando
             </button>
             <button mat-menu-item (click)="changeStatus(t, 'occupied')">
               Ocupada

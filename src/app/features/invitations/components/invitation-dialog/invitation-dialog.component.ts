@@ -14,30 +14,43 @@ import { MatFormField } from '@angular/material/input';
 export class InvitationDialogComponent {
   generatedLink: string | null = null;
 
-  form!: FormGroup; // 👉 Declaramos la propiedad sin inicializar
+  form: FormGroup; // Iniciamos el formulario
 
   constructor(
+    private dialogRef: MatDialogRef<InvitationDialogComponent>,
     private fb: FormBuilder,
     private invitationService: InvitationService,
     @Inject(MAT_DIALOG_DATA) public data: { restaurantId: string }
   ) {
-    // 👉 Ahora sí, inicializamos con fb ya disponible
+    // Inicializamos el formulario con validaciones
     this.form = this.fb.group({
-      email: [''],
-      role: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]], // Validación de email
+      role: ['', Validators.required], // Validación de rol
     });
   }
 
+  // Función para generar el enlace de invitación
   async generate() {
+    if (this.form.invalid) return; // Prevenir ejecución si el formulario no es válido
+
     const email = this.form.get('email')?.value ?? null;
     const role = this.form.get('role')?.value ?? '';
 
-    const token = await this.invitationService.createInvitation(
-      this.data.restaurantId,
-      email,
-      role
-    );
+    try {
+      // Llamamos al servicio para generar la invitación
+      const token = await this.invitationService.createInvitation(
+        this.data.restaurantId, // Aquí se pasa restaurantId
+        email,
+        role
+      );
 
-    this.generatedLink = `${window.location.origin}/invite/${token}`;
+      // Generamos el enlace
+      this.generatedLink = `${window.location.origin}/invite/${token}`;
+    } catch (error) {
+      console.error('Error al generar invitación', error);
+    }
+  }
+  closeDialog() {
+    this.dialogRef.close();
   }
 }

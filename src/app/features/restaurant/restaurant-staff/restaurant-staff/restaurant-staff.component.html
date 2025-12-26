@@ -1,5 +1,4 @@
 <mat-card class="staff-card shadow-sm" [class.dark-theme]="isDarkMode">
-
   <!-- HEADER CON SECTION-HEADER -->
   <app-section-header
     icon="restaurant_menu"
@@ -19,6 +18,11 @@
 
   <mat-divider></mat-divider>
 
+  <!-- Cargando indicador -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+
   <!-- ROLES TEMPLATE -->
   <ng-template #rolesTemplate let-user>
     <mat-chip-set class="mt-2">
@@ -37,7 +41,7 @@
   <div class="table-container mt-3">
     <app-base-table
       [columns]="columns"
-      [data]="staff"
+      [data]="filteredStaff"
       [actionsTemplate]="actionsTemplate"
       filterPlaceholder="Buscar empleado..."
     ></app-base-table>

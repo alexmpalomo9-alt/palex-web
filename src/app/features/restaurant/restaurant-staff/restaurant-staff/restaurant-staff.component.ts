@@ -44,8 +44,9 @@ import { SectionHeaderComponent } from '../../shared/section-header/section-head
 export class RestaurantStaffComponent implements OnInit, OnDestroy {
   restaurantId!: string;
   staff: User[] = [];
-  filteredStaff: User[] = []; // ← Para filtrar la tabla sin perder los datos originales
+  filteredStaff: User[] = [];
   isDarkMode: boolean;
+  isLoading: boolean = true;  // Nuevo flag de carga
 
   private destroy$ = new Subject<void>();
 
@@ -102,6 +103,8 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
   loadStaff() {
     if (!this.restaurantId) return;
 
+    this.isLoading = true;  // Activar el estado de carga
+
     this.restaurantStaffService
       .getRestaurantEmployeesByRestaurantId(this.restaurantId)
       .pipe(takeUntil(this.destroy$))
@@ -123,10 +126,10 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
 
         // Inicializamos la tabla filtrada
         this.filteredStaff = [...this.staff];
+        this.isLoading = false;  // Desactivar el estado de carga
       });
   }
 
-  // 🔹 Método de búsqueda integrado con el header
   onSearch(searchValue: string) {
     if (!searchValue) {
       this.filteredStaff = [...this.staff];
@@ -159,7 +162,8 @@ export class RestaurantStaffComponent implements OnInit, OnDestroy {
 
   openInvitationDialog() {
     const dialogRef = this.dialog.open(InvitationDialogComponent, {
-      width: '450px',
+      // width: '450px',
+      disableClose: true,
       data: { restaurantId: this.restaurantId },
     });
 

@@ -11,12 +11,14 @@
   padding: 4px 8px;
   box-shadow: var(--md-sys-elevation-level3);
   background: var(--md-sys-color-surface);
+  position: relative;
 
   mat-card-header {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 8px;
+    position: relative;
 
     .header-icon {
       font-size: 38px;
@@ -35,6 +37,26 @@
 
   mat-divider {
     margin: 10px 0 18px;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    mat-icon {
+      font-size: 20px;
+      color: var(--md-sys-color-on-surface);
+    }
   }
 }
 

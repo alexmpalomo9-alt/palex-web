@@ -146,4 +146,19 @@
       justify-content: center;
     }
   }
+
+      .status-badges {
+      display: flex;
+      gap: 10px;
+
+      .badge {
+        padding: 8px 12px;
+        border-radius: 20px;
+        color: white;
+        font-size: 0.9rem;
+        text-transform: capitalize;
+        font-weight: 500;
+      }
+    }
+
 }

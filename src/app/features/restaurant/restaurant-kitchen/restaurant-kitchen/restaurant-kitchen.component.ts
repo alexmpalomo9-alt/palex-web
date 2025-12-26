@@ -7,13 +7,14 @@ import { KitchenFacade, KitchenOrder } from '../facade/kitchen-facade.service';
 import { Restaurant } from '../../model/restaurant.model';
 import { RestaurantService } from '../../services/restaurant.service';
 import { OrderStatusService } from '../../../order/status/order-status/order-status.service';
+import { AddButtonComponent } from '../../../../shared/components/button/add-button/add-button.component';
 
 @Component({
   selector: 'app-restaurant-kitchen',
   templateUrl: './restaurant-kitchen.component.html',
   styleUrls: ['./restaurant-kitchen.component.scss'],
   standalone: true,
-  imports: [SharedModule],
+  imports: [SharedModule, AddButtonComponent],
 })
 export class RestaurantKitchenComponent implements OnInit, OnDestroy {
   activeOrders$!: Observable<KitchenOrder[]>;
