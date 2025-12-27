@@ -15,6 +15,7 @@ import { CartComponent } from '../../../../customer/components/cart/cart/cart.co
 import { MenuSelectorComponent } from '../../../../menu/menu-selector/menu-selector.component';
 import { Category } from '../../categories/model/category.model';
 import { ThemeService } from '../../../../core/services/theme/theme.service';
+import { TableService } from '../../restaurant-tables/services/table.service';
 
 @Component({
   selector: 'app-restaurant-menu',
@@ -30,6 +31,11 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
 
   restaurant$!: Observable<Restaurant | null>;
   restaurantId!: string;
+  tableId = '';
+  tableNumber?: number;
+  tableName?: string;
+
+  isQrFlow = false;
 
   cartQuantity$!: Observable<number>;
   offerProducts$!: Observable<Product[]>;
@@ -43,7 +49,6 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
   }[] = [];
 
   selectedImage: string | null = null;
-
   menuType: 'traditional' | 'palex' = 'traditional';
 
   constructor(
@@ -52,15 +57,17 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
     private categoryService: CategoryService,
     private productsService: ProductService,
     private cartService: CartService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private tableService: TableService
   ) {}
 
   ngOnInit(): void {
     this.cartQuantity$ = this.cartService.totalQuantity$;
     this.loadRestaurantAndMenu();
-    this.themeService.darkModeObservable.subscribe((value) => {
-      this.isDarkMode = value;
-    });
+
+    this.themeService.darkModeObservable
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => (this.isDarkMode = value));
   }
 
   ngOnDestroy(): void {
@@ -70,6 +77,12 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
 
   private loadRestaurantAndMenu() {
     this.restaurant$ = this.route.paramMap.pipe(
+      tap((params) => {
+        const tableId = params.get('tableId');
+
+        this.isQrFlow = !!tableId;
+        this.tableId = tableId ?? '';
+      }),
       switchMap((params) => {
         const slug = params.get('slug');
         if (!slug) return of(null);
@@ -80,27 +93,41 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
 
         this.restaurantId = restaurant.restaurantId!;
 
+        // limpiar carrito si cambia de restaurant
         const current = this.cartService.getCurrentRestaurantId();
         if (current && current !== this.restaurantId) {
           this.cartService.clearCart();
         }
 
-        // 🔥 Cargar categorías y sus productos
+        // cargar menú
         this.loadCategoriesFromFirestore();
 
-        // 🔥 Cargar productos en oferta
         this.offerProducts$ = this.productsService.getOfferProducts(
           this.restaurantId
         );
 
-        // Inicializar tipo de menú
         this.menuType = restaurant.menuType || 'palex';
+
+        // 👇👇👇 ACA RESOLVÉS LA MESA (solo si hay QR)
+        if (this.isQrFlow && this.tableId) {
+          this.resolveTable();
+        }
       }),
       takeUntil(this.destroy$)
     );
   }
+  private resolveTable() {
+    this.tableService
+      .getTableById(this.restaurantId, this.tableId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((table) => {
+        if (!table) return;
 
-  /** 🔥 Cargar categorías y sus productos */
+        this.tableNumber = table.number;
+        this.tableName = table.name;
+      });
+  }
+
   private loadCategoriesFromFirestore() {
     this.categoryService
       .getCategories(this.restaurantId)
@@ -119,30 +146,14 @@ export class RestaurantMenuComponent implements OnInit, OnDestroy {
   }
 
   addProductToCart(product: Product) {
-    if (!this.restaurantId) return;
     this.cartService.addProduct(product, this.restaurantId);
   }
 
   openImageModal(imageUrl?: string) {
-    if (imageUrl) this.selectedImage = imageUrl;
+    this.selectedImage = imageUrl ?? null;
   }
 
   closeImageModal() {
     this.selectedImage = null;
-  }
-
-  onImageError(event: any) {
-    event.target.src = 'assets/img/not-found.png';
-  }
-
-  changeMenu(type: 'traditional' | 'palex') {
-    this.menuType = type;
-
-    if (!this.restaurantId) return;
-
-    this.restaurantService
-      .updateRestaurantData(this.restaurantId, { menuType: type })
-      .then(() => console.log('Menu actualizado a', type))
-      .catch((err) => console.error('Error actualizando menu:', err));
   }
 }

@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>¿Confirmar pedido?</h2>
+
+<!-- Botón Cerrar -->
+<button class="close-button" mat-icon-button (click)="closeDialog()">
+  <mat-icon>close</mat-icon>
+</button>
+
+<mat-dialog-content>
+  <div class="content-container">
+    <p class="table-name">
+      <strong>{{ data.tableName || "Mesa: " + data.tableNumber }}</strong>
+    </p>
+
+    <!-- Cabecera de columnas -->
+    <div class="order-header">
+      <span class="header-item">Item</span>
+      <span class="header-quantity">Cantidad</span>
+      <span class="header-price">Precio</span>
+    </div>
+
+    <ul class="order-list">
+      <li *ngFor="let item of data.items" class="order-item">
+        <span class="item-name">{{ item.name }}</span>
+        <span class="item-quantity">x{{ item.quantity }}</span>
+        <span class="item-price">{{ item.price * item.quantity | currency }}</span>
+      </li>
+    </ul>
+
+    <div class="total-container">
+      <strong>Total: {{ data.total | currency }}</strong>
+    </div>
+  </div>
+</mat-dialog-content>

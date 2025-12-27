@@ -1,0 +1,106 @@
+/* Cerrar */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--card-bg);
+  border-radius: 50%;
+  mat-icon {
+    font-size: 1.5rem;
+    color: var(--text-color);
+  }
+  &:hover {
+    background-color: var(--hover-background);
+  }
+}
+
+/* Título */
+mat-dialog-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--text-color);
+  margin: 0;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+}
+
+/* Contenedor del contenido */
+.content-container {
+  padding: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  font-family: "Courier New", Courier, monospace; /* Fuente estilo ticket */
+
+  .table-name {
+    font-size: 1.1rem;
+    color: var(--text-price);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  /* Cabecera de la tabla */
+  .order-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr; /* Item, Cantidad, Precio */
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 8px;
+
+    .header-item,
+    .header-quantity,
+    .header-price {
+      text-align: left;
+    }
+
+    .header-quantity,
+    .header-price {
+      text-align: right;
+    }
+  }
+
+  .order-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+
+    .order-item {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr; /* Nombre, cantidad, precio */
+      grid-gap: 8px;
+      align-items: center;
+      border-bottom: 1px dashed var(--border-color);
+      padding: 6px 0;
+      font-size: 1rem;
+      color: var(--text-color);
+      text-align: left;
+
+      .item-name {
+        font-weight: bold;
+      }
+
+      .item-quantity,
+      .item-price {
+        text-align: right;
+      }
+    }
+  }
+
+  .total-container {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-price);
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    text-align: center;
+    border-top: 2px solid var(--text-price);
+  }
+}

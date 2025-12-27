@@ -78,43 +78,6 @@ export class OrderService {
     });
   }
 
-  /* =====================================================
-     CREATE ORDER (BORRADOR / USER)
-  ===================================================== */
-
-  async createOrder(
-    restaurantId: string,
-    data: {
-      tableId: string;
-      tableNumber?: number;
-      waiter?: string | null;
-      createdBy: string;
-      notes?: string;
-    }
-  ): Promise<string> {
-    const ref = await addDoc(this.ordersCol(restaurantId), {
-      restaurantId,
-      tableId: data.tableId,
-      tableNumber: data.tableNumber ?? null,
-      waiter: data.waiter ?? null,
-      createdBy: data.createdBy,
-      notes: data.notes ?? '',
-      status: 'pending' as OrderStatus,
-      total: 0,
-      itemsCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    await this.addStatusHistory(
-      restaurantId,
-      ref.id,
-      'pending',
-      data.createdBy
-    );
-
-    return ref.id;
-  }
 
   /* =====================================================
      CREATE ORDER FOR MOZO (MULTI MESA)

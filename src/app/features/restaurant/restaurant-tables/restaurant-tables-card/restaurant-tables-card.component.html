@@ -17,45 +17,44 @@
   <div class="cards-wrapper" *ngIf="!loading && filteredTables.length > 0">
     <mat-card class="table-card" *ngFor="let t of filteredTables">
       <div class="card-header">
-        <div class="table-number">Mesa {{ t.number }}</div>
+        <div class="table-number">
+          Mesa {{ t.number }}
 
-        <!-- Estado de la mesa -->
-        <span class="badge" [style.backgroundColor]="getTableStatusColor(t)">
-          {{ getTableStatusLabel(t) }}
-        </span>
-
-        <!-- Estado del pedido -->
-        <div *ngIf="t.currentOrderId">
-          <span class="badge" [style.backgroundColor]="getOrderStatusColor(t)">
-            {{ getOrderStatusLabel(t) }}
+          <!-- Estado de la mesa -->
+          <span class="badge" [style.backgroundColor]="getTableStatusColor(t)">
+            {{ getTableStatusLabel(t) }}
           </span>
+
+          <!-- Estado del pedido -->
+<div *ngIf="getOrderForTable(t) as order">
+  <span class="badge" [style.backgroundColor]="orderStatusService.getColor(order.status)">
+    Pedido: {{ orderStatusService.getLabel(order.status) }}
+  </span>
+</div>
         </div>
       </div>
 
-      <!-- Mensaje de Actualización con Botón de Info -->
+      <!-- Mensaje de actualización -->
       <ng-container *ngIf="getUpdateMessage(t) as update">
         <div class="update-message-container">
-          <span class="badge" [ngClass]="update.type">
-            {{ update.text }}
-          </span>
+          <span class="badge" [ngClass]="update.type">{{ update.text }}</span>
           <mat-icon
             matTooltip="{{
               update.type === 'rejected'
-                ? 'Las modificaciones solicitadas fueron rechazadas, pero el pedido inicial sigue en proceso.'
-                : 'Los cambios solicitados, fueron aceptados.'
+                ? 'Pedido rechazado'
+                : 'Pedido aceptado'
             }}"
-            class="info-icon"
+            >info</mat-icon
           >
-            info
-          </mat-icon>
         </div>
       </ng-container>
 
+      <!-- Sector -->
       <div class="card-info">
-        <div><mat-icon>people</mat-icon> Capacidad: {{ t.capacity }}</div>
         <div><mat-icon>place</mat-icon> Sector: {{ t.sector || "-" }}</div>
       </div>
 
+      <!-- Acciones -->
       <div class="card-actions">
         <button
           mat-icon-button

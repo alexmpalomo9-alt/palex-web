@@ -17,7 +17,7 @@ import {
   orderBy,
 } from '@angular/fire/firestore';
 
-import { Observable } from 'rxjs';
+import { from, map, Observable } from 'rxjs';
 import { Table } from '../model/tables.model';
 
 @Injectable({ providedIn: 'root' })
@@ -27,27 +27,37 @@ export class TableService {
   // ===========================================================================
   // 🟢 1. Obtener todas las mesas del restaurante
   // ===========================================================================
-getTablesByRestaurant(restaurantId: string): Observable<Table[]> {
-  const ref = collection(this.firestore, `restaurants/${restaurantId}/tables`);
-  const q = query(ref, orderBy('number', 'asc')); // ✅ Orden ascendente por número de mesa
-  return collectionData(q, { idField: 'tableId' }) as Observable<Table[]>;
-}
+  getTablesByRestaurant(restaurantId: string): Observable<Table[]> {
+    const ref = collection(
+      this.firestore,
+      `restaurants/${restaurantId}/tables`
+    );
+    const q = query(ref, orderBy('number', 'asc')); // ✅ Orden ascendente por número de mesa
+    return collectionData(q, { idField: 'tableId' }) as Observable<Table[]>;
+  }
 
   // ===========================================================================
   // 🟢 2. Obtener mesa por ID
   // ===========================================================================
 
-  async getTableById(
+  getTableById(
     restaurantId: string,
     tableId: string
-  ): Promise<Table | null> {
+  ): Observable<Table | null> {
     const ref = doc(
       this.firestore,
       `restaurants/${restaurantId}/tables/${tableId}`
     );
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return null;
-    return { tableId: snap.id, ...(snap.data() as Omit<Table, 'tableId'>) };
+
+    return from(getDoc(ref)).pipe(
+      map((snap) => {
+        if (!snap.exists()) return null;
+        return {
+          tableId: snap.id,
+          ...(snap.data() as Omit<Table, 'tableId'>),
+        };
+      })
+    );
   }
 
   // ===========================================================================

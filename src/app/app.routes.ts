@@ -13,18 +13,18 @@ export const routes: Routes = [
       { path: '', component: HomePageComponent },
 
       // Menú público
-      { path: 'restaurant/:slug/menu', component: RestaurantMenuComponent },
-      { path: 'r/:slug/menu/:tableId', component: RestaurantMenuComponent },
+      { path: 'restaurant/:slug/menu', component: RestaurantMenuComponent },  // Ruta normal (cualquier persona)
+      { path: 'r/:slug/menu/:tableId', component: RestaurantMenuComponent },  // Ruta que acceden con código QR
 
       // Invitaciones
-{
-  path: 'invite/:token',
-  canActivate: [InviteGuard],
-  loadComponent: () =>
-    import('./features/invitations/pages/invite-page/invite-page.component').then(
-      (m) => m.InvitePageComponent
-    ),
-},
+      {
+        path: 'invite/:token',
+        canActivate: [InviteGuard],
+        loadComponent: () =>
+          import('./features/invitations/pages/invite-page/invite-page.component').then(
+            (m) => m.InvitePageComponent
+          ),
+      },
 
       // 🔐 AUTH (ACÁ DENTRO)
       {

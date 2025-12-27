@@ -3,8 +3,6 @@ import { ORDER_STATUS_CONFIG } from '../model/order.status.model';
 import { OrderStatus } from '../../models/order.model';
 
 @Injectable({ providedIn: 'root' })
-
-@Injectable({ providedIn: 'root' })
 export class OrderStatusService {
   getConfig(status: OrderStatus) {
     return ORDER_STATUS_CONFIG[status];
@@ -18,9 +16,9 @@ export class OrderStatusService {
     return this.getConfig(status)?.kitchenLabel ?? null;
   }
 
-canUpdate(status: OrderStatus): boolean {
-  return this.getConfig(status)?.canUpdate ?? false;
-}
+  canUpdate(status: OrderStatus): boolean {
+    return this.getConfig(status)?.canUpdate ?? false;
+  }
 
   canCancel(status: OrderStatus): boolean {
     return this.getConfig(status)?.canCancel ?? false;

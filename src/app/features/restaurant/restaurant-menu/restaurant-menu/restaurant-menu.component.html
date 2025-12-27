@@ -1,7 +1,17 @@
-<mat-sidenav-container class="sidenav-container" [class.dark-theme]="isDarkMode">
+<mat-sidenav-container
+  class="sidenav-container"
+  [class.dark-theme]="isDarkMode"
+>
   <!-- Carrito -->
   <mat-sidenav #cartSidenav mode="over" position="end" class="cart-sidenav">
-    <app-cart></app-cart>
+    <app-cart
+      *ngIf="restaurantId && (!isQrFlow || tableId)"
+      [restaurantId]="restaurantId"
+      [tableId]="tableId"
+      [tableNumber]="tableNumber"
+      [tableName]="tableName"
+      [isQrFlow]="isQrFlow"
+    ></app-cart>
   </mat-sidenav>
 
   <mat-sidenav-content>
@@ -12,7 +22,6 @@
         color="primary"
         (click)="cartSidenav.toggle()"
         class="cart-button"
-        matTooltip="Ver carrito"
       >
         🛒
         <span
@@ -24,7 +33,6 @@
         </span>
       </button>
 
-      <!-- Selector del menú + Menú final -->
       <app-menu-selector
         [restaurant]="restaurant"
         [categories]="categories"
@@ -33,15 +41,6 @@
         (addProduct)="addProductToCart($event)"
         (openImage)="openImageModal($event)"
       ></app-menu-selector>
-
-      <!-- Modal de imagen -->
-      <div
-        class="image-modal"
-        *ngIf="selectedImage"
-        (click)="closeImageModal()"
-      >
-        <img [src]="selectedImage" alt="Imagen ampliada" />
-      </div>
     </section>
   </mat-sidenav-content>
 </mat-sidenav-container>

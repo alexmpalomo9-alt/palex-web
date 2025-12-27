@@ -8,10 +8,16 @@ export interface Order {
   tableIds: string[];
   tableNumbers: number[]; // 🔥 DESNORMALIZADO
 
-  // Usuario
-  waiterId?: string;
-  waiterName?: string; // 🔥 DESNORMALIZADO
-  waiterRole?: string; // 🔥 DESNORMALIZADO
+  // Usuario (mozo o invitado)
+  waiterId?: string;  // Si es un mozo logueado
+  waiterName?: string;  // Si es un mozo logueado
+  waiterRole?: string;  // Si es un mozo logueado
+
+  guestId?: string;  // Si es un invitado, puede ser un UUID generado
+  guestName?: string;  // Si es un invitado
+
+  // **Asegúrate de agregar esto**
+  createdBy: string;  // El creador del pedido, ya sea mozo o invitado
 
   // Estado
   status: OrderStatus;
@@ -26,11 +32,11 @@ export interface Order {
   createdAt: any;
   updatedAt: any;
 
-    // feedback al mozo
+  // Feedback al mozo
   lastUpdateDecision?: 'accepted' | 'rejected';
   lastUpdateAt?: any;
 
-  // solicitud viva (si existe)
+  // Solicitud viva (si existe)
   pendingUpdate?: {
     total: number;
     items: OrderItem[];
@@ -38,7 +44,6 @@ export interface Order {
     requestedAt: any;
     kitchenDecision?: 'accepted' | 'rejected'; // opcional
   };
-
 }
 
 export type OrderStatus =
